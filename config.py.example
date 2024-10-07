@@ -1,9 +1,0 @@
-# basic settings
-
-debug = True
-database_url = "sqlite:///database.db"
-
-# domain settings
-
-bind_address = "127.0.0.1"
-bind_port = 8000

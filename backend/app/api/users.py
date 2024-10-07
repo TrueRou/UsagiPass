@@ -1,0 +1,99 @@
+import asyncio
+from datetime import datetime
+from typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from sqlmodel import Session, select
+import bcrypt
+import jwt
+
+from app.database import async_session_ctx, require_session, async_httpx_ctx
+from app.models.user import User, UserPreference, UserPreferencePublic, UserProfile
+from app.maimai import scores
+from app.logging import log, Ansi
+from config import jwt_secret
+
+
+router = APIRouter(prefix="/users", tags=["users"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
+optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login", auto_error=False)
+
+
+def grant_user(user: User):
+    token = jwt.encode({"username": user.username}, jwt_secret, algorithm="HS256")
+    return {"access_token": token, "token_type": "bearer"}
+
+
+def verify_user(token: Annotated[str, Depends(oauth2_scheme)]) -> str:
+    try:
+        payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
+        return payload["username"]
+    except jwt.InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+def verify_user_optional(token: Annotated[str | None, Depends(optional_oauth2_scheme)]) -> str | None:
+    try:
+        payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
+        return payload["username"]
+    except jwt.InvalidTokenError:
+        return None
+
+
+async def update_player_rating(username: str):
+    async with async_session_ctx() as session:
+        try:
+            player_rating = await scores.get_rating(username)
+            user = await session.get(User, username)
+            user.player_rating = player_rating
+            await session.commit()
+        except:
+            log("Failed to update player rating for user: " + username, Ansi.LRED)
+
+
+@router.post("/login")
+async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
+    username = form_data.username
+    password = form_data.password
+    user_optional = session.exec(select(User).where(User.username == username.lower())).first()
+    is_password_correct = bcrypt.checkpw(password.encode(), user_optional.hashed_password.encode()) if user_optional else False
+    # user has registered in our database, we need to check the password
+    if user_optional and is_password_correct:
+        return grant_user(user_optional)
+    # we can't verify the user in our database, we need to check the diving-fish
+    if not user_optional or not is_password_correct:
+        async with async_httpx_ctx() as client:
+            response = await client.post("https://www.diving-fish.com/api/maimaidxprober/login", json={"username": username, "password": password})
+            if "errcode" not in response.json():
+                # user has logged in successfully, we need to upsert the user
+                hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+                profile = (await client.get("https://www.diving-fish.com/api/maimaidxprober/player/profile", cookies=response.cookies)).json()
+                user_optional = User(username=username.lower(), hashed_password=hashed_pw, nickname=profile["nickname"], bind_qq=profile["bind_qq"])
+                asyncio.ensure_future(update_player_rating(username))  # we need to update the player rating for the first time
+                session.merge(user_optional)
+                session.commit()
+                return grant_user(user_optional)
+    # we can't verify the user in our database and diving-fish
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Incorrect username or password",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+@router.get("/profile", response_model=UserProfile)
+async def user_profile(username: str = Depends(verify_user), session: Session = Depends(require_session)):
+    db_user = session.get(User, username)
+    db_preference = session.get(UserPreference, username)
+    if not db_preference:
+        db_preference = UserPreference(username=username)
+        session.add(db_preference)
+        session.commit()
+    # we need to update the player rating if the user has not updated for 4 hours
+    if (datetime.utcnow() - db_user.updated_at).total_seconds() <= 3600 * 4:
+        asyncio.ensure_future(update_player_rating(username))
+    return UserProfile(**db_user.model_dump(), preferences=UserPreferencePublic.model_validate(db_preference))
