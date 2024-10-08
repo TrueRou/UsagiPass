@@ -16,13 +16,25 @@ class User(SQLModel, table=True):
     updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
 
-class UserPreferenceUpdate(SQLModel):
+# maimai version, simplified code, character name, friend code, display name, dx rating
+
+
+class UserPreferenceBase(SQLModel):
+    maimai_version: str | None = None
+    simplified_code: str | None = None
+    character_name: str | None = None
+    friend_code: str | None = None
+    display_name: str | None = None
+    dx_rating: int | None = None
+
+
+class UserPreferenceUpdate(UserPreferenceBase):
     character_id: str | None = None
     background_id: str | None = None
     frame_id: str | None = None
 
 
-class UserPreference(SQLModel, table=True):
+class UserPreference(UserPreferenceBase, table=True):
     __tablename__ = "user_preferences"
 
     username: str = Field(primary_key=True)
@@ -31,7 +43,7 @@ class UserPreference(SQLModel, table=True):
     frame_id: str | None = Field(foreign_key="images.id")
 
 
-class UserPreferencePublic(SQLModel):
+class UserPreferencePublic(UserPreferenceBase):
     character: ImagePublic | None = None
     background: ImagePublic | None = None
     frame: ImagePublic | None = None
