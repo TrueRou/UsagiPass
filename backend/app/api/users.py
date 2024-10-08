@@ -8,7 +8,7 @@ import bcrypt
 import jwt
 
 from app.database import async_session_ctx, require_session, async_httpx_ctx
-from app.models.user import User, UserPreference, UserPreferencePublic, UserProfile
+from app.models.user import User, UserPreference, UserPreferencePublic, UserPreferenceUpdate, UserProfile
 from app.models.image import Image, ImagePublic
 from app.maimai import scores
 from app.logging import log, Ansi
@@ -17,8 +17,8 @@ from config import jwt_secret
 
 
 router = APIRouter(prefix="/users", tags=["users"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
-optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
+optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token", auto_error=False)
 
 
 def grant_user(user: User):
@@ -57,8 +57,8 @@ async def update_player_rating(username: str):
             log("Failed to update player rating for user: " + username, Ansi.LRED)
 
 
-@router.post("/login")
-async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
+@router.post("/token")
+async def get_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
     username = form_data.username
     password = form_data.password
     user_optional = session.exec(select(User).where(User.username == username.lower())).first()
@@ -88,7 +88,7 @@ async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 
 
 @router.get("/profile", response_model=UserProfile)
-async def user_profile(username: str = Depends(verify_user), session: Session = Depends(require_session)):
+async def get_profile(username: str = Depends(verify_user), session: Session = Depends(require_session)):
     db_user = session.get(User, username)
     db_preference = session.get(UserPreference, username)
     # we need to update the player rating if the user has not updated for 4 hours
@@ -105,3 +105,26 @@ async def user_profile(username: str = Depends(verify_user), session: Session = 
 
     user_profile = UserProfile(**db_user.model_dump(), preferences=preferences)
     return user_profile
+
+
+@router.patch("/preference", response_model=UserPreferencePublic)
+async def update_profile(
+    preference: UserPreferenceUpdate,
+    username: str = Depends(verify_user),
+    session: Session = Depends(require_session),
+):
+    db_preference = session.get(UserPreference, username)
+    if not db_preference:
+        db_preference = database.add(session, UserPreference(username=username))
+    if db_preference.username != username:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this preference")
+    # we need to check integrity of the image ids before updating, due to sqlite does't check by default
+    if preference.character_id and not session.get(Image, preference.character_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid character image id")
+    if preference.background_id and not session.get(Image, preference.background_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid background image id")
+    if preference.frame_id and not session.get(Image, preference.frame_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid frame image id")
+    # there's no problem with the image ids, we can update the preference
+    database.partial_update_model(session, db_preference, preference)
+    return {"message": "Preference has been updated"}
