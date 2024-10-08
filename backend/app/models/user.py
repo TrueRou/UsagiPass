@@ -16,6 +16,12 @@ class User(SQLModel, table=True):
     updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
 
+class UserPreferenceUpdate(SQLModel):
+    character_id: str | None = None
+    background_id: str | None = None
+    frame_id: str | None = None
+
+
 class UserPreference(SQLModel, table=True):
     __tablename__ = "user_preferences"
 

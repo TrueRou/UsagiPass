@@ -2,7 +2,7 @@ import contextlib
 from typing import TypeVar
 from fastapi import Request
 import httpx
-from sqlmodel import create_engine, Session
+from sqlmodel import SQLModel, create_engine, Session
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 import config
@@ -57,3 +57,12 @@ def add(session: Session, obj: V) -> V:
     session.commit()
     session.refresh(obj)
     return obj
+
+
+def partial_update_model(session: Session, item: SQLModel, updates: SQLModel):
+    if item and updates:
+        update_data = updates.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(item, key, value)
+        session.commit()
+        session.refresh(item)

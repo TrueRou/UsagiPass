@@ -18,8 +18,8 @@ if not images_folder.exists():
     images_folder.mkdir()
 
 
-@router.get("/gallery", response_model=list[ImageDetail])
-async def get_gallery(user: str | None = Depends(verify_user_optional), session: Session = Depends(require_session)):
+@router.get("/", response_model=list[ImageDetail])
+async def get_images(user: str | None = Depends(verify_user_optional), session: Session = Depends(require_session)):
     if user is None:
         clause = select(Image).where(Image.uploaded_by == None).order_by(Image.uploaded_at.desc())
         return session.exec(clause).all()
@@ -28,7 +28,7 @@ async def get_gallery(user: str | None = Depends(verify_user_optional), session:
         return session.exec(clause).all()
 
 
-@router.post("/upload", response_model=ImageDetail, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=ImageDetail, status_code=status.HTTP_201_CREATED)
 async def upload_image(
     name: str,
     kind: str,
@@ -40,19 +40,32 @@ async def upload_image(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid kind of image")
     image_bytes = await file.read()
     try:
+        file_name = str(uuid.uuid4())
         image: PIL.Image = PIL.Image.open(io.BytesIO(image_bytes)).convert("RGBA")
-        image.save(images_folder / f"{db_image.id}.webp", "webp")
-        db_image = await database.add(session, Image(name=name, kind=kind, source="external", uploaded_by=user))
+        image.save(images_folder / f"{file_name}.webp", "webp")
+        db_image: Image = database.add(session, Image(id=file_name, name=name, kind=kind, uploaded_by=user))
         return db_image
     except PIL.UnidentifiedImageError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to load image file")
 
 
-@router.get("/dl/{image_id}")
+@router.delete("/{image_id}")
+async def delete_image(image_id: uuid.UUID, user: str = Depends(verify_user), session: Session = Depends(require_session)):
+    image = session.get(Image, str(image_id))
+    if image.uploaded_by != user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this image")
+    session.delete(image)
+    session.commit()
+    image_path = images_folder / f"{image.id}.png"
+    image_path.unlink(missing_ok=True)
+    return {"message": "Image has been deleted"}
+
+
+@router.get("/{image_id}")
 async def get_image(image_id: uuid.UUID, session: Session = Depends(require_session)):
     image = session.get(Image, str(image_id))
     try:
-        image_path = images_folder / f"{image.id}.png"
-        return FileResponse(image_path, media_type="image/png")
+        image_path = images_folder / f"{image.id}.webp"
+        return FileResponse(image_path, media_type="image/webp")
     except FileNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file is not found")
