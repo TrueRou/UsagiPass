@@ -1,7 +1,7 @@
 import datetime
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, SQLModel
 
-from app.models.element import Background, Character, ElementPublic, Frame
+from app.models.image import ImagePublic
 
 
 class User(SQLModel, table=True):
@@ -20,19 +20,15 @@ class UserPreference(SQLModel, table=True):
     __tablename__ = "user_preferences"
 
     username: str = Field(primary_key=True)
-    character_id: str | None = Field(foreign_key="characters.id")
-    background_id: str | None = Field(foreign_key="backgrounds.id")
-    frame_id: str | None = Field(foreign_key="frames.id")
-
-    character: Character | None = Relationship()
-    background: Background | None = Relationship()
-    frame: Frame | None = Relationship()
+    character_id: str | None = Field(foreign_key="images.id")
+    background_id: str | None = Field(foreign_key="images.id")
+    frame_id: str | None = Field(foreign_key="images.id")
 
 
 class UserPreferencePublic(SQLModel):
-    character: ElementPublic | None
-    background: ElementPublic | None
-    frame: ElementPublic | None
+    character: ImagePublic | None
+    background: ImagePublic | None
+    frame: ImagePublic | None
 
 
 class UserProfile(SQLModel):
