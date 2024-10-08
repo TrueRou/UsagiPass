@@ -26,9 +26,9 @@ class UserPreference(SQLModel, table=True):
 
 
 class UserPreferencePublic(SQLModel):
-    character: ImagePublic | None
-    background: ImagePublic | None
-    frame: ImagePublic | None
+    character: ImagePublic | None = None
+    background: ImagePublic | None = None
+    frame: ImagePublic | None = None
 
 
 class UserProfile(SQLModel):

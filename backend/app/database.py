@@ -2,7 +2,6 @@ import contextlib
 from typing import TypeVar
 from fastapi import Request
 import httpx
-from sqlalchemy import text
 from sqlmodel import create_engine, Session
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
@@ -53,7 +52,7 @@ async def async_httpx_ctx():
         yield session
 
 
-async def add(session: Session, obj: V) -> V:
+def add(session: Session, obj: V) -> V:
     session.add(obj)
     session.commit()
     session.refresh(obj)

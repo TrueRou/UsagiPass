@@ -103,4 +103,5 @@ async def user_profile(username: str = Depends(verify_user), session: Session = 
     preferences.background = ImagePublic.model_validate(session.get(Image, db_preference.background_id)) if db_preference.background_id else None
     preferences.frame = ImagePublic.model_validate(session.get(Image, db_preference.frame_id)) if db_preference.frame_id else None
 
-    return UserProfile(**db_user.model_dump(), preferences=preferences)
+    user_profile = UserProfile(**db_user.model_dump(), preferences=preferences)
+    return user_profile
