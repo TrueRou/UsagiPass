@@ -9,8 +9,10 @@ import jwt
 
 from app.database import async_session_ctx, require_session, async_httpx_ctx
 from app.models.user import User, UserPreference, UserPreferencePublic, UserProfile
+from app.models.image import Image, ImagePublic
 from app.maimai import scores
 from app.logging import log, Ansi
+from app import database
 from config import jwt_secret
 
 
@@ -89,11 +91,16 @@ async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 async def user_profile(username: str = Depends(verify_user), session: Session = Depends(require_session)):
     db_user = session.get(User, username)
     db_preference = session.get(UserPreference, username)
-    if not db_preference:
-        db_preference = UserPreference(username=username)
-        session.add(db_preference)
-        session.commit()
     # we need to update the player rating if the user has not updated for 4 hours
     if (datetime.utcnow() - db_user.updated_at).total_seconds() <= 3600 * 4:
         asyncio.ensure_future(update_player_rating(username))
-    return UserProfile(**db_user.model_dump(), preferences=UserPreferencePublic.model_validate(db_preference))
+    if not db_preference:
+        db_preference = database.add(session, UserPreference(username=username))
+    preferences = UserPreferencePublic.model_validate(db_preference)
+
+    # we need to get the image objects from the database
+    preferences.character = ImagePublic.model_validate(session.get(Image, db_preference.character_id)) if db_preference.character_id else None
+    preferences.background = ImagePublic.model_validate(session.get(Image, db_preference.background_id)) if db_preference.background_id else None
+    preferences.frame = ImagePublic.model_validate(session.get(Image, db_preference.frame_id)) if db_preference.frame_id else None
+
+    return UserProfile(**db_user.model_dump(), preferences=preferences)

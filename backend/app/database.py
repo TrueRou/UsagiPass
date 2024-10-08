@@ -1,4 +1,5 @@
 import contextlib
+from typing import TypeVar
 from fastapi import Request
 import httpx
 from sqlalchemy import text
@@ -10,6 +11,8 @@ import config
 
 engine = create_engine(config.database_url)
 async_engine = create_async_engine(config.database_url.replace("sqlite://", "sqlite+aiosqlite://"))
+
+V = TypeVar("V")
 
 
 async def create_db_and_tables(engine):
@@ -48,3 +51,10 @@ async def async_session_ctx():
 async def async_httpx_ctx():
     async with httpx.AsyncClient(proxies=config.httpx_proxy) as session:
         yield session
+
+
+async def add(session: Session, obj: V) -> V:
+    session.add(obj)
+    session.commit()
+    session.refresh(obj)
+    return obj
