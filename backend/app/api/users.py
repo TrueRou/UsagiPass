@@ -13,7 +13,7 @@ from app.models.image import Image, ImagePublic
 from app.maimai import scores
 from app.logging import log, Ansi
 from app import database
-from config import jwt_secret, default_character, default_background, default_frame
+from config import jwt_secret, default_character, default_background, default_frame, default_passname
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -61,11 +61,13 @@ def apply_default(preferences: UserPreferencePublic, db_preferences: UserPrefere
     character = session.get(Image, db_preferences.character_id or default_character)
     background = session.get(Image, db_preferences.background_id or default_background)
     frame = session.get(Image, db_preferences.frame_id or default_frame)
+    passname = session.get(Image, db_preferences.passname_id or default_passname)
     if None in [character, background, frame]:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Default image not found in database, please contact the administrator")
     preferences.character = ImagePublic.model_validate(character)
     preferences.background = ImagePublic.model_validate(background)
     preferences.frame = ImagePublic.model_validate(frame)
+    preferences.passname = ImagePublic.model_validate(passname)
 
 
 @router.post("/token")
@@ -113,7 +115,7 @@ async def get_profile(username: str = Depends(verify_user), session: Session = D
     return user_profile
 
 
-@router.patch("/preference", response_model=UserPreferencePublic)
+@router.patch("/preference")
 async def update_profile(
     preference: UserPreferenceUpdate,
     username: str = Depends(verify_user),

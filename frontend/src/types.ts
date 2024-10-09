@@ -7,6 +7,7 @@ interface UserPreferencePublic {
     character: ImagePublic;
     background: ImagePublic;
     frame: ImagePublic;
+    passname: ImagePublic;
     maimai_version?: string;
     simplified_code?: string;
     character_name?: string;

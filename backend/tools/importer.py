@@ -26,7 +26,7 @@ def import_images(kind: str, session: Session):
     if not path.exists():
         return
     
-    if kind not in ["background", "frame", "character"]:
+    if kind not in kinds.image_kinds.keys():
         log(f"Invalid kind of image: {kind}", Ansi.LRED)
         return
     
@@ -55,5 +55,6 @@ if __name__ == "__main__":
         import_images("background", session)
         import_images("frame", session)
         import_images("character", session)
+        import_images("passname", session)
         session.commit()
     log("Import process complete.", Ansi.LGREEN)
