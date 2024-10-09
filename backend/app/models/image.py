@@ -23,3 +23,4 @@ class ImageDetail(SQLModel):
 class ImagePublic(SQLModel):
     id: str
     name: str
+    uploaded_by: str | None

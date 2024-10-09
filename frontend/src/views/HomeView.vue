@@ -83,14 +83,15 @@ const updateWidth = () => {
     userInfoStyle.value = {
         width: `${offset === 0 ? overlayRating.width : 200}px`,
         top: `${offset === 0 ? 9.5 : 10.5}%`,
-        right: `${offset === 0 ? 0 : overlayRating.width - 200}px`
+        right: `${offset === 0 ? 0 : Math.max(0, overlayRating.width - 200)}px`
     }
 };
 
 const redrawImage = (offset: number) => {
     const frameStatus = offset === 0 ? 1 : 0
     if (lastFrameStatus === frameStatus) return
-    // TODO: only redraw for sega frames
+    // if the frame is uploaded by the user, don't redraw the frame
+    if (userProfile.value?.preferences.frame.uploaded_by) return
     lastFrameStatus = frameStatus
 
     const startY = 100;
