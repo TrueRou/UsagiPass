@@ -4,7 +4,7 @@ from app.models.server import ServerMessage
 import config
 
 
-router = APIRouter(prefix="/", tags=["servers"])
+router = APIRouter(tags=["servers"])
 
 
 @router.get("/motd")

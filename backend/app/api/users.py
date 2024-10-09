@@ -13,7 +13,7 @@ from app.models.image import Image, ImagePublic
 from app.maimai import scores
 from app.logging import log, Ansi
 from app import database
-from config import jwt_secret
+from config import jwt_secret, default_character, default_background, default_frame
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -56,6 +56,17 @@ async def update_player_rating(username: str):
         except:
             log("Failed to update player rating for user: " + username, Ansi.LRED)
 
+def apply_default(preferences: UserPreferencePublic, db_preferences: UserPreference, session: Session):
+    # we need to get the image objects from the database
+    character = session.get(Image, db_preferences.character_id or default_character)
+    background = session.get(Image, db_preferences.background_id or default_background)
+    frame = session.get(Image, db_preferences.frame_id or default_frame)
+    if None in [character, background, frame]:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Default image not found in database, please contact the administrator")
+    preferences.character = ImagePublic.model_validate(character)
+    preferences.background = ImagePublic.model_validate(background)
+    preferences.frame = ImagePublic.model_validate(frame)
+
 
 @router.post("/token")
 async def get_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
@@ -97,12 +108,7 @@ async def get_profile(username: str = Depends(verify_user), session: Session = D
     if not db_preference:
         db_preference = database.add(session, UserPreference(username=username))
     preferences = UserPreferencePublic.model_validate(db_preference)
-
-    # we need to get the image objects from the database
-    preferences.character = ImagePublic.model_validate(session.get(Image, db_preference.character_id)) if db_preference.character_id else None
-    preferences.background = ImagePublic.model_validate(session.get(Image, db_preference.background_id)) if db_preference.background_id else None
-    preferences.frame = ImagePublic.model_validate(session.get(Image, db_preference.frame_id)) if db_preference.frame_id else None
-
+    apply_default(preferences, db_preference, session) # apply the default images if the user has not set up
     user_profile = UserProfile(**db_user.model_dump(), preferences=preferences)
     return user_profile
 
@@ -115,7 +121,7 @@ async def update_profile(
 ):
     db_preference = session.get(UserPreference, username)
     if not db_preference:
-        db_preference = database.add(session, UserPreference(username=username))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User has not set up for his preference")
     if db_preference.username != username:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this preference")
     # we need to check integrity of the image ids before updating, due to sqlite does't check by default
