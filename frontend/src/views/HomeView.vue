@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import QRCode, { type QRCodeToDataURLOptions } from 'qrcode'
 import { useUserStore } from '@/stores/user';
 import { useServerStore } from '@/stores/server';
@@ -12,6 +12,11 @@ const userInfoStyle = ref({})
 
 const userProfile = ref<UserProfile>()
 const timeLimit = ref("12:00:00")
+const ratingImg = computed(() => {
+    const arr = String(userProfile.value?.preferences.dx_rating).split('')
+    while (arr.length < 5) arr.unshift('10');
+    return arr.map(num => new URL(`@/assets/rating/num/UI_CMN_Num_26p_`, import.meta.url).href + num + '.png');
+})
 
 const qrcodeOpts = {
     errorCorrectionLevel: 'L',
@@ -63,6 +68,7 @@ const updateWidth = () => {
 const redrawImage = (offset: number) => {
     const frameStatus = offset === 0 ? 1 : 0
     if (lastFrameStatus === frameStatus) return
+    // TODO: only redraw for sega frames
     lastFrameStatus = frameStatus
 
     const startY = 100;
@@ -125,6 +131,9 @@ onMounted(() => {
             src="../assets/frame/UI_CMA_PassName_01.png">
         <img id="overlay-rating" class="absolute object-cover right-0" :style="ratingStyle"
             src="../assets/rating/UI_CMA_Rating_Base_03.png">
+        <div class="flex absolute object-cover right-0" style="margin-right: 2%; margin-top: 3%;" :style="ratingStyle">
+            <img v-for="path in ratingImg" style="height: 48%; width: 48%;" :src="path">
+        </div>
         <img id="overlay-chara" class="absolute object-cover bottom-0 -z-20"
             :src="r(userProfile?.preferences.character)">
         <div id="overlay-user-info" class="absolute bg-white right-0 flex flex-col rounded-md pt-1"
@@ -132,7 +141,7 @@ onMounted(() => {
             <div class="flex items-center p-1" style="height: 3vh;">
                 <p style="font-family: FOTSeurat; font-size: 3vh;">{{ userProfile?.preferences.display_name }}</p>
                 <img class="ml-1" style="height: 3.5vh;"
-                    src="../assets/misc/UI_CMN_Name_DX-topaz-sharpen-textai-enhance-4x.png">
+                    src="../assets/misc/UI_CMN_Name_DX.png">
             </div>
             <div class="flex items-center mt-1" style="height: 3vh;">
                 <p class="text-white pl-2 pr-2 text-center font-extrabold rounded-bl-md"
