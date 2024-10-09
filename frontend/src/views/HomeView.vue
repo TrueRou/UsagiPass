@@ -5,6 +5,18 @@ import { useUserStore } from '@/stores/user';
 import { useServerStore } from '@/stores/server';
 
 let lastFrameStatus = -1;
+const ratingLevels = [
+    1000,
+    2000,
+    4000,
+    7000,
+    10000,
+    12000,
+    13000,
+    14000,
+    14500,
+    15000,
+]
 const overlayStyle = ref({})
 const medalStyle = ref({})
 const ratingStyle = ref({})
@@ -16,6 +28,16 @@ const ratingImg = computed(() => {
     const arr = String(userProfile.value?.preferences.dx_rating).split('')
     while (arr.length < 5) arr.unshift('10');
     return arr.map(num => new URL(`@/assets/rating/num/UI_CMN_Num_26p_`, import.meta.url).href + num + '.png');
+})
+const borderImg = computed(() => {
+    var rating = userProfile.value?.preferences.dx_rating || 0;
+    rating = Math.max(ratingLevels[0], Math.min(rating, ratingLevels[9]));
+    for (let i = 0; i < 9; i++) {
+        if (rating >= ratingLevels[i] && rating < ratingLevels[i + 1]) {
+            const idx = (i + 1).toString().padStart(2, '0');
+            return new URL(`@/assets/rating/UI_CMA_Rating_Base_`, import.meta.url).href + idx + '.png';
+        }
+    }
 })
 
 const qrcodeOpts = {
@@ -128,11 +150,11 @@ onMounted(() => {
     </div>
     <div id="overlay" class="absolute h-full top-0" :style="overlayStyle">
         <img id="overlay-medal" class="absolute object-cover left-0" :style="medalStyle"
-            src="../assets/frame/UI_CMA_PassName_01.png">
+            :src="r(userProfile?.preferences.passname)">
         <img id="overlay-rating" class="absolute object-cover right-0" :style="ratingStyle"
-            src="../assets/rating/UI_CMA_Rating_Base_03.png">
+            :src="borderImg">
         <div class="flex absolute object-cover right-0" style="margin-right: 2%; margin-top: 3%;" :style="ratingStyle">
-            <img v-for="path in ratingImg" style="height: 48%; width: 48%;" :src="path">
+            <img v-for="path in ratingImg" style="height: 46%; width: 46%;" :src="path">
         </div>
         <img id="overlay-chara" class="absolute object-cover bottom-0 -z-20"
             :src="r(userProfile?.preferences.character)">
@@ -140,15 +162,15 @@ onMounted(() => {
             :style="userInfoStyle">
             <div class="flex items-center p-1" style="height: 3vh;">
                 <p style="font-family: FOTSeurat; font-size: 3vh;">{{ userProfile?.preferences.display_name }}</p>
-                <img class="ml-1" style="height: 3.5vh;"
-                    src="../assets/misc/UI_CMN_Name_DX.png">
+                <img class="ml-1" style="height: 3.5vh;" src="../assets/misc/UI_CMN_Name_DX.png">
             </div>
             <div class="flex items-center mt-1" style="height: 3vh;">
                 <p class="text-white pl-2 pr-2 text-center font-extrabold rounded-bl-md"
                     style="font-size: 1vh; background-color: #405baa; -webkit-text-stroke: 1px #fff">
                     フレンド<br>コ一ド
                 </p>
-                <p class="ml-0.5" style="font-family: FOTSeurat; font-size: 1.4vh">{{ userProfile?.preferences.friend_code }}</p>
+                <p class="ml-0.5" style="font-family: FOTSeurat; font-size: 1.4vh">{{
+                    userProfile?.preferences.friend_code }}</p>
             </div>
         </div>
         <div id="overlay-chara-info" class="absolute flex flex-col left-0" style="width: 100%; bottom: 16%;">

@@ -32,6 +32,7 @@ class UserPreferenceUpdate(UserPreferenceBase):
     character_id: str | None = None
     background_id: str | None = None
     frame_id: str | None = None
+    passname_id: str | None = None
 
 
 class UserPreference(UserPreferenceBase, table=True):
@@ -41,12 +42,14 @@ class UserPreference(UserPreferenceBase, table=True):
     character_id: str | None = Field(foreign_key="images.id")
     background_id: str | None = Field(foreign_key="images.id")
     frame_id: str | None = Field(foreign_key="images.id")
+    passname_id: str | None = Field(foreign_key="images.id")
 
 
 class UserPreferencePublic(UserPreferenceBase):
     character: ImagePublic | None = None
     background: ImagePublic | None = None
     frame: ImagePublic | None = None
+    passname: ImagePublic | None = None
 
 
 class UserProfile(SQLModel):
