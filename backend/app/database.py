@@ -14,7 +14,7 @@ async_engine = create_async_engine(config.database_url.replace("sqlite://", "sql
 V = TypeVar("V")
 
 
-async def create_db_and_tables(engine):
+def create_db_and_tables(engine):
     import app.models  # make sure all models are imported (keep its record in metadata)
 
     app.models.SQLModel.metadata.create_all(engine)

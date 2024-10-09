@@ -11,6 +11,7 @@ const ratingStyle = ref({})
 const userInfoStyle = ref({})
 
 const userProfile = ref<UserProfile>()
+const timeLimit = ref("12:00:00")
 
 const qrcodeOpts = {
     errorCorrectionLevel: 'L',
@@ -19,12 +20,20 @@ const qrcodeOpts = {
     margin: 1
 } as QRCodeToDataURLOptions
 
-const setDefaultPreferences = () => {
-
+const r = (resource_key: ImagePublic | undefined) => {
+    if (!resource_key) return ""
+    return import.meta.env.VITE_URL + "/images/" + resource_key!.id
 }
 
-const r = (resource_key: string) => {
-    return import.meta.env.VITE_URL + "/images/" + resource_key
+const setDefaultPreferences = () => {
+    const userStore = useUserStore();
+    const serverStore = useServerStore();
+    userProfile.value!.preferences.character_name ||= userProfile.value!.preferences.character.name;
+    userProfile.value!.preferences.display_name ||= userProfile.value!.nickname;
+    userProfile.value!.preferences.dx_rating ||= userProfile.value!.player_rating;
+    userProfile.value!.preferences.friend_code ||= "664994421382429" // this is my friend code
+    userProfile.value!.preferences.simplified_code ||= userStore.simplifiedCode;
+    userProfile.value!.preferences.maimai_version ||= serverStore.serverMessage!.maimai_version;
 }
 
 const updateWidth = () => {
@@ -45,9 +54,9 @@ const updateWidth = () => {
         top: `${offset === 0 ? 2.5 : 2}%`
     }
     userInfoStyle.value = {
-        width: `${offset === 0 ? overlayRating.width : 170}px`,
+        width: `${offset === 0 ? overlayRating.width : 200}px`,
         top: `${offset === 0 ? 9.5 : 10.5}%`,
-        right: `${offset === 0 ? 0 : overlayRating.width - 170}px`
+        right: `${offset === 0 ? 0 : overlayRating.width - 200}px`
     }
 };
 
@@ -85,36 +94,30 @@ const redrawImage = (offset: number) => {
 
 onMounted(() => {
     const userStore = useUserStore();
-    const serverStore = useServerStore();
-    const cardBg = document.getElementById('card-bg');
-    const cardFr = document.getElementById('card-fr');
+    const cardBg = document.getElementById('card-bg') as HTMLImageElement;
+    const cardFr = document.getElementById('card-fr') as HTMLImageElement;
     const cardFrSource = document.getElementById('card-fr-source');
     const qrcodeImage = document.getElementById('overlay-qrcode-img') as HTMLImageElement;
     cardBg?.addEventListener('load', updateWidth);
     cardFr?.addEventListener('load', updateWidth);
     cardFrSource?.addEventListener('load', () => redrawImage(-1));
+    cardFrSource?.setAttribute('crossOrigin', 'anonymous');
     window.addEventListener('resize', updateWidth);
     QRCode.toDataURL(userStore.maimaiCode, qrcodeOpts, (err, url) => {
         if (err) console.error(err)
         qrcodeImage!.src = url
     })
     userProfile.value = userStore.userProfile! // we can promise it's not null
-    if (!userProfile.value.preferences.simplified_code) {
-        userProfile.value.preferences.simplified_code = userStore.simplifiedCode
-    }
-    if (!userProfile.value.preferences.maimai_version) {
-        userProfile.value.preferences.maimai_version = serverStore.serverMessage?.maimai_version
-    }
+    timeLimit.value = userStore.timeLimit
     setDefaultPreferences() // set default preferences if the field is empty
 });
 
 </script>
 
 <template>
-    <img id="card-fr-source" style="display: none;" src="../assets/frame/UI_CMA_Card_Frame_00_Gold.png">
+    <img id="card-fr-source" style="display: none;" :src="r(userProfile?.preferences.frame)">
     <div id="background" class="flex flex-col items-center justify-center h-full w-full">
-        <img id="card-bg" class="h-full absolute object-cover -z-30"
-            src="../assets/base/UI_CardBase_0000002_000001.png">
+        <img id="card-bg" class="h-full absolute object-cover -z-30" :src="r(userProfile?.preferences.background)">
         <img id="card-fr" style="object-position: 0" class="h-full absolute object-cover -z-10">
     </div>
     <div id="overlay" class="absolute h-full top-0" :style="overlayStyle">
@@ -123,11 +126,11 @@ onMounted(() => {
         <img id="overlay-rating" class="absolute object-cover right-0" :style="ratingStyle"
             src="../assets/rating/UI_CMA_Rating_Base_03.png">
         <img id="overlay-chara" class="absolute object-cover bottom-0 -z-20"
-            src="../assets/chara/UI_CardChara_000201.png">
+            :src="r(userProfile?.preferences.character)">
         <div id="overlay-user-info" class="absolute bg-white right-0 flex flex-col rounded-md pt-1"
             :style="userInfoStyle">
             <div class="flex items-center p-1" style="height: 3vh;">
-                <p style="font-family: FOTSeurat; font-size: 3vh;">TuRou</p>
+                <p style="font-family: FOTSeurat; font-size: 3vh;">{{ userProfile?.preferences.display_name }}</p>
                 <img class="ml-1" style="height: 3.5vh;"
                     src="../assets/misc/UI_CMN_Name_DX-topaz-sharpen-textai-enhance-4x.png">
             </div>
@@ -136,17 +139,17 @@ onMounted(() => {
                     style="font-size: 1vh; background-color: #405baa; -webkit-text-stroke: 1px #fff">
                     フレンド<br>コ一ド
                 </p>
-                <p class="ml-0.5" style="font-family: FOTSeurat; font-size: 1.6vh">211851246666024</p>
+                <p class="ml-0.5" style="font-family: FOTSeurat; font-size: 1.4vh">{{ userProfile?.preferences.friend_code }}</p>
             </div>
         </div>
         <div id="overlay-chara-info" class="absolute flex flex-col left-0" style="width: 100%; bottom: 16%;">
             <div class="flex flex-col pt-1 pb-1 rounded-tr-lg" style="width: 33%; background-color: #fee37c;">
-                <p class="text-center" style="font-size: 1.6vh;">Chara Name</p>
+                <p class="text-center" style="font-size: 1.6vh;">{{ userProfile?.preferences.character_name }}</p>
             </div>
             <div class="flex flex-col pb-1 rounded-tr-lg rounded-br-lg shadow-xl"
                 style="width: 37%; background-color: #fee37c;">
                 <p class="text-center" style="font-size: 1.4vh;">ブ一スト期限
-                    <b class="ml-2" style="font-size: 2vh;">11:53:66</b>
+                    <b class="ml-2" style="font-size: 2vh;">{{ timeLimit }}</b>
                 </p>
             </div>
         </div>

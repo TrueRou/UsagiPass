@@ -4,9 +4,9 @@ interface ImagePublic {
 }
 
 interface UserPreferencePublic {
-    character?: ImagePublic;
-    background?: ImagePublic;
-    frame?: ImagePublic;
+    character: ImagePublic;
+    background: ImagePublic;
+    frame: ImagePublic;
     maimai_version?: string;
     simplified_code?: string;
     character_name?: string;

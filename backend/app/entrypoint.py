@@ -13,9 +13,14 @@ from app.maimai import music, scores
 
 
 def init_middlewares(asgi_app: FastAPI) -> None:
+    origins = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ]
+
     asgi_app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -35,7 +40,7 @@ def init_events(asgi_app: FastAPI) -> None:
     async def on_startup() -> None:
         async with async_session_ctx() as session:
             await session.execute(text("SELECT 1"))  # Test connection
-            await database.create_db_and_tables(database.engine)  # TODO: Sql migration
+            database.create_db_and_tables(database.engine)  # TODO: Sql migration
             asyncio.ensure_future(download_music_list())  # Download music list from diving-fish
             log("Startup process complete.", Ansi.LGREEN)
 
