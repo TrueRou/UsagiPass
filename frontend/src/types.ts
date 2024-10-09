@@ -1,6 +1,7 @@
 interface ImagePublic {
     id: string;
     name: string;
+    uploaded_by?: string;
 }
 
 interface UserPreferencePublic {
