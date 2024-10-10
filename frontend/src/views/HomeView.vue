@@ -32,12 +32,9 @@ const ratingImg = computed(() => {
 const borderImg = computed(() => {
     var rating = userProfile.value?.preferences.dx_rating || 0;
     rating = Math.max(ratingLevels[0], Math.min(rating, ratingLevels[9]));
-    for (let i = 0; i < 9; i++) {
-        if (rating >= ratingLevels[i] && rating < ratingLevels[i + 1]) {
-            const idx = (i + 1).toString().padStart(2, '0');
-            return new URL(`@/assets/rating/UI_CMA_Rating_Base_`, import.meta.url).href + idx + '.png';
-        }
-    }
+    let stage = 0;
+    while (rating >= ratingLevels[stage + 1]) stage++;
+    return new URL(`@/assets/rating/UI_CMA_Rating_Base_`, import.meta.url).href + (stage + 1) + '.png';
 })
 
 const qrcodeOpts = {
