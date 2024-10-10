@@ -32,5 +32,32 @@ export const useUserStore = defineStore('user', () => {
         isSignedIn.value = false
     }
 
-    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, refreshUser, isSignedIn }
+    async function getImages() : Promise<Record<string, ImagePublic[]>> {
+        const response = await axiosInstance.get('/images')
+        const data = response.data
+        const result = data.reduce((acc: any, obj: any) => {
+            if (!acc[obj.kind]) {
+              acc[obj.kind] = [];
+            }
+            
+            acc[obj.kind].push({
+              id: obj.id,
+              name: obj.name,
+              uploaded_by: obj.uploaded_by
+            });
+            
+            return acc;
+          }, {});
+        return result
+    }
+
+    async function patchPreferences(preferences: UserPreferencePublic) {
+        const response = await axiosInstance.patch('/users/preference', preferences)
+        if (response.status === 200) {
+            userProfile.value = response.data
+        }
+        return response.status === 200
+    }
+
+    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, refreshUser, getImages, patchPreferences }
 })

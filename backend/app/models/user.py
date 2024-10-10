@@ -25,7 +25,7 @@ class UserPreferenceBase(SQLModel):
     character_name: str | None = None
     friend_code: str | None = None
     display_name: str | None = None
-    dx_rating: int | None = None
+    dx_rating: str | None = None
 
 
 class UserPreferenceUpdate(UserPreferenceBase):
