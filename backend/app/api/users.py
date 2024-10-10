@@ -56,6 +56,7 @@ async def update_player_rating(username: str):
         except:
             log("Failed to update player rating for user: " + username, Ansi.LRED)
 
+
 def apply_default(preferences: UserPreferencePublic, db_preferences: UserPreference, session: Session):
     # we need to get the image objects from the database
     character = session.get(Image, db_preferences.character_id or default_character)
@@ -63,7 +64,9 @@ def apply_default(preferences: UserPreferencePublic, db_preferences: UserPrefere
     frame = session.get(Image, db_preferences.frame_id or default_frame)
     passname = session.get(Image, db_preferences.passname_id or default_passname)
     if None in [character, background, frame]:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Default image not found in database, please contact the administrator")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Default image not found in database, please contact the administrator"
+        )
     preferences.character = ImagePublic.model_validate(character)
     preferences.background = ImagePublic.model_validate(background)
     preferences.frame = ImagePublic.model_validate(frame)
@@ -110,14 +113,14 @@ async def get_profile(username: str = Depends(verify_user), session: Session = D
     if not db_preference:
         db_preference = database.add(session, UserPreference(username=username))
     preferences = UserPreferencePublic.model_validate(db_preference)
-    apply_default(preferences, db_preference, session) # apply the default images if the user has not set up
+    apply_default(preferences, db_preference, session)  # apply the default images if the user has not set up
     user_profile = UserProfile(**db_user.model_dump(), preferences=preferences)
     return user_profile
 
 
 @router.patch("/preference")
 async def update_profile(
-    preference: UserPreferenceUpdate,
+    preference: UserPreferencePublic,
     username: str = Depends(verify_user),
     session: Session = Depends(require_session),
 ):
@@ -126,13 +129,13 @@ async def update_profile(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User has not set up for his preference")
     if db_preference.username != username:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this preference")
-    # we need to check integrity of the image ids before updating, due to sqlite does't check by default
-    if preference.character_id and not session.get(Image, preference.character_id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid character image id")
-    if preference.background_id and not session.get(Image, preference.background_id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid background image id")
-    if preference.frame_id and not session.get(Image, preference.frame_id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid frame image id")
+    update_preference = UserPreferenceUpdate(
+        **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
+        character_id=preference.character.id if preference.character else None,
+        background_id=preference.background.id if preference.background else None,
+        frame_id=preference.frame.id if preference.frame else None,
+        passname_id=preference.passname.id if preference.passname else None,
+    )
     # there's no problem with the image ids, we can update the preference
-    database.partial_update_model(session, db_preference, preference)
+    database.partial_update_model(session, db_preference, update_preference)
     return {"message": "Preference has been updated"}
