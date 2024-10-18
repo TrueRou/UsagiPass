@@ -23,12 +23,8 @@ def request(flow: mitmproxy.http.HTTPFlow):
         flow.request.path = "/"
         flow.request.port = 4173
         flow.request.headers["Host"] = target_url
-        flow.request.headers["cookie"] = json.dumps(
-            {
-                "maimaiCode": maid,
-                "timeLimit": datetime.datetime.fromtimestamp(timestamp).strftime("%H:%M:%S"),
-            }
-        )
+        flow.response.cookies["maimaiCode"] = maid
+        flow.response.cookies["timeLimit"] = datetime.datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
 
     # redirect other assets to the local server
     flow.request.host = target_url
