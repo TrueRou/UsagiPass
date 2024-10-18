@@ -45,6 +45,15 @@ const qrcodeOpts = {
     margin: 1
 } as QRCodeToDataURLOptions
 
+let eventCounter = 0;
+
+function eventComplete() {
+    eventCounter++;
+    if (eventCounter === 3) {
+        updateWidth();
+    }
+}
+
 const r = (resource_key: ImagePublic | undefined) => {
     if (!resource_key) return ""
     return import.meta.env.VITE_URL + "/images/" + resource_key!.id
@@ -66,27 +75,28 @@ const updateWidth = () => {
     const overlayRating = document.getElementById('overlay-rating') as HTMLImageElement;
     const offset = (window.innerWidth - cardBg!.clientWidth) / 2
     redrawImage(offset); // redraw the frame
+    console.log(overlayRating.width)
     overlayStyle.value = {
         left: `${offset}px`,
         width: `${cardBg!.clientWidth}px`
     }
     medalStyle.value = {
-        height: `${offset === 0 ? 8 : 12}%`,
-        top: `${offset === 0 ? 0.8 : 0}%`
+        height: `${offset < 5 ? 8 : 12}%`,
+        top: `${offset < 5 ? 0.8 : 0}%`
     }
     ratingStyle.value = {
-        height: `${offset === 0 ? 6 : 8}%`,
-        top: `${offset === 0 ? 2.5 : 2}%`
+        height: `${offset < 5 ? 6 : 8}%`,
+        top: `${offset < 5 ? 2.5 : 2}%`
     }
     userInfoStyle.value = {
-        width: `${offset === 0 ? overlayRating.width : 200}px`,
-        top: `${offset === 0 ? 9.5 : 10.5}%`,
-        right: `${offset === 0 ? 0 : Math.max(0, overlayRating.width - 200)}px`
+        width: `50%`,
+        top: `${offset < 5 ? 9.5 : 10.5}%`,
+        right: `0px`
     }
 };
 
 const redrawImage = (offset: number) => {
-    const frameStatus = offset === 0 ? 1 : 0
+    const frameStatus = offset < 5 ? 1 : 0
     if (lastFrameStatus === frameStatus) return
     // if the frame is uploaded by the user, don't redraw the frame
     if (userProfile.value?.preferences.frame.uploaded_by) return
@@ -127,10 +137,12 @@ onMounted(() => {
 
     const cardBg = document.getElementById('card-bg') as HTMLImageElement;
     const cardFr = document.getElementById('card-fr') as HTMLImageElement;
+    const overlayRating = document.getElementById('overlay-rating') as HTMLImageElement;
     const cardFrSource = document.getElementById('card-fr-source');
     const qrcodeImage = document.getElementById('overlay-qrcode-img') as HTMLImageElement;
-    cardBg?.addEventListener('load', updateWidth);
-    cardFr?.addEventListener('load', updateWidth);
+    cardBg?.addEventListener('load', eventComplete);
+    cardFr?.addEventListener('load', eventComplete);
+    overlayRating?.addEventListener('load', eventComplete);
     cardFrSource?.addEventListener('load', () => redrawImage(-1));
     cardFrSource?.setAttribute('crossOrigin', 'anonymous');
     window.addEventListener('resize', updateWidth);
@@ -158,8 +170,8 @@ onMounted(() => {
         <div class="flex absolute object-cover right-0" style="margin-right: 2%; margin-top: 3%;" :style="ratingStyle">
             <img v-for="path in ratingImg" style="height: 46%; width: 46%;" :src="path">
         </div>
-        <img id="overlay-chara" class="absolute object-cover bottom-0 -z-20"
-            :src="r(userProfile?.preferences.character)">
+        <img id="overlay-chara" class="absolute object-cover -z-20" :src="r(userProfile?.preferences.character)"
+            style="left: 50%; top: 50%; transform:translate(-50%,-50%);">
         <div id="overlay-user-info" class="absolute bg-white right-0 flex flex-col rounded-md pt-1"
             :style="userInfoStyle">
             <div class="flex items-center p-1" style="height: 3vh;">
@@ -190,9 +202,9 @@ onMounted(() => {
             style="width: 100%; bottom: 1.6%;">
             <div class="flex justify-between pt-1 pb-1 rounded-2xl bg-gray-800 text-white opacity-85"
                 style="width: 80%; padding-left: 3%; padding-right: 3%;">
-                <p style="font-size: 1.6vh; font-family: FOTSeurat; line-height: 120%;">{{
+                <p style="font-size: 1.2vh; font-family: FOTSeurat; line-height: 120%;">{{
                     userProfile?.preferences.simplified_code }}</p>
-                <p style="font-size: 1.6vh; font-family: FOTSeurat; line-height: 120%;">{{
+                <p style="font-size: 1.2vh; font-family: FOTSeurat; line-height: 120%;">{{
                     userProfile?.preferences.maimai_version }}</p>
             </div>
         </div>
