@@ -12,9 +12,9 @@ const router = createRouter({
             component: HomeView
         },
         {
-            path: '/about',
-            name: 'about',
-            component: () => import('../views/AboutView.vue')
+            path: '/login',
+            name: 'login',
+            component: () => import('../views/LoginView.vue')
         },
         {
             path: '/settings',
@@ -28,9 +28,12 @@ router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
     const serverStore = useServerStore()
     await serverStore.refreshMotd()
-    await userStore.refreshUser()
-    if (!userStore.isSignedIn) {
-        // TODO: Redirect to the error page if the user is not signed in
+    if (localStorage.getItem('token')) await userStore.refreshUser()
+    if (!userStore.isSignedIn && to.name !== 'login') {
+        next({ name: 'login' })
+    }
+    if (userStore.isSignedIn && to.name === 'login') {
+        next({ name: 'home' })
     }
     next()
 })

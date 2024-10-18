@@ -1,6 +1,7 @@
 import axios from "axios"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
+import { useRouter } from "vue-router";
 
 const cookieDict = document.cookie.split(';').reduce((cookies, cookie) => {
     const [name, value] = cookie.split('=').map(c => c.trim());
@@ -22,13 +23,28 @@ export const useUserStore = defineStore('user', () => {
     const isSignedIn = ref(false)
     const userProfile = ref<UserProfile | null>(null)
 
+    async function login(username: string, password: string) {
+        try {
+            const data = await axiosInstance.post('/users/token', new URLSearchParams({
+                username,
+                password
+            }))
+            localStorage.setItem('token', data.data.access_token)
+            return true
+        } catch (error) {
+            // TODO: Show error message
+            return false
+        }
+    }
+
     async function refreshUser() {
-        const response = (await axiosInstance.get('/users/profile'))
-        if (response.status === 200) {
+        try {
+            const response = (await axiosInstance.get('/users/profile'))
             userProfile.value = response.data
             isSignedIn.value = true
+        } catch (error) {
+            isSignedIn.value = false
         }
-        isSignedIn.value = false
     }
 
     async function getImages(): Promise<Record<string, ImagePublic[]>> {
@@ -58,5 +74,5 @@ export const useUserStore = defineStore('user', () => {
         return response.status === 200
     }
 
-    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, refreshUser, getImages, patchPreferences }
+    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, refreshUser, getImages, patchPreferences, login }
 })
