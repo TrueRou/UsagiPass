@@ -2,14 +2,8 @@ import axios from "axios"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
 
-const cookieDict = document.cookie.split(';').reduce((cookies, cookie) => {
-    const [name, value] = cookie.split('=').map(c => c.trim());
-    cookies[name] = value;
-    return cookies;
-}, {})
-
 export const useUserStore = defineStore('user', () => {
-    const token = localStorage.getItem('token') || ""
+    const token = ref(localStorage.getItem('token'))
     const maimaiCode = ref("")
     const timeLimit = ref("")
     const simplifiedCode = computed(() => maimaiCode.value.slice(8, 28).match(/.{1,4}/g)?.join(' '))
@@ -29,6 +23,7 @@ export const useUserStore = defineStore('user', () => {
                 password
             }))
             localStorage.setItem('token', data.data.access_token)
+            token.value = data.data.access_token
             await refreshUser()
             return true
         } catch (error) {

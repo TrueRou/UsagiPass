@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/user';
 import { useServerStore } from '@/stores/server';
 import { useRouter } from 'vue-router';
 
+
 let lastFrameStatus = -1;
 const ratingLevels = [
     1000,
@@ -25,17 +26,25 @@ const userInfoStyle = ref({})
 
 const userProfile = ref<UserProfile>()
 const timeLimit = ref("12:00:00")
+function getStaticNumImage(id: string) {
+    return new URL(`@/assets/rating/num/UI_CMN_Num_26p_${id}.png`, import.meta.url).href
+}
+
+function getStaticRatingImage(id: string) {
+    return new URL(`@/assets/rating/UI_CMA_Rating_Base_${id}.png`, import.meta.url).href
+}
+
 const ratingImg = computed(() => {
     const arr = String(userProfile.value?.preferences.dx_rating).split('')
     while (arr.length < 5) arr.unshift('10');
-    return arr.map(num => new URL(`@/assets/rating/num/UI_CMN_Num_26p_`, import.meta.url).href + num + '.png');
+    return arr.map(num => getStaticNumImage(num));
 })
 const borderImg = computed(() => {
     var rating = userProfile.value?.preferences.dx_rating || 0;
     rating = Math.max(ratingLevels[0], Math.min(rating, ratingLevels[9]));
     let stage = 0;
     while (rating >= ratingLevels[stage + 1]) stage++;
-    return new URL(`@/assets/rating/UI_CMA_Rating_Base_`, import.meta.url).href + (stage + 1) + '.png';
+    return getStaticRatingImage(String(stage + 1));
 })
 
 const qrcodeOpts = {
