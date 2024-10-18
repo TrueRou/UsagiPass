@@ -14,12 +14,15 @@ from app import database
 
 
 router = APIRouter(prefix="/images", tags=["images"])
+data_folder = Path.cwd() / ".data"
 images_folder = Path.cwd() / ".data" / "images"
-if not images_folder.exists():
-    images_folder.mkdir()
+data_folder.mkdir(exist_ok=True)
+images_folder.mkdir(exist_ok=True)
+
 
 def get_folder():
     return images_folder
+
 
 @router.get("/", response_model=list[ImageDetail])
 async def get_images(user: str | None = Depends(verify_user_optional), session: Session = Depends(require_session)):

@@ -1,11 +1,21 @@
 # basic settings
-
 debug = True
 database_url = "sqlite:///database.db"
-httpx_proxy = "http://localhost:7890"
+httpx_proxy = None
 jwt_secret = "SECRET"
 
 # domain settings
-
 bind_address = "127.0.0.1"
 bind_port = 8000
+
+# default settings
+default_character = "uuid"
+default_background = "uuid"
+default_frame = "uuid"
+default_passname = "uuid"
+
+# server settings
+maimai_version = "[maimaiDX]1.45-0001"
+server_motd = "Welcome to UsagiPass API server!"
+author_motd = "Authored by TuRou"
+
