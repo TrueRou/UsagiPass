@@ -27,11 +27,11 @@ const userInfoStyle = ref({})
 const userProfile = ref<UserProfile>()
 const timeLimit = ref("12:00:00")
 function getStaticNumImage(id: string) {
-    return new URL(`@/assets/rating/num/UI_CMN_Num_26p_${id}.png`, import.meta.url).href
+    return new URL(`../assets/rating/num/UI_CMN_Num_26p_${id}.png`, import.meta.url).href
 }
 
 function getStaticRatingImage(id: string) {
-    return new URL(`@/assets/rating/UI_CMA_Rating_Base_${id}.png`, import.meta.url).href
+    return new URL(`../assets/rating/UI_CMA_Rating_Base_${id}.png`, import.meta.url).href
 }
 
 const ratingImg = computed(() => {
