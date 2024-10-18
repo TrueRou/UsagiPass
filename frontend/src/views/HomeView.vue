@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import QRCode, { type QRCodeToDataURLOptions } from 'qrcode'
 import { useUserStore } from '@/stores/user';
 import { useServerStore } from '@/stores/server';
+import { useRouter } from 'vue-router';
 
 let lastFrameStatus = -1;
 const ratingLevels = [
@@ -120,6 +121,10 @@ const redrawImage = (offset: number) => {
 
 onMounted(() => {
     const userStore = useUserStore();
+    const router = useRouter();
+    userStore.maimaiCode = router.currentRoute.value.query.maid as string
+    userStore.timeLimit = router.currentRoute.value.query.time as string
+
     const cardBg = document.getElementById('card-bg') as HTMLImageElement;
     const cardFr = document.getElementById('card-fr') as HTMLImageElement;
     const cardFrSource = document.getElementById('card-fr-source');
@@ -149,8 +154,7 @@ onMounted(() => {
     <div id="overlay" class="absolute h-full top-0" :style="overlayStyle">
         <img id="overlay-medal" class="absolute object-cover left-0" :style="medalStyle"
             :src="r(userProfile?.preferences.passname)">
-        <img id="overlay-rating" class="absolute object-cover right-0" :style="ratingStyle"
-            :src="borderImg">
+        <img id="overlay-rating" class="absolute object-cover right-0" :style="ratingStyle" :src="borderImg">
         <div class="flex absolute object-cover right-0" style="margin-right: 2%; margin-top: 3%;" :style="ratingStyle">
             <img v-for="path in ratingImg" style="height: 46%; width: 46%;" :src="path">
         </div>

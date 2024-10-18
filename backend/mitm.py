@@ -18,6 +18,5 @@ def request(flow: mitmproxy.http.HTTPFlow):
         maid = flow.request.path_components[2].replace(".html", "")
         timestamp = int(flow.request.query.get("l"))
 
-        flow.response = mitmproxy.http.Response.make(302, headers={"Location": target_url})
-        flow.response.cookies["maimaiCode"] = maid
-        flow.response.cookies["timeLimit"] = datetime.datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
+        location = target_url + f"?maid={maid}&time={datetime.datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")}"
+        flow.response = mitmproxy.http.Response.make(302, headers={"Location": location})

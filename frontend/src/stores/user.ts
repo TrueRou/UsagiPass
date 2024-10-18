@@ -1,7 +1,6 @@
 import axios from "axios"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
-import { useRouter } from "vue-router";
 
 const cookieDict = document.cookie.split(';').reduce((cookies, cookie) => {
     const [name, value] = cookie.split('=').map(c => c.trim());
@@ -11,9 +10,9 @@ const cookieDict = document.cookie.split(';').reduce((cookies, cookie) => {
 
 export const useUserStore = defineStore('user', () => {
     const token = localStorage.getItem('token') || ""
-    const maimaiCode = cookieDict['maimaiCode'] || ""
-    const timeLimit = cookieDict['timeLimit'] || ""
-    const simplifiedCode = computed(() => maimaiCode.slice(8, 28).match(/.{1,4}/g)?.join(' '))
+    const maimaiCode = ref("")
+    const timeLimit = ref("")
+    const simplifiedCode = computed(() => maimaiCode.value.slice(8, 28).match(/.{1,4}/g)?.join(' '))
     const axiosInstance = axios.create({
         baseURL: import.meta.env.VITE_URL,
         timeout: 3000,
