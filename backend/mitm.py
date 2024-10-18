@@ -1,9 +1,8 @@
 import datetime
-import json
 import mitmproxy.http
 
 sysall_ip = "42.193.74.107"
-target_url = "192.168.100.4"
+target_url = "https://dxpass.turou.fun/"
 
 
 def request(flow: mitmproxy.http.HTTPFlow):
@@ -19,12 +18,6 @@ def request(flow: mitmproxy.http.HTTPFlow):
         maid = flow.request.path_components[2].replace(".html", "")
         timestamp = int(flow.request.query.get("l"))
 
-        flow.request.host = target_url
-        flow.request.path = "/"
-        flow.request.port = 4173
-        flow.request.headers["Host"] = target_url
+        flow.response = mitmproxy.http.Response.make(302, headers={"Location": target_url})
         flow.response.cookies["maimaiCode"] = maid
         flow.response.cookies["timeLimit"] = datetime.datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
-
-    # redirect other assets to the local server
-    flow.request.host = target_url
