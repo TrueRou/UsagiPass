@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import { useUserStore } from '@/stores/user';
+import { useRouter } from 'vue-router';
 
 const userStore = useUserStore();
+const router = useRouter();
 const settings = ref<UserPreferencePublic>(userStore.userProfile!.preferences);
 const images = ref<Record<string, ImagePublic[]>>()
 
@@ -12,7 +14,9 @@ const r = (resource_id: string) => {
 }
 
 const submit = async () => {
-    await userStore.patchPreferences(settings.value)
+    if (await userStore.patchPreferences(settings.value)) {
+        router.push('/')
+    }
 }
 
 onMounted(async () => {
@@ -29,24 +33,28 @@ onMounted(async () => {
                     </div>
                     <div class="flex justify-between items-center w-full mt-2">
                         <div class="flex items-center">
-                            <a href="https://github.com/TrueRou"><img class="w-12 h-12 rounded-full ml-2" src="../assets/misc/avatar.webp"></a>
-                            
+                            <a href="https://github.com/TrueRou"><img class="w-12 h-12 rounded-full ml-2"
+                                    src="../assets/misc/avatar.webp"></a>
+
                             <div class="flex flex-col p-2">
                                 <span><a href="https://github.com/TrueRou">兔肉</a></span>
                                 <span class="text-gray-600" style="font-size: 12px;">本项目已在Github开源</span>
                             </div>
                         </div>
                         <div class="flex items-center">
-                            <a class="bg-blue-500 text-white font-bold py-2 px-2 h-[40px] w-[40px] rounded hover:bg-blue-600 cursor-pointer" href="https://github.com/TrueRou/UsagiPass">
+                            <a class="bg-blue-500 text-white font-bold py-2 px-2 h-[40px] w-[40px] rounded hover:bg-blue-600 cursor-pointer"
+                                href="https://github.com/TrueRou/UsagiPass">
                                 <img src="../assets/misc/github-mark-white.svg">
                             </a>
-                            <a class="ml-2 bg-blue-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-blue-600 text-sm cursor-pointer" href="https://afdian.com/a/turou">
+                            <a class="ml-2 bg-blue-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-blue-600 text-sm cursor-pointer"
+                                href="https://afdian.com/a/turou">
                                 <img src="../assets/misc/afdian.svg">
                             </a>
                         </div>
                     </div>
                 </div>
-                <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
+                <div
+                    class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
                     <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
                         <h1 class="font-bold text-white">卡面设置</h1>
                     </div>
@@ -62,41 +70,69 @@ onMounted(async () => {
                             <span>背景图片</span>
                             <span class="text-gray-600" style="font-size: 12px;">选择作为卡面背景的图片</span>
                         </div>
-                        <div><select v-model="settings.background.id"><option v-for="item in images?.background" :value="item.id">{{ item.name }}</option></select></div>
+                        <div>
+                            <select v-model="settings.background.id">
+                                <option v-for="item in images?.background" :value="item.id">{{ item.name }}</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="flex justify-between items-center w-full mt-2">
                         <div class="flex flex-col p-2">
                             <span>边框图片</span>
                             <span class="text-gray-600" style="font-size: 12px;">选择作为卡面边框的图片</span>
                         </div>
-                        <div><select v-model="settings.frame.id"><option v-for="item in images?.frame" :value="item.id">{{ item.name }}</option></select></div>
+                        <div>
+                            <select v-model="settings.frame.id">
+                                <option v-for="item in images?.frame" :value="item.id">{{ item.name }}</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="flex justify-between items-center w-full mt-2">
                         <div class="flex flex-col p-2">
                             <span>人物图片</span>
                             <span class="text-gray-600" style="font-size: 12px;">选择作为卡面人物的图片</span>
                         </div>
-                        <div><select v-model="settings.character.id"><option v-for="item in images?.character" :value="item.id">{{ item.name }}</option></select></div>
+                        <div>
+                            <select v-model="settings.character.id">
+                                <option v-for="item in images?.character" :value="item.id">{{ item.name }}</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="flex justify-between items-center w-full mt-2">
                         <div class="flex flex-col p-2">
                             <span>PASS图片</span>
                             <span class="text-gray-600" style="font-size: 12px;">选择作为卡面PassName的图片</span>
                         </div>
-                        <div><select v-model="settings.passname.id"><option v-for="item in images?.passname" :value="item.id">{{ item.name }}</option></select></div>
+                        <div>
+                            <select v-model="settings.passname.id">
+                                <option v-for="item in images?.passname" :value="item.id">{{ item.name }}</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="flex flex-col ml-2 mr-2">
                         <div class="flex justify-between items-center w-full mt-2">
-                            <div class="flex flex-col flex-1 items-center justify-between"><img :src="r(settings.background.id)"></div>
-                            <div class="flex flex-col flex-1 items-center justify-between"><img :src="r(settings.frame.id)"></div>
-                            <div class="flex flex-col flex-1 items-center justify-between"><img :src="r(settings.character.id)"></div>
-                            <div class="flex flex-col flex-1 items-center justify-between"><img :src="r(settings.passname.id)"></div>
+                            <div class="flex flex-col flex-1 items-center justify-between"><img
+                                    :src="r(settings.background.id)"></div>
+                            <div class="flex flex-col flex-1 items-center justify-between"><img
+                                    :src="r(settings.frame.id)"></div>
+                            <div class="flex flex-col flex-1 items-center justify-between"><img
+                                    :src="r(settings.character.id)"></div>
+                            <div class="flex flex-col flex-1 items-center justify-between"><img
+                                    :src="r(settings.passname.id)"></div>
                         </div>
                         <div class="flex justify-between items-center w-full mt-2">
-                            <div class="flex flex-col flex-1 items-center justify-between"><p class="text-gray-600" style="font-size: 12px;">背景预览</p></div>
-                            <div class="flex flex-col flex-1 items-center justify-between"><p class="text-gray-600" style="font-size: 12px;">边框预览</p></div>
-                            <div class="flex flex-col flex-1 items-center justify-between"><p class="text-gray-600" style="font-size: 12px;">人物预览</p></div>
-                            <div class="flex flex-col flex-1 items-center justify-between"><p class="text-gray-600" style="font-size: 12px;">PASS预览</p></div>
+                            <div class="flex flex-col flex-1 items-center justify-between">
+                                <p class="text-gray-600" style="font-size: 12px;">背景预览</p>
+                            </div>
+                            <div class="flex flex-col flex-1 items-center justify-between">
+                                <p class="text-gray-600" style="font-size: 12px;">边框预览</p>
+                            </div>
+                            <div class="flex flex-col flex-1 items-center justify-between">
+                                <p class="text-gray-600" style="font-size: 12px;">人物预览</p>
+                            </div>
+                            <div class="flex flex-col flex-1 items-center justify-between">
+                                <p class="text-gray-600" style="font-size: 12px;">PASS预览</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -144,11 +180,63 @@ onMounted(async () => {
                         </div>
                         <div><input v-model="settings.maimai_version"></div>
                     </div>
-                    <div class="flex justify-end w-full mt-2">
-                        <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600" v-on:click="submit">
-                            保存
-                        </button>
+                </div>
+                <!-- class hidden -> flex -->
+                <div
+                    class="hidden flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
+                    <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
+                        <h1 class="font-bold text-white">自定义图片</h1>
                     </div>
+                    <div class="flex justify-between items-center w-full mt-2">
+                        <div class="flex flex-col p-2">
+                            <span>上传背景</span>
+                            <span class="text-gray-600" style="font-size: 12px;">上传自定义背景图片 (768 * 1052)</span>
+                        </div>
+                        <div>
+                            <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600">
+                                上传
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center w-full mt-2">
+                        <div class="flex flex-col p-2">
+                            <span>上传边框</span>
+                            <span class="text-gray-600" style="font-size: 12px;">上传自定义边框图片 (768 * 1052)</span>
+                        </div>
+                        <div>
+                            <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600">
+                                上传
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center w-full mt-2">
+                        <div class="flex flex-col p-2">
+                            <span>上传人物</span>
+                            <span class="text-gray-600" style="font-size: 12px;">上传自定义人物图片 (768 * 1052)</span>
+                        </div>
+                        <div>
+                            <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600">
+                                上传
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center w-full mt-2">
+                        <div class="flex flex-col p-2">
+                            <span>上传PASS</span>
+                            <span class="text-gray-600" style="font-size: 12px;">上传自定义PASS图片 (338 * 112)</span>
+                        </div>
+                        <div>
+                            <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600">
+                                上传
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end w-full mt-2 mr-5">
+                    <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+                        v-on:click="submit">
+                        保存
+                    </button>
                 </div>
             </div>
         </div>
@@ -156,7 +244,7 @@ onMounted(async () => {
 </template>
 <style scoped>
 ::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 input {
@@ -180,8 +268,8 @@ input {
 }
 
 
-select {  
-    background:#fafdfe;  
+select {
+    background: #fafdfe;
     width: 200px;
     height: 100%;
     padding: 10px 10px;
