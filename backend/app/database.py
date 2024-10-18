@@ -9,7 +9,7 @@ import config
 
 
 engine = create_engine(config.database_url)
-async_engine = create_async_engine(config.database_url.replace("sqlite://", "sqlite+aiosqlite://"))
+async_engine = create_async_engine(config.database_url.replace("sqlite://", "sqlite+aiosqlite://").replace("mysql://", "mysql+aiomysql://"))
 
 V = TypeVar("V")
 
