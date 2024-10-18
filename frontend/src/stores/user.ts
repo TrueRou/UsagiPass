@@ -11,8 +11,8 @@ const cookieDict = document.cookie.split(';').reduce((cookies, cookie) => {
 
 export const useUserStore = defineStore('user', () => {
     const token = localStorage.getItem('token') || ""
-    const maimaiCode = cookieDict['maimaiCode']
-    const timeLimit = cookieDict['timeLimit']
+    const maimaiCode = cookieDict['maimaiCode'] || ""
+    const timeLimit = cookieDict['timeLimit'] || ""
     const simplifiedCode = computed(() => maimaiCode.slice(8, 28).match(/.{1,4}/g)?.join(' '))
     const axiosInstance = axios.create({
         baseURL: import.meta.env.VITE_URL,
@@ -30,6 +30,7 @@ export const useUserStore = defineStore('user', () => {
                 password
             }))
             localStorage.setItem('token', data.data.access_token)
+            await refreshUser()
             return true
         } catch (error) {
             // TODO: Show error message

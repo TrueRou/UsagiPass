@@ -32,10 +32,10 @@ router.beforeEach(async (to, from, next) => {
     if (!userStore.isSignedIn && to.name !== 'login') {
         next({ name: 'login' })
     }
-    if (userStore.isSignedIn && to.name === 'login') {
+    else if (userStore.isSignedIn && to.name === 'login') {
         next({ name: 'home' })
     }
-    next()
+    else next()
 })
 
 export default router
