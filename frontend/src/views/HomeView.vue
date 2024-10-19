@@ -143,8 +143,8 @@ const routeSettings = () => {
 
 onMounted(() => {
     const userStore = useUserStore();
-    userStore.maimaiCode = router.currentRoute.value.query.maid as string || ""
-    userStore.timeLimit = router.currentRoute.value.query.time as string || "12:00:00"
+    if (router.currentRoute.value.query.maid) userStore.maimaiCode = router.currentRoute.value.query.maid as string
+    if (router.currentRoute.value.query.time) userStore.timeLimit = router.currentRoute.value.query.time as string
 
     const cardBg = document.getElementById('card-bg') as HTMLImageElement;
     const cardFr = document.getElementById('card-fr') as HTMLImageElement;

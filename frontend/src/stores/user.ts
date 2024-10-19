@@ -5,7 +5,7 @@ import { computed, ref } from "vue"
 export const useUserStore = defineStore('user', () => {
     const token = ref(localStorage.getItem('token'))
     const maimaiCode = ref("")
-    const timeLimit = ref("")
+    const timeLimit = ref("12:00:00")
     const simplifiedCode = computed(() => maimaiCode.value.slice(8, 28).match(/.{1,4}/g)?.join(' '))
     const axiosInstance = axios.create({
         baseURL: import.meta.env.VITE_URL,
