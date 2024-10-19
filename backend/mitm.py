@@ -1,15 +1,15 @@
 import datetime
 import mitmproxy.http
 
-sysall_ip = "42.193.74.107"
+allowed_hosts = ["42.193.74.107", "wq.sys-all.cn"]
 target_url = "https://dxpass.turou.fun/"
 
 
 def request(flow: mitmproxy.http.HTTPFlow):
     # refuse all requests that are not from sysall
-    if flow.request.host != sysall_ip:
+    if flow.request.host not in allowed_hosts:
         flow.response = mitmproxy.http.Response.make(
-            content=f'{{"error":"invalid request", "url": "{flow.request.url}", "msg": "The url is not allowed by UsagiPass mitmproxy, please check your proxy routes.", "msg_zh": "不允许的请求，请检查代理的路由配置"}}'
+            content=f'{{"error":"invalid request", "host": "{flow.request.host}", "msg": "The host is not allowed by UsagiPass mitmproxy, please check your proxy routes.", "msg_zh": "不允许的请求，请检查代理的路由配置"}}'
         )
         return
 
