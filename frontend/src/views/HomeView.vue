@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router';
 
 
 let lastFrameStatus = -1;
+let eventCounter = 0;
 const ratingLevels = [
     1000,
     2000,
@@ -19,26 +20,27 @@ const ratingLevels = [
     14500,
     15000,
 ]
+const qrcodeOpts = {
+    errorCorrectionLevel: 'L',
+    type: 'image/jpeg',
+    quality: 0.3,
+    margin: 1
+} as QRCodeToDataURLOptions
+
 const overlayStyle = ref({})
 const medalStyle = ref({})
 const ratingStyle = ref({})
 const userInfoStyle = ref({})
-
 const userProfile = ref<UserProfile>()
 const timeLimit = ref("12:00:00")
-function getStaticNumImage(id: string) {
-    return new URL(`../assets/rating/num/UI_CMN_Num_26p_${id}.png`, import.meta.url).href
-}
-
-function getStaticRatingImage(id: string) {
-    return new URL(`../assets/rating/UI_CMA_Rating_Base_${id}.png`, import.meta.url).href
-}
+const router = useRouter()
 
 const ratingImg = computed(() => {
     const arr = String(userProfile.value?.preferences.dx_rating).split('')
     while (arr.length < 5) arr.unshift('10');
     return arr.map(num => getStaticNumImage(num));
 })
+
 const borderImg = computed(() => {
     var rating = userProfile.value?.preferences.dx_rating || 0;
     rating = Math.max(ratingLevels[0], Math.min(rating, ratingLevels[9]));
@@ -47,20 +49,19 @@ const borderImg = computed(() => {
     return getStaticRatingImage(String(stage + 1));
 })
 
-const qrcodeOpts = {
-    errorCorrectionLevel: 'L',
-    type: 'image/jpeg',
-    quality: 0.3,
-    margin: 1
-} as QRCodeToDataURLOptions
-
-let eventCounter = 0;
-
 function eventComplete() {
     eventCounter++;
     if (eventCounter === 3) {
         updateWidth();
     }
+}
+
+function getStaticNumImage(id: string) {
+    return new URL(`../assets/rating/num/UI_CMN_Num_26p_${id}.png`, import.meta.url).href
+}
+
+function getStaticRatingImage(id: string) {
+    return new URL(`../assets/rating/UI_CMA_Rating_Base_${id}.png`, import.meta.url).href
 }
 
 const r = (resource_key: ImagePublic | undefined) => {
@@ -81,10 +82,8 @@ const setDefaultPreferences = () => {
 
 const updateWidth = () => {
     const cardBg = document.getElementById('card-bg') as HTMLImageElement;
-    const overlayRating = document.getElementById('overlay-rating') as HTMLImageElement;
     const offset = (window.innerWidth - cardBg!.clientWidth) / 2
     redrawImage(offset); // redraw the frame
-    console.log(overlayRating.width)
     overlayStyle.value = {
         left: `${offset}px`,
         width: `${cardBg!.clientWidth}px`
@@ -138,11 +137,14 @@ const redrawImage = (offset: number) => {
     cardFr.src = canvas.toDataURL('image/png');
 }
 
+const routeSettings = () => {
+    router.push({ name: 'settings' })
+}
+
 onMounted(() => {
     const userStore = useUserStore();
-    const router = useRouter();
-    userStore.maimaiCode = router.currentRoute.value.query.maid as string
-    userStore.timeLimit = router.currentRoute.value.query.time as string
+    userStore.maimaiCode = router.currentRoute.value.query.maid as string || ""
+    userStore.timeLimit = router.currentRoute.value.query.time as string || "12:00:00"
 
     const cardBg = document.getElementById('card-bg') as HTMLImageElement;
     const cardFr = document.getElementById('card-fr') as HTMLImageElement;
@@ -155,10 +157,12 @@ onMounted(() => {
     cardFrSource?.addEventListener('load', () => redrawImage(-1));
     cardFrSource?.setAttribute('crossOrigin', 'anonymous');
     window.addEventListener('resize', updateWidth);
-    QRCode.toDataURL(userStore.maimaiCode, qrcodeOpts, (err, url) => {
-        if (err) console.error(err)
-        qrcodeImage!.src = url
-    })
+    if (userStore.maimaiCode) {
+        QRCode.toDataURL("SGWC" + userStore.maimaiCode, qrcodeOpts, (err, url) => {
+            if (err) console.error(err)
+            qrcodeImage!.src = url
+        })
+    }
     userProfile.value = userStore.userProfile! // we can promise it's not null
     timeLimit.value = userStore.timeLimit
     setDefaultPreferences() // set default preferences if the field is empty
@@ -203,7 +207,7 @@ onMounted(() => {
             <div class="flex flex-col pb-1 rounded-tr-lg rounded-br-lg shadow-xl"
                 style="width: 37%; background-color: #fee37c;">
                 <p class="text-center" style="font-size: 1.4vh;">ブ一スト期限
-                    <b class="ml-2" style="font-size: 2vh;">{{ timeLimit }}</b>
+                    <b class="ml-2" style="font-size: 1.6vh;">{{ timeLimit }}</b>
                 </p>
             </div>
         </div>
@@ -219,6 +223,10 @@ onMounted(() => {
         </div>
         <div id="overlay-qrcode" class="absolute p-0.5 rounded bg-white" style="bottom: 6%; right: 8%;">
             <img id="overlay-qrcode-img" style="width: 15vh;"></img>
+        </div>
+        <div id="overlay-qrcode" class="absolute p-1 rounded-full bg-white" style="bottom: 1%; right: 1.2%;"
+            @click="routeSettings">
+            <img src="../assets/misc/settings.svg" style="width: 3vh;"></img>
         </div>
     </div>
 </template>

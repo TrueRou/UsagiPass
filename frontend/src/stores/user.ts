@@ -43,7 +43,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function getImages(): Promise<Record<string, ImagePublic[]>> {
-        const response = await axiosInstance.get('/images')
+        const response = await axiosInstance.get('/images/')
         const data = response.data
         const result = data.reduce((acc: any, obj: any) => {
             if (!acc[obj.kind]) {
