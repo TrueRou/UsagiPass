@@ -18,8 +18,8 @@ DXPass是**日服限定**的, 可以在制卡机上制作的具有特殊功能�
     - **Github(推荐)**: [https://github.com/MetaCubeX/ClashMetaForAndroid/releases](https://github.com/MetaCubeX/ClashMetaForAndroid/releases)
     - **蓝奏云(国内)**: [https://wwps.lanzouj.com/iXMCk2cydjmd](https://wwps.lanzouj.com/iXMCk2cydjmd)
 2. 导入UsagiPass配置
-    - 点击URI直接导入: [导入Clash配置](clash://install-config?url=https://dxpass.turou.fun/rules.yaml&name=UsagiPass)
-3. **点击启动代理, 并保证ClashMeta在后台运行**
+    - 点击URI直接导入: [导入Clash配置](clash://install-config?url=https://dxpass.turou.fun/UsagiPass.yaml&name=UsagiPass)
+3. **选择该配置, 点击启动代理, 并保证ClashMeta在后台运行**
 4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
 
 ::: tip
@@ -28,7 +28,16 @@ UsagiPass利用代理来重定向华立二维码网页, 请保证在使用过程
 
 ### IOS设备
 
-To be done...
+1. 安装Shadowrocket(小火箭)作为代理工具: 
+    - 请自行寻找安装方法
+2. 导入UsagiPass配置
+    - 点击URI直接导入: [导入Clash配置](clash://install-config?url=https://dxpass.turou.fun/UsagiPass.yaml&name=UsagiPass)
+3. **选择该配置, 点击启动代理, 并保证Shadowrocket在后台运行**
+4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
+
+::: tip
+UsagiPass利用代理来重定向华立二维码网页, 请保证在使用过程中代理不要关闭.
+:::
 
 # 使用UsagiPass
 
