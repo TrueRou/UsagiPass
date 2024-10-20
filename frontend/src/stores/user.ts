@@ -7,18 +7,18 @@ export const useUserStore = defineStore('user', () => {
     const maimaiCode = ref("")
     const timeLimit = ref("12:00:00")
     const simplifiedCode = computed(() => maimaiCode.value.slice(8, 28).match(/.{1,4}/g)?.join(' '))
-    const axiosInstance = axios.create({
+    const axiosInstance = computed(() => axios.create({
         baseURL: import.meta.env.VITE_URL,
         timeout: 3000,
         headers: { 'Authorization': `Bearer ${token.value}` },
-    });
+    }));
 
     const isSignedIn = ref(false)
     const userProfile = ref<UserProfile | null>(null)
 
     async function login(username: string, password: string) {
         try {
-            const data = await axiosInstance.post('/users/token', new URLSearchParams({
+            const data = await axiosInstance.value.post('/users/token', new URLSearchParams({
                 username,
                 password
             }))
@@ -27,14 +27,14 @@ export const useUserStore = defineStore('user', () => {
             await refreshUser()
             return true
         } catch (error) {
-            // TODO: Show error message
+            alert("账号或密码错误")
             return false
         }
     }
 
     async function refreshUser() {
         try {
-            const response = (await axiosInstance.get('/users/profile'))
+            const response = (await axiosInstance.value.get('/users/profile'))
             userProfile.value = response.data
             isSignedIn.value = true
         } catch (error) {
@@ -43,7 +43,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function getImages(): Promise<Record<string, ImagePublic[]>> {
-        const response = await axiosInstance.get('/images/')
+        const response = await axiosInstance.value.get('/images/')
         const data = response.data
         const result = data.reduce((acc: any, obj: any) => {
             if (!acc[obj.kind]) {
@@ -62,12 +62,12 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function patchPreferences(preferences: UserPreferencePublic) {
-        const response = await axiosInstance.patch('/users/preference', preferences)
+        const response = await axiosInstance.value.patch('/users/preference', preferences)
         if (response.status === 200) {
             userProfile.value = response.data
         }
         return response.status === 200
     }
 
-    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, refreshUser, getImages, patchPreferences, login }
+    return { maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, refreshUser, getImages, patchPreferences, login }
 })
