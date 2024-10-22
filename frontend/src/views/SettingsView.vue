@@ -264,7 +264,7 @@ input {
     border: 2px solid #000;
     border-radius: 5px;
     width: 200px;
-    height: 100%;
+    height: 44.5px;
     padding: 0;
     padding: 10px 10px;
     box-sizing: border-box;
@@ -283,7 +283,7 @@ input {
 select {
     background: #fafdfe;
     width: 200px;
-    height: 100%;
+    height: 44.5px;
     padding: 10px 10px;
     box-sizing: border-box;
     border: 2px solid #000;
