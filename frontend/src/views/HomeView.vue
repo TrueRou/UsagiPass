@@ -222,7 +222,7 @@ onMounted(() => {
             </div>
         </div>
         <div id="overlay-qrcode" class="absolute p-0.5 rounded bg-white" style="bottom: 6%; left: 65%;">
-            <img id="overlay-qrcode-img" style="width: 15vh;"></img>
+            <img id="overlay-qrcode-img" :style="{ width: userProfile?.preferences.qr_size }"></img>
         </div>
         <div id="overlay-qrcode" class="absolute p-1 rounded-full bg-white" style="bottom: 1%; right: 1.2%;"
             @click="routeSettings">
