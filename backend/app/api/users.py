@@ -71,6 +71,8 @@ def apply_default(preferences: UserPreferencePublic, db_preferences: UserPrefere
     preferences.background = ImagePublic.model_validate(background)
     preferences.frame = ImagePublic.model_validate(frame)
     preferences.passname = ImagePublic.model_validate(passname)
+    # grant some default value here
+    preferences.qr_size = 15  # medium
 
 
 @router.post("/token")

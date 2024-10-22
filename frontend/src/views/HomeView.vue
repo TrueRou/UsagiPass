@@ -221,7 +221,7 @@ onMounted(() => {
                     userProfile?.preferences.maimai_version }}</p>
             </div>
         </div>
-        <div id="overlay-qrcode" class="absolute p-0.5 rounded bg-white" style="bottom: 6%; right: 8%;">
+        <div id="overlay-qrcode" class="absolute p-0.5 rounded bg-white" style="bottom: 6%; left: 65%;">
             <img id="overlay-qrcode-img" style="width: 15vh;"></img>
         </div>
         <div id="overlay-qrcode" class="absolute p-1 rounded-full bg-white" style="bottom: 1%; right: 1.2%;"

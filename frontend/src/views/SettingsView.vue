@@ -67,6 +67,18 @@ onMounted(async () => {
                     </div>
                     <div class="flex justify-between items-center w-full mt-2">
                         <div class="flex flex-col p-2">
+                            <span>二维码尺寸</span>
+                            <span class="text-gray-600" style="font-size: 12px;">如果机台无法识别, 请增大二维码尺寸</span>
+                        </div>
+                        <select v-model="settings.qr_size">
+                            <option :value="12">小</option>
+                            <option :value="15">中</option>
+                            <option :value="20">大</option>
+                            <option :value="24">标准</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-between items-center w-full mt-2">
+                        <div class="flex flex-col p-2">
                             <span>背景图片</span>
                             <span class="text-gray-600" style="font-size: 12px;">选择作为卡面背景的图片</span>
                         </div>

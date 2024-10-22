@@ -15,6 +15,7 @@ interface UserPreferencePublic {
     friend_code?: string;
     display_name?: string;
     dx_rating?: number;
+    qr_size?: number;
 }
 
 interface UserProfile {
