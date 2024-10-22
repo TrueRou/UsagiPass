@@ -2,13 +2,17 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  lang: 'zh-CN',
   title: "UsagiPass",
+  titleTemplate: ':title - UsagiPass',
   description: "UsagiPass 文档",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: '主页', link: '/' },
-      { text: '手册', link: '/implementation' }
+      { text: '手册', link: '/implementation' },
+      { text: '博客', link: 'https://turou.fun/' },
+      { text: '❤️', link: 'https://afdian.com/a/turou' },
     ],
 
     sidebar: [
@@ -26,6 +30,11 @@ export default defineConfig({
         ]
       }
     ],
+
+    footer: {
+      message: '欢迎加入UsagiPass兔兔群: 363346002',
+      copyright: 'Copyright © 2019-2024 TuRou'
+    },
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/TrueRou/UsagiPass' }

@@ -13,6 +13,9 @@ hero:
     - theme: alt
       text: 手册
       link: /implementation
+    - theme: alt
+      text: ⭐
+      link: https://github.com/TrueRou/UsagiPass
   image:
     src: https://s2.loli.net/2024/10/20/bMBCKPxzWdo15nO.webp
 
