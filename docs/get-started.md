@@ -56,3 +56,9 @@ UsagiPass利用代理来重定向华立二维码网页, 请保证在使用过程
 ::: tip
 上传自定义背景、角色、边框的功能尚在开发中
 :::
+
+![settings-image](https://s2.loli.net/2024/10/22/cgbQVaCkmPKWZsu.jpg)
+
+## 支持UsagiPass
+
+如果觉得UsagiPass好用的话, 不妨给[我们的仓库](https://github.com/TrueRou/UsagiPass)点一个Star吧
