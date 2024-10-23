@@ -179,9 +179,11 @@ onMounted(() => {
     <div id="overlay" class="absolute h-full top-0" :style="overlayStyle">
         <img id="overlay-medal" class="absolute object-cover left-0" :style="medalStyle"
             :src="r(userProfile?.preferences.passname)">
-        <img id="overlay-rating" class="absolute object-cover right-0" :style="ratingStyle" :src="borderImg">
-        <div class="flex absolute object-cover right-0" style="margin-right: 2%; margin-top: 3%;" :style="ratingStyle">
-            <img v-for="path in ratingImg" style="height: 46%; width: 46%;" :src="path">
+        <div class="absolute object-cover right-0" :style="ratingStyle">
+            <img id="overlay-rating" class="relative object-cover right-0 h-full" :src="borderImg">
+            <div class="flex absolute object-cover right-0" style="top: 25%; height: 48%; right: 4%;">
+                <img v-for="path in ratingImg" :src="path">
+            </div>
         </div>
         <img id="overlay-chara" class="absolute object-cover -z-20" :src="r(userProfile?.preferences.character)"
             style="left: 50%; top: 50%; transform:translate(-50%,-50%);">
