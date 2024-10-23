@@ -31,6 +31,7 @@ const overlayStyle = ref({})
 const medalStyle = ref({})
 const ratingStyle = ref({})
 const userInfoStyle = ref({})
+const ratingNumberStyle = ref({})
 const userProfile = ref<UserProfile>()
 const timeLimit = ref("12:00:00")
 const router = useRouter()
@@ -100,6 +101,11 @@ const updateWidth = () => {
         width: `50%`,
         top: `${offset < 5 ? 9.5 : 10.5}%`,
         right: `0px`
+    }
+    ratingNumberStyle.value = {
+        top: "4%",
+        height: `${offset < 5 ? 2.8 : 3.6}%`,
+        right: `calc(1.6% + ${offset}px)`
     }
 };
 
@@ -181,7 +187,7 @@ onMounted(() => {
             :src="r(userProfile?.preferences.passname)">
         <div class="absolute object-cover right-0" :style="ratingStyle">
             <img id="overlay-rating" class="relative object-cover right-0 h-full" :src="borderImg">
-            <div class="flex absolute object-cover right-0" style="top: 25%; height: 48%; right: 4%;">
+            <div class="flex fixed object-cover right-0" :style=ratingNumberStyle>
                 <img v-for="path in ratingImg" :src="path">
             </div>
         </div>
