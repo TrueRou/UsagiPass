@@ -52,6 +52,7 @@ async def update_player_rating(username: str):
             player_rating = await scores.get_rating(username)
             user = await session.get(User, username)
             user.player_rating = player_rating
+            user.updated_at = datetime.utcnow()
             await session.commit()
         except:
             log("Failed to update player rating for user: " + username, Ansi.LRED)
@@ -111,7 +112,7 @@ async def get_profile(username: str = Depends(verify_user), session: Session = D
     db_user = session.get(User, username)
     db_preference = session.get(UserPreference, username)
     # we need to update the player rating if the user has not updated for 4 hours
-    if (datetime.utcnow() - db_user.updated_at).total_seconds() <= 3600 * 4:
+    if (datetime.utcnow() - db_user.updated_at).total_seconds() >= 3600 * 4:
         asyncio.ensure_future(update_player_rating(username))
     if not db_preference:
         db_preference = database.add(session, UserPreference(username=username))
