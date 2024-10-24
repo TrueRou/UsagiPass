@@ -16,12 +16,14 @@ DXPass是**日服限定**的, 可以在制卡机上制作的具有特殊功能�
 
 ### 安卓设备
 
-1. 安装ClashMetaForAndroid作为代理工具: 
+1. 安装Clash/ClashMeta作为代理工具: 
     - **Github(推荐)**: [https://github.com/MetaCubeX/ClashMetaForAndroid/releases](https://github.com/MetaCubeX/ClashMetaForAndroid/releases)
     - **蓝奏云(国内)**: [https://wwps.lanzouj.com/iXMCk2cydjmd](https://wwps.lanzouj.com/iXMCk2cydjmd)
     - 加入UsagiPass用户群获取: 363346002
 2. 导入UsagiPass配置
-    - 点击URI直接导入: [导入Clash配置](clash://install-config?url=https://dxpass.turou.fun/UsagiPass.yaml&name=UsagiPass)
+    - 一键导入: [导入Clash配置](clash://install-config?url=https://dxpass.turou.fun/UsagiPass.yaml&name=UsagiPass)
+    - 复制链接到Clash导入: https://dxpass.turou.fun/UsagiPass.yaml
+    - 也可以加群下载文件, 从文件导入: 363346002
 3. **选择该配置, 点击启动代理, 并保证ClashMeta在后台运行**
 4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
 
@@ -35,12 +37,13 @@ UsagiPass利用代理来重定向华立二维码网页, 请保证在使用过程
     - 请自行寻找安装方法
     - 加入UsagiPass用户群寻求帮助: 363346002
 2. 导入UsagiPass配置
-    - 点击URI直接导入: [导入Clash配置](clash://install-config?url=https://dxpass.turou.fun/UsagiPass.yaml&name=UsagiPass)
+    - 一键导入: [导入Clash配置](clash://install-config?url=https://dxpass.turou.fun/UsagiPass.yaml&name=UsagiPass)
+    - 复制链接到小火箭导入: https://dxpass.turou.fun/UsagiPass.yaml
 3. **选择该配置, 点击启动代理, 并保证Shadowrocket在后台运行**
 4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
 
 ::: tip
-UsagiPass利用代理来重定向华立二维码网页, 请保证在使用过程中代理不要关闭.
+sing-box, QuantX规则绝赞制作中
 :::
 
 ## 使用UsagiPass
@@ -57,8 +60,28 @@ UsagiPass利用代理来重定向华立二维码网页, 请保证在使用过程
 上传自定义背景、角色、边框的功能尚在开发中
 :::
 
-![settings-image](https://s2.loli.net/2024/10/22/cgbQVaCkmPKWZsu.jpg)
-
 ## 支持UsagiPass
 
 如果觉得UsagiPass好用的话, 不妨给[我们的仓库](https://github.com/TrueRou/UsagiPass)点一个Star吧
+
+## Q & A
+
+**Q: IOS使用小火箭需要购买**
+
+A: sing-box规则绝赞制作中, sing-box是一款在外区商店可以免费下载的代理软件
+
+**Q: IOS我不知道应该如何获得外区账号**
+
+A: 可以在B站搜索相关关键词, 这类视频还是挺多的
+
+**Q: 我不知道应该如何配置代理**
+
+A: 请按照文章步骤进行, 如果真的遇到某一步卡住, 可以加群与我们交流
+
+**Q: 在按照步骤配置后, 我无法打开UsagiPass网页**
+
+A: 首先, 能够打开此官网则证明您可以连接至UsagiPass的分发服务器. 无法打开可能是代理配置不正确, 或者是无法连接至我们的代理服务器.
+
+请再次检查代理配置是否正确, 是否选择了UsagiPass作为配置, **是否在代理软件中开启规则模式**.
+
+如果您的错误代码为类似ERR_PROXY_CONNECTION_FAILED的字样, 请加群联系我们, 我们会提供备用代理服务器, 尝试解决你的问题.

@@ -17,6 +17,7 @@ def request(flow: mitmproxy.http.HTTPFlow):
     if flow.request.path.find("qrcode") != -1 and flow.request.path.find("req") != -1:
         maid = flow.request.path_components[2].replace(".html", "")
         timestamp = int(flow.request.query.get("l"))
+        timestr = datetime.datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
 
-        location = target_url + f"?maid={maid}&time={datetime.datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")}"
+        location = target_url + f"?maid={maid}&time={timestr}"
         flow.response = mitmproxy.http.Response.make(302, headers={"Location": location})
