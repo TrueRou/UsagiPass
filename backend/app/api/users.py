@@ -84,10 +84,24 @@ async def get_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], 
     user_optional = session.exec(select(User).where(User.username == username.lower())).first()
     is_password_correct = bcrypt.checkpw(password.encode(), user_optional.hashed_password.encode()) if user_optional else False
     # user has registered in our database, we need to check the password
-    if user_optional and is_password_correct:
-        return grant_user(user_optional)
+    if user_optional:
+        # user has correct password, we can grant the token
+        if is_password_correct:
+            return grant_user(user_optional)
+        # user has incorrect password, we need to check the diving-fish
+        if not is_password_correct:
+            async with async_httpx_ctx() as client:
+                response = await client.post(
+                    "https://www.diving-fish.com/api/maimaidxprober/login", json={"username": username, "password": password}
+                )
+                if "errcode" not in response.json():
+                    # the password is correct, we need to update the password in our database
+                    hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+                    user_optional.hashed_password = hashed_pw
+                    session.commit()
+                    return grant_user(user_optional)
     # we can't verify the user in our database, we need to check the diving-fish
-    if not user_optional or not is_password_correct:
+    if not user_optional:
         async with async_httpx_ctx() as client:
             response = await client.post("https://www.diving-fish.com/api/maimaidxprober/login", json={"username": username, "password": password})
             if "errcode" not in response.json():
