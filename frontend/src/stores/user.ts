@@ -32,6 +32,19 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 
+    function logout() {
+        localStorage.removeItem('token')
+        token.value = null
+        isSignedIn.value = false
+        location.reload()
+    }
+
+    async function updateRating() {
+        if (isSignedIn) {
+            await axiosInstance.value.patch('/users/rating')
+        }
+    }
+
     async function refreshUser() {
         try {
             const response = (await axiosInstance.value.get('/users/profile'))
@@ -69,5 +82,5 @@ export const useUserStore = defineStore('user', () => {
         return response.status === 200
     }
 
-    return { maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, refreshUser, getImages, patchPreferences, login }
+    return { maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, refreshUser, updateRating, getImages, patchPreferences, login, logout }
 })

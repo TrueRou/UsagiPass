@@ -143,3 +143,8 @@ async def update_profile(
     # there's no problem with the image ids, we can update the preference
     database.partial_update_model(session, db_preference, update_preference)
     return {"message": "Preference has been updated"}
+
+
+@router.patch("/rating")
+async def update_rating(username: str = Depends(verify_user)):
+    await update_player_rating(username)

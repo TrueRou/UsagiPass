@@ -6,18 +6,26 @@ import { useRouter } from 'vue-router';
 const userStore = useUserStore();
 const router = useRouter();
 const settings = ref<UserPreferencePublic>(userStore.userProfile!.preferences);
+const profile = ref<UserProfile>(userStore.userProfile!);
 const images = ref<Record<string, ImagePublic[]>>()
 
 const r = (resource_id: string) => import.meta.env.VITE_URL + "/images/" + resource_id;
 
 const submit = async () => {
     if (await userStore.patchPreferences(settings.value)) {
-        router.push('/')
+        router.push('/');
     }
 }
 
+const refreshRating = async () => {
+    await userStore.updateRating();
+    await userStore.refreshUser();
+    profile.value = userStore.userProfile!;
+    alert("DXRating已刷新");
+}
+
 onMounted(async () => {
-    images.value = await userStore.getImages()
+    images.value = await userStore.getImages();
 });
 </script>
 <template>
@@ -46,6 +54,29 @@ onMounted(async () => {
                             <a class="ml-2 bg-blue-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-blue-600 text-sm cursor-pointer"
                                 href="https://afdian.com/a/turou">
                                 <img src="../assets/misc/afdian.svg">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
+                    <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
+                        <h1 class="font-bold text-white">账户设置</h1>
+                    </div>
+                    <div class="flex justify-between items-center w-full mt-2">
+                        <div class="flex flex-col p-2">
+                            <span>{{ profile.nickname }} ({{ profile.username }})</span>
+                            <span class="text-gray-600" style="font-size: 12px;">DXRating: {{ profile.player_rating
+                                }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <a class="bg-blue-500 text-white font-bold py-2 px-2 h-[40px] w-[40px] rounded hover:bg-blue-600 cursor-pointer"
+                                @click="refreshRating">
+                                <img src="../assets/misc/refresh.svg">
+                            </a>
+                            <a class="ml-2 bg-blue-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-blue-600 text-sm cursor-pointer"
+                                @click="userStore.logout">
+                                <img class="pl-1.5 pt-1" src="../assets/misc/logout.svg">
                             </a>
                         </div>
                     </div>
