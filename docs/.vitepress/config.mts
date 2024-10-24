@@ -23,6 +23,14 @@ export default defineConfig({
         ]
       },
       {
+        text: '代理',
+        items: [
+          { text: 'Clash', link: '/proxies/clash' },
+          { text: 'Shadowrocket', link: '/proxies/rocket' },
+          { text: 'Sing-box', link: '/proxies/singbox' },
+        ]
+      },
+      {
         text: '手册',
         items: [
           { text: '实现方式', link: '/implementation' },

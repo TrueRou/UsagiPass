@@ -14,61 +14,16 @@ DXPass是**日服限定**的, 可以在制卡机上制作的具有特殊功能�
 
 ## 安装UsagiPass
 
-### 安卓设备
+安装UsagiPass需要你具有一定的动手能力, 下面我们将逐步讲解如何安装UsagiPass.
 
-#### Clash 使用方法
-
-1. 安装Clash / ClashMeta: 
-    - **Github(推荐)**: [https://github.com/MetaCubeX/ClashMetaForAndroid/releases](https://github.com/MetaCubeX/ClashMetaForAndroid/releases)
-    - **蓝奏云(国内)**: [https://wwps.lanzouj.com/iXMCk2cydjmd](https://wwps.lanzouj.com/iXMCk2cydjmd)
-    - 加入UsagiPass用户群获取: 363346002
-2. 导入UsagiPass配置
-    - 一键导入: [导入Clash配置](clash://install-config?url=https://dxpass.turou.fun/UsagiPass.yaml&name=UsagiPass)
-    - 复制链接到Clash导入: https://dxpass.turou.fun/UsagiPass.yaml
-    - 也可以加群下载文件, 从文件导入: 363346002
-3. **选择该配置, 点击启动代理, 并保证ClashMeta在后台运行**
-4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
-
-#### Sing-box 使用方法
-
-1. 安装Sing-box: 
-    - **Github(推荐)**: [https://github.com/SagerNet/sing-box/releases](https://github.com/SagerNet/sing-box/releases)
-    - 加入UsagiPass用户群获取: 363346002
-2. 导入UsagiPass配置
-    - 复制链接到Sing-box导入: https://dxpass.turou.fun/UsagiPass.json
-    - 也可以加群下载文件, 从文件导入: 363346002
-3. **选择该配置, 点击启动代理, 并保证Sing-box在后台运行**
-4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
+1. 选择代理软件: UsagiPass需要代理才能运行, 请任选**一款**你喜欢的代理软件即可, 他们的功能都是相同的.
+    - 安卓: **Clash**, Sing-box
+    - iOS: **Shadowrocket**, Sing-box, QuantX (敬请期待)
+2. 在左侧的目录中找到对应你选择的代理的教程, 按照步骤操作即可.
+3. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号, 享受UsagiPass.
 
 ::: tip
 UsagiPass利用代理来重定向华立二维码网页, 请保证在使用过程中代理不要关闭.
-:::
-
-### IOS设备
-
-#### Shadowrocket(小火箭) 使用方法
-
-1. 安装Shadowrocket(小火箭): 
-    - 请自行寻找安装方法
-    - 加入UsagiPass用户群寻求帮助: 363346002
-2. 导入UsagiPass配置
-    - 一键导入: [导入Clash配置](clash://install-config?url=https://dxpass.turou.fun/UsagiPass.yaml&name=UsagiPass)
-    - 复制链接到小火箭导入: https://dxpass.turou.fun/UsagiPass.yaml
-3. **选择该配置, 点击启动代理, 并保证Shadowrocket在后台运行**
-4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
-
-#### Sing-box 使用方法
-
-1. 安装Shadowrocket(小火箭)作为代理工具: 
-    - 请自行寻找安装方法
-    - 加入UsagiPass用户群寻求帮助: 363346002
-2. 导入UsagiPass配置
-    - 复制链接到 Sing-box 导入: https://dxpass.turou.fun/UsagiPass.json
-3. **选择该配置, 点击启动代理, 并保证Shadowrocket在后台运行**
-4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
-   
-::: tip
-QuantX规则绝赞制作中
 :::
 
 ## 使用UsagiPass
@@ -93,20 +48,16 @@ QuantX规则绝赞制作中
 
 **Q: IOS使用小火箭需要购买**
 
-A: 可以使用 sing-box, sing-box 是一款在外区商店可以免费下载的代理软件
+A: 可以使用 Sing-box 方案, Sing-box 是一款在外区商店可以免费下载的代理软件
 
 **Q: IOS我不知道应该如何获得外区账号**
 
-A: 可以在B站搜索相关关键词, 这类视频还是挺多的
-
-**Q: 我不知道应该如何配置代理**
-
-A: 请按照文章步骤进行, 如果真的遇到某一步卡住, 可以加群与我们交流
+A: 可以在B站搜索相关关键词, 这类视频还是挺多的, 请尽量不要在群内讨论相关话题.
 
 **Q: 在按照步骤配置后, 我无法打开UsagiPass网页**
 
-A: 首先, 能够打开此官网则证明您可以连接至UsagiPass的分发服务器. 无法打开可能是代理配置不正确, 或者是无法连接至我们的代理服务器.
+在部分地区, UsagiPass所采用的CDN(CloudFlare)被运营商封禁或者污染, 可能导致无法进入官网、下载配置、打开网页.
 
-请再次检查代理配置是否正确, 是否选择了UsagiPass作为配置, **是否在代理软件中开启规则模式**.
+通常来说, 更换代理软件和采用不同方式导入配置不能解决任何问题, 如果成功导入了配置, 可以不需要做这方面的尝试.
 
-如果您的错误代码为类似ERR_PROXY_CONNECTION_FAILED的字样, 请加群联系我们, 我们会提供备用代理服务器, 尝试解决你的问题.
+如果您的错误代码为**ERR_PROXY_CONNECTION_FAILED**或**ERR_CONNECTION_TIMED_OUT**, 请加群联系我们, 我们会提供备用配置文件, 尝试解决你的问题.
