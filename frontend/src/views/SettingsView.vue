@@ -8,10 +8,7 @@ const router = useRouter();
 const settings = ref<UserPreferencePublic>(userStore.userProfile!.preferences);
 const images = ref<Record<string, ImagePublic[]>>()
 
-const r = (resource_id: string) => {
-    if (!resource_id) return ""
-    return import.meta.env.VITE_URL + "/images/" + resource_id
-}
+const r = (resource_id: string) => import.meta.env.VITE_URL + "/images/" + resource_id;
 
 const submit = async () => {
     if (await userStore.patchPreferences(settings.value)) {
