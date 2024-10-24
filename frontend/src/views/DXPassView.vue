@@ -45,7 +45,7 @@ prepareDefaultPreferences();
                 </div>
             </div>
             <div class="absolute flex flex-col left-0" style="width: 50%; bottom: 8%;">
-                <CharaInfo chara="测试" :time="userStore.timeLimit || '12:00:00'"></CharaInfo>
+                <CharaInfo :chara="userProfile.preferences.character_name!" :time="userStore.timeLimit || '12:00:00'" />
             </div>
             <div class="qr-widget absolute" v-if="userStore.maimaiCode">
                 <QRCode :content="userStore.maimaiCode" :size="userProfile.preferences.qr_size || 20" />
