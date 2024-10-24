@@ -16,7 +16,9 @@ DXPass是**日服限定**的, 可以在制卡机上制作的具有特殊功能�
 
 ### 安卓设备
 
-1. 安装Clash/ClashMeta作为代理工具: 
+#### Clash 使用方法
+
+1. 安装Clash / ClashMeta: 
     - **Github(推荐)**: [https://github.com/MetaCubeX/ClashMetaForAndroid/releases](https://github.com/MetaCubeX/ClashMetaForAndroid/releases)
     - **蓝奏云(国内)**: [https://wwps.lanzouj.com/iXMCk2cydjmd](https://wwps.lanzouj.com/iXMCk2cydjmd)
     - 加入UsagiPass用户群获取: 363346002
@@ -27,13 +29,26 @@ DXPass是**日服限定**的, 可以在制卡机上制作的具有特殊功能�
 3. **选择该配置, 点击启动代理, 并保证ClashMeta在后台运行**
 4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
 
+#### Sing-box 使用方法
+
+1. 安装Sing-box: 
+    - **Github(推荐)**: [https://github.com/SagerNet/sing-box/releases](https://github.com/SagerNet/sing-box/releases)
+    - 加入UsagiPass用户群获取: 363346002
+2. 导入UsagiPass配置
+    - 复制链接到Sing-box导入: https://dxpass.turou.fun/UsagiPass.json
+    - 也可以加群下载文件, 从文件导入: 363346002
+3. **选择该配置, 点击启动代理, 并保证Sing-box在后台运行**
+4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
+
 ::: tip
 UsagiPass利用代理来重定向华立二维码网页, 请保证在使用过程中代理不要关闭.
 :::
 
 ### IOS设备
 
-1. 安装Shadowrocket(小火箭)作为代理工具: 
+#### Shadowrocket(小火箭) 使用方法
+
+1. 安装Shadowrocket(小火箭): 
     - 请自行寻找安装方法
     - 加入UsagiPass用户群寻求帮助: 363346002
 2. 导入UsagiPass配置
@@ -42,8 +57,18 @@ UsagiPass利用代理来重定向华立二维码网页, 请保证在使用过程
 3. **选择该配置, 点击启动代理, 并保证Shadowrocket在后台运行**
 4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
 
+#### Sing-box 使用方法
+
+1. 安装Shadowrocket(小火箭)作为代理工具: 
+    - 请自行寻找安装方法
+    - 加入UsagiPass用户群寻求帮助: 363346002
+2. 导入UsagiPass配置
+    - 复制链接到 Sing-box 导入: https://dxpass.turou.fun/UsagiPass.json
+3. **选择该配置, 点击启动代理, 并保证Shadowrocket在后台运行**
+4. 在微信中打开玩家二维码, 按照提示登录水鱼查分器账号
+   
 ::: tip
-sing-box, QuantX规则绝赞制作中
+QuantX规则绝赞制作中
 :::
 
 ## 使用UsagiPass
@@ -68,7 +93,7 @@ sing-box, QuantX规则绝赞制作中
 
 **Q: IOS使用小火箭需要购买**
 
-A: sing-box规则绝赞制作中, sing-box是一款在外区商店可以免费下载的代理软件
+A: 可以使用 sing-box, sing-box 是一款在外区商店可以免费下载的代理软件
 
 **Q: IOS我不知道应该如何获得外区账号**
 
