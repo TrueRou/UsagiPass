@@ -28,8 +28,8 @@ router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
     const serverStore = useServerStore()
 
-    if (router.currentRoute.value.query.maid) userStore.maimaiCode = router.currentRoute.value.query.maid as string
-    if (router.currentRoute.value.query.time) userStore.timeLimit = router.currentRoute.value.query.time as string
+    if (to.query.maid) userStore.maimaiCode = to.query.maid as string
+    if (to.query.time) userStore.timeLimit = to.query.time as string
     if (!serverStore.serverMessage) await serverStore.refreshMotd()
     if (localStorage.getItem('token')) await userStore.refreshUser()
 
