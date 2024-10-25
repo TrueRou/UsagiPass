@@ -19,7 +19,7 @@ DXPass 是**日服限定**的，可以在制卡机上制作的具有特殊功能
 1. 选择代理软件: UsagiPass 需要代理才能运行，请任选**一款**你喜欢的代理软件即可，他们实现的功能都是相同的。
     - 安卓: **Clash**，Sing-box
     - iOS: **Shadowrocket**，Sing-box，QuantX (敬请期待)
-2. 在左侧的目录中找到对应你选择的代理的教程，按照步骤操作即可。
+2. 在左侧的目录 (手机用户请点击左上角Menu按钮) 中找到对应你选择的代理的教程，按照步骤操作即可。
 3. 在微信中打开玩家二维码，按照提示登录[水鱼查分器](https://www.diving-fish.com/maimaidx/prober/)账号，享受UsagiPass。
 
 ::: tip
