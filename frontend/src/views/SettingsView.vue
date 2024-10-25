@@ -103,6 +103,8 @@ onMounted(async () => {
                             <option :value="15">中</option>
                             <option :value="20">大</option>
                             <option :value="24">标准</option>
+                            <option :value="28">标准+</option>
+                            <option :value="32">标准++</option>
                         </select>
                     </div>
                     <div class="flex justify-between items-center w-full mt-2">
