@@ -1,8 +1,8 @@
 import datetime
 import mitmproxy.http
 
-allowed_hosts = ["42.193.74.107", "129.28.248.89", "wq.sys-all.cn"]
-target_url = "http://38.55.96.170/"  # we don't use https here.
+allowed_hosts = ["42.193.74.107", "129.28.248.89", "wq.sys-all.cn", "fallback.dxpass.turou.fun", "38.55.96.170"]
+target_url = "http://fallback.dxpass.turou.fun/"  # we don't use https here.
 
 
 def request(flow: mitmproxy.http.HTTPFlow):
@@ -21,3 +21,5 @@ def request(flow: mitmproxy.http.HTTPFlow):
 
         location = target_url + f"?maid={maid}&time={timestr}"
         flow.response = mitmproxy.http.Response.make(302, headers={"Location": location})
+
+    # proxy all other requests in this mitmproxy
