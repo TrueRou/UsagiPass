@@ -18,7 +18,7 @@ const qrImage = useTemplateRef('qr-image')
 
 watchEffect(() => {
     if (qrImage.value && props.content) {
-        QRCode.toDataURL(props.content, qrcodeOpts, (err, url) => {
+        QRCode.toDataURL("SGWC" + props.content, qrcodeOpts, (err, url) => {
             if (err) console.error(err)
             qrImage.value!.src = url
         })
