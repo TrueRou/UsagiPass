@@ -16,12 +16,20 @@ from app import database
 router = APIRouter(prefix="/images", tags=["images"])
 data_folder = Path.cwd() / ".data"
 images_folder = Path.cwd() / ".data" / "images"
+thumbnail_folder = Path.cwd() / ".data" / "thumbnails"
 data_folder.mkdir(exist_ok=True)
 images_folder.mkdir(exist_ok=True)
+thumbnail_folder.mkdir(exist_ok=True)
 
 
-def get_folder():
-    return images_folder
+def require_image(image_id: uuid.UUID, session: Session = Depends(require_session)) -> Image:
+    image = session.get(Image, str(image_id))
+    image_path = images_folder / f"{image.id}.webp"
+    if image is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image is not found")
+    if not image_path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file is not found")
+    return image
 
 
 @router.get("/", response_model=list[ImageDetail])
@@ -59,8 +67,7 @@ async def upload_image(
 
 
 @router.delete("/{image_id}")
-async def delete_image(image_id: uuid.UUID, user: str = Depends(verify_user), session: Session = Depends(require_session)):
-    image = session.get(Image, str(image_id))
+async def delete_image(user: str = Depends(verify_user), session: Session = Depends(require_session), image: Image = Depends(require_image)):
     if image.uploaded_by != user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this image")
     session.delete(image)
@@ -71,10 +78,17 @@ async def delete_image(image_id: uuid.UUID, user: str = Depends(verify_user), se
 
 
 @router.get("/{image_id}")
-async def get_image(image_id: uuid.UUID, session: Session = Depends(require_session)):
-    image = session.get(Image, str(image_id))
-    try:
-        image_path = images_folder / f"{image.id}.webp"
-        return FileResponse(image_path, media_type="image/webp")
-    except FileNotFoundError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file is not found")
+async def get_image(image: Image = Depends(require_image)):
+    image_path = images_folder / f"{image.id}.webp"
+    return FileResponse(image_path, media_type="image/webp")
+
+
+@router.get("/thumbnail/{image_id}")
+async def get_image_thumbnail(image: Image = Depends(require_image)):
+    thumbnail_path = thumbnail_folder / f"{image.id}.webp"
+    image_path = images_folder / f"{image.id}.webp"
+    if not thumbnail_path.exists():
+        thumbnail = PIL.Image.open(image_path)
+        thumbnail.thumbnail((256, 256))
+        thumbnail.save(thumbnail_path, "webp", optimize=True, quality=80)
+    return FileResponse(thumbnail_path, media_type="image/webp")

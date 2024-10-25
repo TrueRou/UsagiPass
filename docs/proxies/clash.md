@@ -17,5 +17,3 @@ outline: deep
 ::: tip
 Clash 和 ClashMeta 都支持 UsagiPass，已经安装过系列软件的不需要重新安装
 :::
-
-## 可能遇到的问题与解答
