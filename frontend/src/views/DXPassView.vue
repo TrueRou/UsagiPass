@@ -40,7 +40,7 @@ prepareDefaultPreferences();
                     <DXRating class="w-1/2" :rating="userProfile.preferences.dx_rating || 0" />
                 </div>
                 <div class="header-widget flex relative w-full flex-row-reverse">
-                    <PlayerInfo class="w-1/2" :username="userProfile.nickname"
+                    <PlayerInfo class="w-1/2" :username="userProfile.preferences.display_name!"
                         :friend-code="userProfile.preferences.friend_code!" />
                 </div>
             </div>
