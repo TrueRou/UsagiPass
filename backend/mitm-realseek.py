@@ -2,7 +2,7 @@ import datetime
 import mitmproxy.http
 
 allowed_hosts = ["42.193.74.107", "129.28.248.89", "wq.sys-all.cn"]
-target_url = "http://fallback.dxpass.turou.fun/"  # we don't use https here.
+target_url = "http://usagipass.realseek.club/"  # we don't use https here.
 
 
 def request(flow: mitmproxy.http.HTTPFlow):
