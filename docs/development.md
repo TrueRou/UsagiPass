@@ -40,19 +40,27 @@ mitmweb -s mitm.py --listen-port 2560 --set block_global=false --set connection_
 
 ::: tip
 感谢群友 原味零花 提供的 Dockerfile, 需要的开发者可以加群获取
+启动时请使用 `-t` 参数，否则将没有日志输出
 :::
 
 ```docker
-FROM debian AS fetch
-RUN apt update && apt install git ca-certificates -y && update-ca-certificates
+FROM python:3.9-alpine AS fetch
+RUN sed -i 's#https\?://dl-cdn.alpinelinux.org/alpine#https://mirrors.tuna.tsinghua.edu.cn/alpine#g' /etc/apk/repositories && \
+    apk update && apk upgrade && apk add --no-cache --latest ca-certificates git && update-ca-certificates
 RUN git clone https://github.com/TrueRou/UsagiPass.git
 
-FROM debian
+FROM python:3.9-alpine
 EXPOSE 2560
-COPY --from=fetch /UsagiPass/backend/* /app/backend/
-RUN apt update && apt install pipx python3-minimal ca-certificates -y && update-ca-certificates
-RUN pipx install mitmproxy
-WORKDIR /app/backend
-ENTRYPOINT [ "/root/.local/bin/mitmweb" ]
+COPY --from=fetch /UsagiPass/backend/* /app/
+ENV PATH=/root/.cargo/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV RUSTUP_UPDATE_ROOT=https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup
+RUN sed -i 's#https\?://dl-cdn.alpinelinux.org/alpine#https://mirrors.tuna.tsinghua.edu.cn/alpine#g' /etc/apk/repositories \
+    && apk update && apk upgrade && apk add --no-cache --latest build-base bsd-compat-headers ca-certificates curl && update-ca-certificates \
+    && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal \
+    && pip install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple --verbose mitmproxy \
+    && pip cache purge && rustup self uninstall -y && apk del build-base bsd-compat-headers curl \
+    && apk add --no-cache --latest libgcc libstdc++
+WORKDIR /app
+ENTRYPOINT [ "mitmweb" ]
 CMD [ "-s", "mitm.py", "--listen-port", "2560", "--set", "block_global=false", "--set", "connection_strategy=lazy" ]
 ```
