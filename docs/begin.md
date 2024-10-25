@@ -8,7 +8,7 @@ outline: deep
 
 DXPass 是**日服限定**的，可以在制卡机上制作的具有特殊功能的实体卡片。通常印有玩家信息、角色立绘、区域背景等元素，有提升跑图距离、解锁上位难度的谱面等等功能。
 
-![dx-pass-collection](https://s2。loli。net/2024/10/19/13bZcj9NtnW5xDq。webp)
+![dx-pass-collection](https://s2.loli.net/2024/10/19/13bZcj9NtnW5xDq.webp)
 
 虽然国服无法制作 DXPass，但是独特的微信登录机制使我们有了动态生成 DXPass 的可能，UsagiPass 应运而生。
 
@@ -20,7 +20,7 @@ DXPass 是**日服限定**的，可以在制卡机上制作的具有特殊功能
     - 安卓: **Clash**，Sing-box
     - iOS: **Shadowrocket**，Sing-box，QuantX (敬请期待)
 2. 在左侧的目录中找到对应你选择的代理的教程，按照步骤操作即可。
-3. 在微信中打开玩家二维码，按照提示登录[水鱼查分器](https://www。diving-fish。com/maimaidx/prober/)账号，享受UsagiPass。
+3. 在微信中打开玩家二维码，按照提示登录[水鱼查分器](https://www.diving-fish.com/maimaidx/prober/)账号，享受UsagiPass。
 
 ::: tip
 UsagiPass 利用代理来重定向华立二维码网页，请保证在使用过程中代理不要关闭。
@@ -42,7 +42,7 @@ UsagiPass 利用代理来重定向华立二维码网页，请保证在使用过�
 
 ## 支持 UsagiPass
 
-如果觉得 UsagiPass 好用的话，不妨给[我们的仓库](https://github。com/TrueRou/UsagiPass)点一个 ⭐ 吧
+如果觉得 UsagiPass 好用的话，不妨给[我们的仓库](https://github.com/TrueRou/UsagiPass)点一个 ⭐ 吧
 
 ## Q & A
 
@@ -56,8 +56,16 @@ A: 可以在B站搜索相关关键词，这类视频还是挺多的，请尽量�
 
 **Q: 在按照步骤配置后，我无法打开 UsagiPass 网页**
 
-在部分地区，UsagiPass 所采用的 CDN(CloudFlare) 被运营商封禁或者污染，可能导致无法进入官网、下载配置、打开网页。
+在部分地区，UsagiPass 所采用的 CDN (CloudFlare) 被运营商封禁或者污染，可能导致无法进入官网、下载配置、打开网页。
 
 通常来说，更换代理软件和采用不同方式导入配置不能解决任何问题，如果成功导入了配置，可以不需要做这方面的尝试。
 
-如果您的错误代码为 **ERR_PROXY_CONNECTION_FAILED** 或 **ERR_CONNECTION_TIMED_OUT** 或 **ERR_HTTP_RESPONSE_CODE_FAILURE**，请加群联系我们，我们会提供备用配置文件，尝试解决你的问题。
+如果您的错误代码在下面表格中列出
+
+- **ERR_PROXY_CONNECTION_FAILED**
+- **ERR_CONNECTION_TIMED_OUT**
+- **ERR_HTTP_RESPONSE_CODE_FAILURE**
+
+请加群联系我们，我们会提供备用配置文件，尝试解决你的问题。
+
+针对部分省市存在的域名或IP白名单，有可能导致无法访问的情况，敬请谅解。
