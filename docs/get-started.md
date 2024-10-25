@@ -60,4 +60,4 @@ A: 可以在B站搜索相关关键词, 这类视频还是挺多的, 请尽量不
 
 通常来说, 更换代理软件和采用不同方式导入配置不能解决任何问题, 如果成功导入了配置, 可以不需要做这方面的尝试.
 
-如果您的错误代码为**ERR_PROXY_CONNECTION_FAILED**或**ERR_CONNECTION_TIMED_OUT**, 请加群联系我们, 我们会提供备用配置文件, 尝试解决你的问题.
+如果您的错误代码为**ERR_PROXY_CONNECTION_FAILED**或**ERR_CONNECTION_TIMED_OUT**或**ERR_HTTP_RESPONSE_CODE_FAILURE**, 请加群联系我们, 我们会提供备用配置文件, 尝试解决你的问题.
