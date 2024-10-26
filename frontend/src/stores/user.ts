@@ -74,10 +74,10 @@ export const useUserStore = defineStore('user', () => {
         return result
     }
 
-    async function patchPreferences(preferences: UserPreferencePublic) {
-        const response = await axiosInstance.value.patch('/users/preference', preferences)
+    async function patchPreferences() {
+        const response = await axiosInstance.value.patch('/users/preference', userProfile.value!.preferences)
         if (response.status === 200) {
-            userProfile.value = response.data
+            await refreshUser()
         }
         return response.status === 200
     }

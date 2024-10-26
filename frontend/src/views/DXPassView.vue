@@ -11,7 +11,7 @@ import { useRouter } from 'vue-router';
 const userStore = useUserStore();
 const serverStore = useServerStore();
 const router = useRouter();
-const userProfile = ref<UserProfile>(userStore.userProfile!);
+const userProfile = ref<UserProfile>(JSON.parse(JSON.stringify(userStore.userProfile))); // Deep copy
 
 const r = (resource_key: ImagePublic) => import.meta.env.VITE_URL + "/images/" + resource_key!.id;
 
@@ -55,7 +55,7 @@ prepareDefaultPreferences();
                     <p class="footer-text">{{ userProfile.preferences.simplified_code }}</p>
                     <p class="footer-text">{{ userProfile.preferences.maimai_version }}</p>
                 </div>
-                <div class="p-1 rounded-full bg-white" @click="router.push({ name: 'settings' })">
+                <div class="p-1 rounded-full bg-white" @click="router.push({ name: 'preferences' })">
                     <img src="../assets/misc/settings.svg" style="width: 2vh;"></img>
                 </div>
             </div>

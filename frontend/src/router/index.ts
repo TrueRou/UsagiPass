@@ -12,15 +12,32 @@ const router = createRouter({
             component: DXPassView
         },
         {
-            path: '/login',
-            name: 'login',
-            component: () => import('../views/LoginView.vue')
+            path: '/',
+            name: 'menus',
+            component: () => import('../views/MenuView.vue'),
+            children: [
+                {
+                    path: 'login',
+                    name: 'login',
+                    component: () => import('../components/menus/Login.vue')
+                },
+                {
+                    path: 'preferences',
+                    name: 'preferences',
+                    component: () => import('../components/menus/Preferences.vue'),
+                },
+                {
+                    path: 'gallery/:kind',
+                    name: 'gallery',
+                    props: true,
+                    component: () => import('../components/menus/Gallery.vue'),
+                },
+            ]
         },
         {
-            path: '/settings',
-            name: 'settings',
-            component: () => import('../views/SettingsView.vue')
-        }
+            path: '/:pathMatch(.*)*',
+            redirect: '/'
+        },
     ]
 })
 
@@ -31,7 +48,7 @@ router.beforeEach(async (to, from, next) => {
     if (to.query.maid) userStore.maimaiCode = to.query.maid as string
     if (to.query.time) userStore.timeLimit = to.query.time as string
     if (!serverStore.serverMessage) await serverStore.refreshMotd()
-    if (localStorage.getItem('token')) await userStore.refreshUser()
+    if (localStorage.getItem('token') && !userStore.userProfile) await userStore.refreshUser()
 
     if (!userStore.isSignedIn && to.name !== 'login') {
         next({ name: 'login' })
