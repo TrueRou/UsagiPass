@@ -93,14 +93,16 @@ const refreshRating = async () => {
                 <span>二维码尺寸</span>
                 <span class="text-gray-600" style="font-size: 12px;">如果机台无法识别, 请增大二维码尺寸</span>
             </div>
-            <select v-model="userProfile!.preferences.qr_size">
-                <option :value="12">小</option>
-                <option :value="15">中</option>
-                <option :value="20">大</option>
-                <option :value="24">标准</option>
-                <option :value="28">标准+</option>
-                <option :value="32">标准++</option>
-            </select>
+            <div>
+                <select v-model="userProfile!.preferences.qr_size">
+                    <option :value="12">小</option>
+                    <option :value="15">中</option>
+                    <option :value="20">大</option>
+                    <option :value="24">标准</option>
+                    <option :value="28">标准+</option>
+                    <option :value="32">标准++</option>
+                </select>
+            </div>
         </div>
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">

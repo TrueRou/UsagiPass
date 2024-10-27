@@ -1,3 +1,4 @@
+aiomysql==0.2.0
 aioquic==1.2.0
 aiosqlite==0.20.0
 annotated-types==0.7.0
@@ -43,6 +44,7 @@ pydantic_core==2.23.3
 pydivert==2.1.0
 PyJWT==2.9.0
 pylsqpack==0.3.18
+PyMySQL==1.1.1
 pyOpenSSL==24.2.1
 pyparsing==3.1.4
 pyperclip==1.9.0
