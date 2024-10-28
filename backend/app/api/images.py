@@ -4,11 +4,11 @@ import uuid
 import PIL.Image
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
-from sqlmodel import Session, or_, select
+from sqlmodel import Session
 
 from app.database import require_session
 from app.models.image import Image, ImageDetail
-from app.api.users import verify_user, verify_user_optional
+from app.api.users import verify_user
 from app.maimai import kinds
 from app import database
 
@@ -30,16 +30,6 @@ def require_image(image_id: uuid.UUID, session: Session = Depends(require_sessio
     if not image_path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file is not found")
     return image
-
-
-@router.get("/", response_model=list[ImageDetail])
-async def get_images(user: str | None = Depends(verify_user_optional), session: Session = Depends(require_session)):
-    if user is None:
-        clause = select(Image).where(Image.uploaded_by == None).order_by(Image.uploaded_at.desc())
-        return session.exec(clause).all()
-    else:
-        clause = select(Image).where(or_(Image.uploaded_by == None, Image.uploaded_by == user)).order_by(Image.uploaded_at.desc())
-        return session.exec(clause).all()
 
 
 @router.post("/", response_model=ImageDetail, status_code=status.HTTP_201_CREATED)
@@ -84,10 +74,13 @@ async def get_image(image: Image = Depends(require_image)):
 
 
 @router.get("/thumbnail/{image_id}")
-async def get_image_thumbnail(image: Image = Depends(require_image)):
-    thumbnail_path = thumbnail_folder / f"{image.id}.webp"
-    image_path = images_folder / f"{image.id}.webp"
+async def get_image_thumbnail(image_id: uuid.UUID):
+    # we don't verify the image here, due to performance reasons
+    thumbnail_path = thumbnail_folder / f"{image_id}.webp"
+    image_path = images_folder / f"{image_id}.webp"
     if not thumbnail_path.exists():
+        if not image_path.exists():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file is not found")
         thumbnail = PIL.Image.open(image_path)
         thumbnail.thumbnail((256, 256))
         thumbnail.save(thumbnail_path, "webp", optimize=True, quality=80)

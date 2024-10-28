@@ -1,0 +1,19 @@
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+
+proxies:
+  - {
+    "name": "UsagiPass",
+    "type": "ss",
+    "server": "up.turou.fun",
+    "port": 16789,
+    "cipher": "chacha20-ietf-poly1305",
+    "password": "o5bZUHHvbFLy3eXkzi2M",
+    "udp": false
+  }
+
+rules:
+  - DOMAIN-SUFFIX,sys-all.cn,UsagiPass
+  - MATCH,DIRECT

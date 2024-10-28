@@ -3,13 +3,13 @@ from datetime import datetime
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlmodel import Session, select
+from sqlmodel import Session, or_, select
 import bcrypt
 import jwt
 
 from app.database import async_session_ctx, require_session, async_httpx_ctx
 from app.models.user import User, UserPreference, UserPreferencePublic, UserPreferenceUpdate, UserProfile
-from app.models.image import Image, ImagePublic
+from app.models.image import Image, ImageDetail, ImagePublic
 from app.maimai import scores
 from app.logging import log, Ansi
 from app import database
@@ -134,6 +134,16 @@ async def get_profile(username: str = Depends(verify_user), session: Session = D
     apply_default(preferences, db_preference, session)  # apply the default images if the user has not set up
     user_profile = UserProfile(**db_user.model_dump(), preferences=preferences)
     return user_profile
+
+
+@router.get("/gallery", response_model=list[ImageDetail])
+async def get_images(user: str | None = Depends(verify_user_optional), session: Session = Depends(require_session)):
+    if user is None:
+        clause = select(Image).where(Image.uploaded_by == None).order_by(Image.uploaded_at.desc())
+        return session.exec(clause).all()
+    else:
+        clause = select(Image).where(or_(Image.uploaded_by == None, Image.uploaded_by == user)).order_by(Image.uploaded_at.desc())
+        return session.exec(clause).all()
 
 
 @router.patch("/preference")

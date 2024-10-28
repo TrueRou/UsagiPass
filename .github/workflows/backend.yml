@@ -1,0 +1,28 @@
+name: UsagiPass Backend CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch the repository
+        uses: actions/checkout@v4
+      
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@v5.1.0
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SCRIPT_AFTER: "cd /UsagiPass && python3 -m venv .venv && ./.venv/bin/pip3 install -r requirements.txt && pm2 restart up-backend"
+          ARGS: "-rlgoDzvc -i --delete --exclude=\".data\" --exclude=\".venv\" --exclude=\"config.py\""
+          SOURCE: "backend/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: /UsagiPass
+          

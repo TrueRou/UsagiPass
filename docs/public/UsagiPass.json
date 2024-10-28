@@ -1,0 +1,89 @@
+{
+    "log": {
+        "level": "info",
+        "timestamp": true
+    },
+    "dns": {
+        "servers": [
+            {
+                "tag": "dns_resolver",
+                "address": "local",
+                "detour": "direct"
+            }
+        ],
+        "rules": [
+            {
+                "outbound": "any",
+                "server": "dns_resolver"
+            }
+        ],
+        "final": "dns_resolver"
+    },
+    "inbounds": [
+        {
+            "type": "tun",
+            "tag": "tun-in",
+            "mtu": 1400,
+            "auto_route": true,
+            "strict_route": true,
+            "stack": "gvisor",
+            "sniff": true,
+            "inet4_address": "172.16.0.1/30",
+            "inet6_address": "fd00::1/126"
+        }
+    ],
+    "outbounds": [
+        {
+            "type": "shadowsocks",
+            "tag": "UsagiPass",
+            "server": "up.turou.fun",
+            "server_port": 16789,
+            "method": "chacha20-ietf-poly1305",
+            "password": "o5bZUHHvbFLy3eXkzi2M",
+            "network": "tcp",
+            "tcp_fast_open": false
+        },
+        {
+            "type": "direct",
+            "tag": "direct"
+        },
+        {
+            "type": "block",
+            "tag": "block"
+        },
+        {
+            "type": "dns",
+            "tag": "dns-out"
+        }
+    ],
+    "route": {
+        "rules": [
+            {
+                "protocol": "dns",
+                "outbound": "dns-out"
+            },
+            {
+                "type": "logical",
+                "mode": "and",
+                "rules": [
+                    {
+                        "domain_suffix": "sys-all.cn"
+                    }
+                ],
+                "outbound": "UsagiPass"
+            },
+            {
+                "ip_is_private": true,
+                "outbound": "direct"
+            }
+        ],
+        "final": "direct",
+        "auto_detect_interface": true
+    },
+    "experimental": {
+        "cache_file": {
+            "enabled": true,
+            "path": "cache.db"
+        }
+    }
+}

@@ -80,7 +80,6 @@ prepareDefaultPreferences();
 
 .footer-text {
     font-size: 1.2vh;
-    font-family: FOTSeurat;
     line-height: 120%;
 }
 </style>
