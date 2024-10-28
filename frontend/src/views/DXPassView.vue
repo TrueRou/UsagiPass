@@ -7,6 +7,7 @@ import QRCode from '@/components/QRCode.vue';
 import CharaInfo from '@/components/CharaInfo.vue';
 import PlayerInfo from '@/components/PlayerInfo.vue';
 import { useRouter } from 'vue-router';
+import CardBack from '@/components/CardBack.vue';
 
 const userStore = useUserStore();
 const serverStore = useServerStore();
@@ -30,10 +31,7 @@ prepareDefaultPreferences();
 <template>
     <div class="flex items-center justify-center h-full w-full">
         <div class="flex relative flex-col items-center justify-center h-full">
-            <img class="h-full object-cover -z-30" :src="r(userProfile?.preferences.background)">
-            <img class="frame-upper h-full absolute -z-10" :src="r(userProfile?.preferences.frame)">
-            <img class="frame-under h-full absolute -z-10" :src="r(userProfile?.preferences.frame)">
-            <img class="chara-center absolute object-cover -z-20" :src="r(userProfile?.preferences.character)">
+            <CardBack :preferences="userProfile.preferences" />
             <div class="flex flex-col absolute top-0 w-full h-full">
                 <div class="header-widget flex relative w-full justify-between">
                     <img class="object-cover w-1/2" :src="r(userProfile?.preferences.passname)">
@@ -63,24 +61,6 @@ prepareDefaultPreferences();
     </div>
 </template>
 <style scoped>
-.frame-upper {
-    object-fit: contain;
-    object-position: left top;
-    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
-}
-
-.frame-under {
-    object-fit: contain;
-    object-position: left bottom;
-    clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
-}
-
-.chara-center {
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%)
-}
-
 .qr-widget {
     bottom: 5%;
     right: 0;
