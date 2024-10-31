@@ -16,4 +16,5 @@ proxies:
 
 rules:
   - DOMAIN-SUFFIX,sys-all.cn,UsagiPass
+  - DOMAIN-SUFFIX,sys-allnet.cn,UsagiPass
   - MATCH,DIRECT

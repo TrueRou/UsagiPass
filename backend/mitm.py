@@ -1,7 +1,12 @@
 import datetime
 import mitmproxy.http
 
-allowed_hosts = ["42.193.74.107", "129.28.248.89", "wq.sys-all.cn"]
+allowed_hosts = [
+    "42.193.74.107",
+    "129.28.248.89",
+    "wq.sys-all.cn",
+    "wq.sys-allnet.cn",
+]
 target_url = "https://up.turou.fun/"
 
 

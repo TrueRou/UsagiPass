@@ -67,7 +67,10 @@
                 "mode": "and",
                 "rules": [
                     {
-                        "domain_suffix": "sys-all.cn"
+                        "domain_suffix": [
+                            "sys-all.cn",
+                            "sys-allnet.cn"
+                        ]
                     }
                 ],
                 "outbound": "UsagiPass"
