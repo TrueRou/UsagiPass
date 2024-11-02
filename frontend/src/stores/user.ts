@@ -7,12 +7,12 @@ export const useUserStore = defineStore('user', () => {
     const maimaiCode = ref("")
     const timeLimit = ref("12:00:00")
     const simplifiedCode = computed(() => maimaiCode.value.slice(8, 28).match(/.{1,4}/g)?.join(' '))
+
     const axiosInstance = computed(() => axios.create({
         baseURL: import.meta.env.VITE_URL,
         timeout: 3000,
         headers: { 'Authorization': `Bearer ${token.value}` },
     }));
-
     const isSignedIn = ref(false)
     const userProfile = ref<UserProfile | null>(null)
 
@@ -55,24 +55,6 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 
-    async function getImages(): Promise<Record<string, ImagePublic[]>> {
-        const response = await axiosInstance.value.get('/users/gallery')
-        const result = response.data.reduce((acc: any, obj: any) => {
-            if (!acc[obj.kind]) {
-                acc[obj.kind] = [];
-            }
-
-            acc[obj.kind].push({
-                id: obj.id,
-                name: obj.name,
-                uploaded_by: obj.uploaded_by
-            });
-
-            return acc;
-        }, {});
-        return result
-    }
-
     async function patchPreferences() {
         const response = await axiosInstance.value.patch('/users/preference', userProfile.value!.preferences)
         if (response.status === 200) {
@@ -81,5 +63,5 @@ export const useUserStore = defineStore('user', () => {
         return response.status === 200
     }
 
-    return { maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, refreshUser, updateRating, getImages, patchPreferences, login, logout }
+    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, refreshUser, updateRating, patchPreferences, login, logout }
 })

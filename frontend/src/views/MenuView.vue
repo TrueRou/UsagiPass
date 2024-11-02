@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore();
-const images = ref<Record<string, ImagePublic[]>>()
+const images = ref<Record<string, ImageDetail[]>>()
 
-images.value = await userStore.getImages();
+const response = await userStore.axiosInstance.get('/bits')
+images.value = response.data.reduce((acc: Record<string, ImageDetail[]>, item: ImageDetail) => {
+    if (!acc[item.kind]) {
+        acc[item.kind] = [];
+    }
+    acc[item.kind].push(item);
+    return acc;
+}, {});
 </script>
 <template>
     <div class="bg-blue-400 flex flex-col items-center h-full w-full">

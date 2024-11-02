@@ -1,14 +1,25 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue';
+import { useServerStore } from '@/stores/server';
+
 const props = defineProps<{
     preferences: UserPreferencePublic;
 }>()
 
-const r = (resource_key: ImagePublic) => import.meta.env.VITE_URL + "/images/" + resource_key!.id;
+const mask = ref<ImageDetail | undefined>(undefined);
+const maskEnabled = computed(() => mask.value !== undefined)
+const r = (image?: ImagePublic) => import.meta.env.VITE_URL + "/images/" + image?.id;
+
+if (props.preferences.mask_type !== 0) {
+    const serverStore = useServerStore();
+    const response = await serverStore.axiosInstance.get('/bits/related/' + props.preferences.character.id);
+    mask.value = (response.data as ImageDetail[]).filter(image => image.kind === 'mask').pop();
+}
 </script>
 <template>
     <img class="h-full object-cover -z-[20]" :src="r(props.preferences.background)">
-    <div class="lazer-mask h-full w-full absolute -z-[15]">
-        <!-- <div class="h-full w-full flow-colorful"></div> -->
+    <div v-if="maskEnabled" class="lazer-mask h-full w-full absolute -z-[15]" :style="{ maskImage: `url(${r(mask)})` }">
+        <div class="h-full w-full flow-colorful"></div>
     </div>
     <img class="chara-center h-full absolute object-cover -z-[10]" :src="r(props.preferences.character)">
     <img class="frame-upper h-full absolute -z-[5]" :src="r(props.preferences.frame)">
@@ -34,11 +45,10 @@ const r = (resource_key: ImagePublic) => import.meta.env.VITE_URL + "/images/" +
 }
 
 .lazer-mask {
-    mask-image: #000;
-    /* mask image here */
     mask-mode: luminance;
     mask-repeat: no-repeat;
     mask-size: cover;
+    mask-position: center;
 }
 
 .flow-colorful {

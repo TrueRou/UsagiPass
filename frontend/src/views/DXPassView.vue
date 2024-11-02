@@ -14,7 +14,7 @@ const serverStore = useServerStore();
 const router = useRouter();
 const userProfile = ref<UserProfile>(JSON.parse(JSON.stringify(userStore.userProfile))); // Deep copy
 
-const r = (resource_key: ImagePublic) => import.meta.env.VITE_URL + "/images/" + resource_key!.id;
+const r = (image: ImagePublic) => import.meta.env.VITE_URL + "/images/" + image!.id;
 
 const prepareDefaultPreferences = () => {
     userProfile.value!.preferences.character_name ||= userProfile.value!.preferences.character.name;

@@ -27,6 +27,7 @@ class UserPreferenceBase(SQLModel):
     display_name: str | None = None
     dx_rating: str | None = None
     qr_size: int | None = None
+    mask_type: int | None = None
 
 
 class UserPreferenceUpdate(UserPreferenceBase):

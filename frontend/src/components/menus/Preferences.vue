@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user';
 import { storeToRefs } from 'pinia';
-import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const props = defineProps<{
@@ -161,6 +160,18 @@ const refreshRating = async () => {
                 </a>
                 <select v-model="userProfile!.preferences.passname.id">
                     <option v-for="item in props.images?.passname" :value="item.id">{{ item.name }}</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex justify-between items-center w-full mt-2">
+            <div class="flex flex-col p-2">
+                <span>镭射设置</span>
+                <span class="text-gray-600" style="font-size: 12px;">背景镭射层的显示样式</span>
+            </div>
+            <div>
+                <select v-model="userProfile!.preferences.mask_type">
+                    <option :value="0">未启用</option>
+                    <option :value="1">动态渐变</option>
                 </select>
             </div>
         </div>

@@ -5,17 +5,17 @@ import { ref } from "vue";
 export const useServerStore = defineStore('server', () => {
     const serverMessage = ref<ServerMessage | null>(null)
 
-    const axiosInstance = axios.create({
+    const axiosInstance = ref(axios.create({
         baseURL: import.meta.env.VITE_URL,
         timeout: 3000,
-    });
+    }));
 
     async function refreshMotd() {
-        const response = (await axiosInstance.get('/motd'))
+        const response = (await axiosInstance.value.get('/motd'))
         if (response.status === 200) {
             serverMessage.value = response.data
         }
     }
 
-    return { serverMessage, refreshMotd }
+    return { axiosInstance, serverMessage, refreshMotd }
 })

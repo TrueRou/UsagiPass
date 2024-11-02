@@ -4,6 +4,10 @@ interface ImagePublic {
     uploaded_by?: string;
 }
 
+interface ImageDetail extends ImagePublic {
+    kind: string;
+}
+
 interface UserPreferencePublic {
     character: ImagePublic;
     background: ImagePublic;
@@ -16,6 +20,7 @@ interface UserPreferencePublic {
     display_name?: string;
     dx_rating?: number;
     qr_size?: number;
+    mask_type?: number;
 }
 
 interface UserProfile {

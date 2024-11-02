@@ -1,5 +1,4 @@
 import datetime
-import uuid
 from sqlmodel import Field, SQLModel
 
 
@@ -8,8 +7,9 @@ class Image(SQLModel, table=True):
 
     id: str = Field(primary_key=True)
     name: str
-    kind: str = Field(index=True)
-    uploaded_by: str | None = Field(default=None, foreign_key="users.username", index=True)
+    kind: str
+    sega_name: str | None = Field(default=None, index=True)
+    uploaded_by: str | None = Field(default=None, foreign_key="users.username")
     uploaded_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
 
