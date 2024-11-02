@@ -18,7 +18,8 @@ if (props.preferences.mask_type !== 0) {
 </script>
 <template>
     <img class="h-full object-cover -z-[20]" :src="r(props.preferences.background)">
-    <div v-if="maskEnabled" class="lazer-mask h-full w-full absolute -z-[15]" :style="{ maskImage: `url(${r(mask)})` }">
+    <div v-if="maskEnabled" class="lazer-mask h-full w-full absolute -z-[15]"
+        :style="{ 'maskImage': `url(${r(mask)})`, '-webkit-mask-image': `url(${r(mask)})` }">
         <div class="h-full w-full flow-colorful"></div>
     </div>
     <img class="chara-center h-full absolute object-cover -z-[10]" :src="r(props.preferences.character)">
@@ -46,9 +47,13 @@ if (props.preferences.mask_type !== 0) {
 
 .lazer-mask {
     mask-mode: luminance;
+    -webkit-mask-mode: luminance;
     mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
     mask-size: cover;
+    -webkit-mask-size: cover;
     mask-position: center;
+    -webkit-mask-position: center;
 }
 
 .flow-colorful {
