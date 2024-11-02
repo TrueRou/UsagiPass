@@ -62,10 +62,12 @@ def import_images(kind: str, session: Session):
                     img = post_process(kind, img)  # post-process the image for the specific kind to perform effects
                     img.save(images_folder / f"{idx}.webp", "webp", optimize=True, quality=80)
                     session.add(Image(id=idx, name=matched_name, sega_name=file.stem, kind=kind))
+                    file.unlink()  # delete the success file after importing
                     success += 1
                 else:
                     # this image already exists
-                    log(f"Image {matched_name} of kind {kind} already exists, skipping", Ansi.LYELLOW)
+                    log(f"Image {matched_name} of kind {kind} already exists, unlinking and skipping", Ansi.LYELLOW)
+                    file.unlink()  # delete the skipped file after importing
                     skipped += 1
             except PIL.UnidentifiedImageError:
                 failed += 1
