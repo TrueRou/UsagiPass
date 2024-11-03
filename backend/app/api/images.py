@@ -24,7 +24,7 @@ thumbnail_folder.mkdir(exist_ok=True)
 
 def require_image(image_id: uuid.UUID, session: Session = Depends(require_session)) -> Image:
     image = session.get(Image, str(image_id))
-    image_path = images_folder / f"{image.id}.webp"
+    image_path = images_folder / f"{image_id}.webp"
     if image is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image is not found")
     if not image_path.exists():
