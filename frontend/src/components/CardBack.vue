@@ -45,7 +45,7 @@ if (props.preferences.mask_type !== 0) {
 }
 
 .lazer-mask {
-    mask-mode: luminance;
+    mask-mode: alpha;
     mask-repeat: no-repeat;
     mask-size: cover;
     mask-position: center;
