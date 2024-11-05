@@ -3,6 +3,8 @@ import { useImageStore } from '@/stores/image';
 import { useUserStore } from '@/stores/user';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
+import Prompt from '../widgets/Prompt.vue';
+import { ref } from 'vue';
 
 const props = defineProps<{
     kind: string;
@@ -18,6 +20,8 @@ const kindDict: Record<string, string> = {
 const userStore = useUserStore();
 const imageStore = useImageStore();
 const router = useRouter();
+const showDialog = ref<boolean>(false);
+const renamingImage = ref<ImagePublic>({ id: '', name: '', uploaded_by: '' });
 const { userProfile } = storeToRefs(userStore)
 
 const r = (resource_id: string) => import.meta.env.VITE_URL + `/images/${resource_id}/thumbnail`;
@@ -34,12 +38,11 @@ const deleteImage = async (image: ImagePublic) => {
     }
 }
 
-const renameImage = async (image: ImagePublic) => {
-    const name = prompt("请输入新的名称", image.name);
-    if (name) {
-        await userStore.axiosInstance.patch("/images/" + image.id + "?name=" + name);
-        await imageStore.refreshImages();
-    }
+const renameImage = async () => {
+    await userStore.axiosInstance.patch("/images/" + renamingImage.value?.id + "?name=" + renamingImage.value?.name);
+    await imageStore.refreshImages();
+    renamingImage.value = { id: '', name: '', uploaded_by: '' };
+    showDialog.value = false;
 }
 
 if (!imageStore.images) await imageStore.refreshImages();
@@ -50,6 +53,8 @@ if (!Object.keys(imageStore.images!).includes(props.kind)) {
 }
 </script>
 <template>
+    <Prompt text="请修改图片名称: " v-model="renamingImage!['name']" :show="showDialog" @confirm="renameImage"
+        @cancel="showDialog = false;"></Prompt>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
             <h1 class="font-bold text-white">{{ '选取' + kindDict[props.kind] }}</h1>
@@ -59,7 +64,7 @@ if (!Object.keys(imageStore.images!).includes(props.kind)) {
                 <div class="relative rounded border-solid border-2 shadow-lg border-black p-2">
                     <button
                         class="absolute top-0 left-0 bg-black bg-opacity-50 text-white p-1 rounded-br-lg text-xs max-w-full z-10"
-                        v-if="image.uploaded_by" @click="renameImage(image)">
+                        v-if="image.uploaded_by" @click="renamingImage = image; showDialog = true;">
                         {{ image.name }}
                     </button>
                     <div class="absolute top-0 left-0 bg-black bg-opacity-50 text-white p-1 rounded-br-lg text-xs max-w-full z-10"
