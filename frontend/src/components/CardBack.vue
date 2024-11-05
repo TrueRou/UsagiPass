@@ -12,7 +12,7 @@ const r = (image?: ImagePublic) => import.meta.env.VITE_URL + "/images/" + image
 
 if (props.preferences.mask_type !== 0) {
     const serverStore = useServerStore();
-    const response = await serverStore.axiosInstance.get('/bits/related/' + props.preferences.character.id);
+    const response = await serverStore.axiosInstance.get(`/images/${props.preferences.character.id}/related`);
     mask.value = (response.data as ImageDetail[]).filter(image => image.kind === 'mask').pop();
 }
 </script>

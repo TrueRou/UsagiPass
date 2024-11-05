@@ -12,6 +12,12 @@ const router = createRouter({
             component: DXPassView
         },
         {
+            path: '/cropper/:kind',
+            name: 'cropper',
+            props: true,
+            component: () => import('../views/CropperView.vue'),
+        },
+        {
             path: '/',
             name: 'menus',
             component: () => import('../views/MenuView.vue'),

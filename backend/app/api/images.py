@@ -2,9 +2,10 @@ import io
 from pathlib import Path
 import uuid
 import PIL.Image
+from PIL.Image import Image as PILImage, Resampling
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.database import require_session
 from app.models.image import Image, ImageDetail
@@ -32,6 +33,12 @@ def require_image(image_id: uuid.UUID, session: Session = Depends(require_sessio
     return image
 
 
+@router.get("/{image_id}")
+async def get_image(image: Image = Depends(require_image)):
+    image_path = images_folder / f"{image.id}.webp"
+    return FileResponse(image_path, media_type="image/webp")
+
+
 @router.post("/", response_model=ImageDetail, status_code=status.HTTP_201_CREATED)
 async def upload_image(
     name: str,
@@ -45,8 +52,8 @@ async def upload_image(
     image_bytes = await file.read()
     try:
         file_name = str(uuid.uuid4())
-        image: PIL.Image = PIL.Image.open(io.BytesIO(image_bytes)).convert("RGBA")
-        kinds.verify_kind(image, kind)
+        image: PILImage = PIL.Image.open(io.BytesIO(image_bytes)).convert("RGBA")
+        image = image.resize(kinds.image_kinds[kind]["hw"][0], resample=Resampling.BILINEAR)
         image.save(images_folder / f"{file_name}.webp", "webp", optimize=True, quality=80)
         db_image: Image = database.add(session, Image(id=file_name, name=name, kind=kind, uploaded_by=user))
         return db_image
@@ -57,7 +64,11 @@ async def upload_image(
 
 
 @router.delete("/{image_id}")
-async def delete_image(user: str = Depends(verify_user), session: Session = Depends(require_session), image: Image = Depends(require_image)):
+async def delete_image(
+    user: str = Depends(verify_user),
+    session: Session = Depends(require_session),
+    image: Image = Depends(require_image),
+):
     if image.uploaded_by != user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this image")
     session.delete(image)
@@ -67,13 +78,31 @@ async def delete_image(user: str = Depends(verify_user), session: Session = Depe
     return {"message": "Image has been deleted"}
 
 
-@router.get("/{image_id}")
-async def get_image(image: Image = Depends(require_image)):
-    image_path = images_folder / f"{image.id}.webp"
-    return FileResponse(image_path, media_type="image/webp")
+@router.patch("/{image_id}")
+async def patch_image(
+    name: str,
+    user: str = Depends(verify_user),
+    session: Session = Depends(require_session),
+    image: Image = Depends(require_image),
+):
+    if image.uploaded_by != user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this image")
+    image.name = name
+    session.commit()
+    return {"message": "Image has been renamed"}
 
 
-@router.get("/thumbnail/{image_id}")
+@router.get("/{image_id}/related", response_model=list[ImageDetail])
+async def get_images_related(session: Session = Depends(require_session), image: Image = Depends(require_image)):
+    # we don't verify the image here, due to related images are usually from SEGA
+    if not image.sega_name:
+        return []
+    suffix = kinds.remove_sega_prefix(image.sega_name)
+    results = session.exec(select(Image).where(Image.sega_name.endswith(suffix)))
+    return results.all()
+
+
+@router.get("/{image_id}/thumbnail")
 async def get_image_thumbnail(image_id: uuid.UUID):
     # we don't verify the image here, due to performance reasons
     thumbnail_path = thumbnail_folder / f"{image_id}.webp"

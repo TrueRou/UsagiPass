@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.models.server import ServerMessage
+from app.maimai import kinds
 import config
 
 
@@ -14,3 +15,8 @@ async def get_motd():
         server_motd=config.server_motd,
         author_motd=config.author_motd,
     )
+
+
+@router.get("/kinds")
+async def get_kinds():
+    return kinds.image_kinds

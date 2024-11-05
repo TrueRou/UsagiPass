@@ -15,6 +15,7 @@ export const useUserStore = defineStore('user', () => {
     }));
     const isSignedIn = ref(false)
     const userProfile = ref<UserProfile | null>(null)
+    const cropperImage = ref<string | null>(null)
 
     async function login(username: string, password: string) {
         try {
@@ -63,5 +64,5 @@ export const useUserStore = defineStore('user', () => {
         return response.status === 200
     }
 
-    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, refreshUser, updateRating, patchPreferences, login, logout }
+    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, cropperImage, refreshUser, updateRating, patchPreferences, login, logout }
 })

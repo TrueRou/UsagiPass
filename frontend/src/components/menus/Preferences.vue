@@ -1,15 +1,17 @@
 <script setup lang="ts">
+import { useImageStore } from '@/stores/image';
 import { useUserStore } from '@/stores/user';
 import { storeToRefs } from 'pinia';
+import { onMounted, ref, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 
-const props = defineProps<{
-    images: Record<string, ImagePublic[]>;
-}>()
-
 const userStore = useUserStore();
+const imageStore = useImageStore();
 const router = useRouter();
-const { userProfile } = storeToRefs(userStore)
+const imagePicker = useTemplateRef('image-picker');
+
+const { userProfile, cropperImage } = storeToRefs(userStore);
+const uploadKind = ref<string | null>(null);
 
 const r = (resource_id: string) => import.meta.env.VITE_URL + "/images/" + resource_id;
 
@@ -25,6 +27,26 @@ const refreshRating = async () => {
     alert("DXRating已刷新");
 }
 
+const openPicker = (kind: string) => {
+    uploadKind.value = kind;
+    imagePicker.value?.click();
+}
+
+onMounted(() => {
+    imagePicker.value?.addEventListener('change', async () => {
+        const file = imagePicker.value?.files?.[0];
+        if (file && uploadKind.value) {
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                cropperImage.value = ev.target?.result as string;
+                router.push({ name: 'cropper', params: { kind: uploadKind.value } });
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+});
+
+if (!imageStore.images) await imageStore.refreshImages();
 </script>
 <template>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
@@ -114,7 +136,7 @@ const refreshRating = async () => {
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.background.id">
-                    <option v-for="item in props.images?.background" :value="item.id">{{ item.name }}</option>
+                    <option v-for="item in imageStore.images?.background" :value="item.id">{{ item.name }}</option>
                 </select>
             </div>
         </div>
@@ -129,7 +151,7 @@ const refreshRating = async () => {
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.frame.id">
-                    <option v-for="item in props.images?.frame" :value="item.id">{{ item.name }}</option>
+                    <option v-for="item in imageStore.images?.frame" :value="item.id">{{ item.name }}</option>
                 </select>
             </div>
         </div>
@@ -144,7 +166,7 @@ const refreshRating = async () => {
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.character.id">
-                    <option v-for="item in props.images?.character" :value="item.id">{{ item.name }}</option>
+                    <option v-for="item in imageStore.images?.character" :value="item.id">{{ item.name }}</option>
                 </select>
             </div>
         </div>
@@ -159,7 +181,7 @@ const refreshRating = async () => {
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.passname.id">
-                    <option v-for="item in props.images?.passname" :value="item.id">{{ item.name }}</option>
+                    <option v-for="item in imageStore.images?.passname" :value="item.id">{{ item.name }}</option>
                 </select>
             </div>
         </div>
@@ -250,18 +272,19 @@ const refreshRating = async () => {
             <div><input v-model="userProfile!.preferences.maimai_version"></div>
         </div>
     </div>
-    <!-- class hidden -> flex -->
-    <div class="hidden flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
+    <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
             <h1 class="font-bold text-white">自定义图片</h1>
         </div>
         <div class="flex justify-between items-center w-full mt-2">
+            <input class="hidden" ref="image-picker" type="file" accept="image/jpeg,image/png,image/webp" />
             <div class="flex flex-col p-2">
                 <span>上传背景</span>
                 <span class="text-gray-600" style="font-size: 12px;">上传自定义背景图片 (768 * 1052)</span>
             </div>
             <div>
-                <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600">
+                <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
+                    @click="openPicker('background')">
                     上传
                 </button>
             </div>
@@ -272,7 +295,8 @@ const refreshRating = async () => {
                 <span class="text-gray-600" style="font-size: 12px;">上传自定义边框图片 (768 * 1052)</span>
             </div>
             <div>
-                <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600">
+                <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
+                    @click="openPicker('frame')">
                     上传
                 </button>
             </div>
@@ -283,7 +307,8 @@ const refreshRating = async () => {
                 <span class="text-gray-600" style="font-size: 12px;">上传自定义人物图片 (768 * 1052)</span>
             </div>
             <div>
-                <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600">
+                <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
+                    @click="openPicker('character')">
                     上传
                 </button>
             </div>
@@ -294,7 +319,8 @@ const refreshRating = async () => {
                 <span class="text-gray-600" style="font-size: 12px;">上传自定义PASS图片 (338 * 112)</span>
             </div>
             <div>
-                <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600">
+                <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
+                    @click="openPicker('passname')">
                     上传
                 </button>
             </div>
