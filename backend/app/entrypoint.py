@@ -2,6 +2,7 @@ from __future__ import annotations
 import asyncio
 
 from fastapi import FastAPI
+from httpx import ConnectError
 from sqlalchemy import text
 from starlette.middleware.cors import CORSMiddleware
 
@@ -33,8 +34,11 @@ def init_events(asgi_app: FastAPI) -> None:
     async def download_music_list() -> None:
         await asyncio.sleep(1)  # Wait for web server to start
         log("Started downloading maimai music list.", Ansi.LYELLOW)
-        scores.music_list = await music.download_music_list()
-        log("Finished downloading maimai music list.", Ansi.LGREEN)
+        try:
+            scores.music_list = await music.download_music_list()
+            log("Finished downloading maimai music list.", Ansi.LGREEN)
+        except ConnectError:
+            log("Failed to download maimai music list.", Ansi.LRED)
 
     @asgi_app.on_event("startup")
     async def on_startup() -> None:

@@ -17,9 +17,9 @@ export const useUserStore = defineStore('user', () => {
     const userProfile = ref<UserProfile | null>(null)
     const cropperImage = ref<string | null>(null)
 
-    async function login(username: string, password: string) {
+    async function login(target: string, username: string, password: string) {
         try {
-            const data = await axiosInstance.value.post('/users/token', new URLSearchParams({
+            const data = await axiosInstance.value.post(`/accounts/token/${target}`, new URLSearchParams({
                 username,
                 password
             }))
@@ -27,8 +27,19 @@ export const useUserStore = defineStore('user', () => {
             token.value = data.data.access_token
             await refreshUser()
             return true
-        } catch (error) {
-            alert("账号或密码错误")
+        } catch (error: any) {
+            alert(error.response.data.detail)
+            return false
+        }
+    }
+
+    async function bind(target: string, username: string, password: string) {
+        try {
+            await axiosInstance.value.post(`/accounts/bind/${target}`, new URLSearchParams({ username, password }))
+            await refreshUser()
+            return true
+        } catch (error: any) {
+            alert(error.response.data.detail)
             return false
         }
     }
@@ -64,5 +75,5 @@ export const useUserStore = defineStore('user', () => {
         return response.status === 200
     }
 
-    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, cropperImage, refreshUser, updateRating, patchPreferences, login, logout }
+    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, cropperImage, refreshUser, updateRating, patchPreferences, login, logout, bind }
 })

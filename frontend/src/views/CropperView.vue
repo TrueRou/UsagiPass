@@ -25,7 +25,7 @@ const uploadImage = async () => {
     ((imageCropper.value) as any).getCropBlob(async (blob: Blob) => {
         const formData = new FormData();
         formData.append('file', blob);
-        await userStore.axiosInstance.post(`/images/?name=${imageName.value}&kind=${props.kind}`, formData, {
+        await userStore.axiosInstance.post(`/images?name=${imageName.value}&kind=${props.kind}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

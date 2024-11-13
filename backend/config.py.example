@@ -15,11 +15,7 @@ default_frame = "uuid"
 default_passname = "uuid"
 
 # server settings
+lxns_developer_token = "lxns_developer_token"
 maimai_version = "[maimaiDX]1.45-0001"
 server_motd = "Welcome to UsagiPass API server!"
 author_motd = "Authored by TuRou"
-
-# mitm settings
-
-allowed_hosts = ["42.193.74.107", "129.28.248.89", "wq.sys-all.cn"]
-target_url = "https://up.turou.fun/"

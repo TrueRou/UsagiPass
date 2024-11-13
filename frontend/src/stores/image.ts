@@ -7,7 +7,7 @@ export const useImageStore = defineStore('image', () => {
     const images = ref<Record<string, ImageDetail[]>>()
 
     async function refreshImages() {
-        const response = await userStore.axiosInstance.get('/bits/')
+        const response = await userStore.axiosInstance.get('/bits')
         images.value = response.data.reduce((acc: Record<string, ImageDetail[]>, item: ImageDetail) => {
             if (!acc[item.kind]) {
                 acc[item.kind] = [];

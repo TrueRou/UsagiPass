@@ -26,7 +26,7 @@ watchEffect(() => {
 })
 </script>
 <template>
-    <div class="p-0.5 rounded bg-white">
+    <div class="p-0.5 rounded bg-white" v-if="size != -1">
         <img class="w-full h-full" ref="qr-image" :style="{ width: `${size}vh` }"></img>
     </div>
 </template>

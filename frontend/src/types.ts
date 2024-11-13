@@ -23,11 +23,19 @@ interface UserPreferencePublic {
     mask_type?: number;
 }
 
+interface UserAccountPublic {
+    account_name: string
+    nickname: string
+    player_rating: number
+}
+
 interface UserProfile {
     username: string;
+    prefer_server: number;
     nickname: string;
     player_rating: number;
     preferences: UserPreferencePublic;
+    accounts: Record<string, UserAccountPublic>
 }
 
 interface ServerMessage {

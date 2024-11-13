@@ -9,7 +9,7 @@ from sqlmodel import Session, select
 
 from app.database import require_session
 from app.models.image import Image, ImageDetail
-from app.api.users import verify_user
+from app.api.accounts import verify_user
 from app.maimai import kinds
 from app import database
 
@@ -33,13 +33,7 @@ def require_image(image_id: uuid.UUID, session: Session = Depends(require_sessio
     return image
 
 
-@router.get("/{image_id}")
-async def get_image(image: Image = Depends(require_image)):
-    image_path = images_folder / f"{image.id}.webp"
-    return FileResponse(image_path, media_type="image/webp")
-
-
-@router.post("/", response_model=ImageDetail, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ImageDetail, status_code=status.HTTP_201_CREATED)
 async def upload_image(
     name: str,
     kind: str,
@@ -61,6 +55,12 @@ async def upload_image(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to load image file")
     except ValueError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Irregular width or height")
+
+
+@router.get("/{image_id}")
+async def get_image(image: Image = Depends(require_image)):
+    image_path = images_folder / f"{image.id}.webp"
+    return FileResponse(image_path, media_type="image/webp")
 
 
 @router.delete("/{image_id}")

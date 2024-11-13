@@ -1,22 +1,40 @@
 import datetime
+from enum import IntEnum, auto
 from sqlmodel import Field, SQLModel
 
 from app.models.image import ImagePublic
+
+
+class AccountServer(IntEnum):
+    DIVING_FISH = auto()  # 水鱼查分器
+    LXNS = auto()  # 落雪咖啡屋
 
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
 
     username: str = Field(primary_key=True)
-    nickname: str
-    bind_qq: str
-    player_rating: int = Field(default=10000)
-    hashed_password: str  # we don't want to store plain diving-fish passwords
+    prefer_server: AccountServer
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
 
-# maimai version, simplified code, character name, friend code, display name, dx rating
+class UserUpdate(SQLModel):
+    prefer_server: AccountServer | None = None
+
+
+class UserAccount(SQLModel, table=True):
+    __tablename__ = "user_accounts"
+
+    account_name: str = Field(primary_key=True)
+    account_server: AccountServer = Field(primary_key=True)
+    account_password: str
+    nickname: str
+    bind_qq: str = Field(default="")
+    player_rating: int = Field(default=10000)
+    username: str = Field(index=True)
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+    updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
 
 class UserPreferenceBase(SQLModel):
@@ -26,8 +44,8 @@ class UserPreferenceBase(SQLModel):
     friend_code: str | None = None
     display_name: str | None = None
     dx_rating: str | None = None
-    qr_size: int | None = None
-    mask_type: int | None = None
+    qr_size: int = Field(default=15)
+    mask_type: int = Field(default=0)
 
 
 class UserPreferenceUpdate(UserPreferenceBase):
@@ -54,8 +72,16 @@ class UserPreferencePublic(UserPreferenceBase):
     passname: ImagePublic | None = None
 
 
+class UserAccountPublic(SQLModel):
+    account_name: str
+    nickname: str
+    player_rating: int
+
+
 class UserProfile(SQLModel):
     username: str
+    prefer_server: AccountServer
     nickname: str
     player_rating: int
     preferences: UserPreferencePublic
+    accounts: dict[int, UserAccountPublic]

@@ -9,7 +9,7 @@ class Image(SQLModel, table=True):
     name: str
     kind: str
     sega_name: str | None = Field(default=None, index=True)
-    uploaded_by: str | None = Field(default=None, foreign_key="users.username")
+    uploaded_by: str | None = Field(default=None)
     uploaded_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
 
