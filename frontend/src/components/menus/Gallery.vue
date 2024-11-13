@@ -64,7 +64,7 @@ if (!Object.keys(imageStore.images!).includes(props.kind)) {
                 <div class="relative rounded border-solid border-2 shadow-lg border-black p-2">
                     <button
                         class="absolute top-0 left-0 bg-black bg-opacity-50 text-white p-1 rounded-br-lg text-xs max-w-full z-10"
-                        v-if="image.uploaded_by" @click="renamingImage = image; showDialog = true;">
+                        v-if="image.uploaded_by" @click="renamingImage = Object.assign({}, image); showDialog = true;">
                         {{ image.name }}
                     </button>
                     <div class="absolute top-0 left-0 bg-black bg-opacity-50 text-white p-1 rounded-br-lg text-xs max-w-full z-10"
