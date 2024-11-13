@@ -1,5 +1,5 @@
 import asyncio
-from httpx import ConnectError
+from httpx import ConnectError, ReadTimeout
 import jwt
 from typing import Annotated
 from datetime import datetime
@@ -120,7 +120,7 @@ async def get_token_diving(form_data: Annotated[OAuth2PasswordRequestForm, Depen
         try:
             json = {"username": form_data.username, "password": form_data.password}
             response = await client.post("https://www.diving-fish.com/api/maimaidxprober/login", json=json)
-        except ConnectError:
+        except (ConnectError, ReadTimeout):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="无法连接到水鱼查分器服务",
@@ -158,6 +158,7 @@ async def get_token_diving(form_data: Annotated[OAuth2PasswordRequestForm, Depen
 @router.post("/token/lxns")
 async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
     personal_token = form_data.password
+
     account = session.exec(
         select(UserAccount).where(UserAccount.account_password == personal_token, UserAccount.account_server == AccountServer.LXNS)
     ).first()
@@ -168,8 +169,9 @@ async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends
 
     async with async_httpx_ctx() as client:
         try:
-            response_data = (await client.get("https://maimai.lxns.net/api/v0/user/maimai/player", headers={"X-User-Token": personal_token})).json()
-        except ConnectError:
+            headers = {"X-User-Token": personal_token.encode()}
+            response_data = (await client.get("https://maimai.lxns.net/api/v0/user/maimai/player", headers=headers)).json()
+        except (ConnectError, ReadTimeout):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="无法连接到落雪服务",
@@ -212,7 +214,7 @@ async def bind_diving(
         try:
             json = {"username": form_data.username, "password": form_data.password}
             response = await client.post("https://www.diving-fish.com/api/maimaidxprober/login", json=json)
-        except ConnectError:
+        except (ConnectError, ReadTimeout):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="无法连接到水鱼查分器服务",
@@ -249,8 +251,9 @@ async def bind_lxns(
     personal_token = form_data.password
     async with async_httpx_ctx() as client:
         try:
-            response_data = (await client.get("https://maimai.lxns.net/api/v0/user/maimai/player", headers={"X-User-Token": personal_token})).json()
-        except ConnectError:
+            headers = {"X-User-Token": personal_token.encode()}
+            response_data = (await client.get("https://maimai.lxns.net/api/v0/user/maimai/player", headers=headers)).json()
+        except (ConnectError, ReadTimeout):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="无法连接到落雪服务",
