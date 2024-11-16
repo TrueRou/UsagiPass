@@ -76,11 +76,12 @@ export const useUserStore = defineStore('user', () => {
         }
         try {
             const testWahlap = await axios.get("http://tgk-wcaime.wahlap.com/test");
-            if (!testWahlap.data || testWahlap.data.proxy != "ok") throw new Error();
-        } catch (error: any) {
-            alert("当前代理配置已过时, 请更新订阅后重试");
-            return false;
-        }
+            // 502 is wahlap's original status code for proxy with old rules
+            if (testWahlap.status == 502) {
+                alert("当前代理配置已过时, 请更新订阅后重试");
+                return false;
+            }
+        } catch (error: any) { } // bypass cors
         try {
             const resp = await axiosInstance.value.post("/accounts/update/oauth")
             window.location.href = resp.data.url;
