@@ -50,8 +50,8 @@ prepareDefaultPreferences();
             </div>
             <div class="flex absolute bottom-0 items-center justify-center w-full h-8">
                 <div class="footer-widget flex justify-between py-1 rounded-2xl bg-gray-800 text-white opacity-85">
-                    <p class="footer-text">{{ userProfile.preferences.simplified_code }}</p>
-                    <p class="footer-text">{{ userProfile.preferences.maimai_version }}</p>
+                    <p class="footer-text font-sega">{{ userProfile.preferences.simplified_code }}</p>
+                    <p class="footer-text font-sega">{{ userProfile.preferences.maimai_version }}</p>
                 </div>
                 <div class="p-1 rounded-full bg-white" @click="router.push({ name: 'preferences' })">
                     <img src="../assets/misc/settings.svg" style="width: 2vh;"></img>
