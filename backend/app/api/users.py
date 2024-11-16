@@ -7,7 +7,7 @@ from app import database
 from app.database import require_session
 from app.models.user import User, UserAccount, UserAccountPublic, UserPreference, UserPreferencePublic, UserPreferenceUpdate, UserProfile, UserUpdate
 from app.models.image import Image, ImagePublic
-from app.api.accounts import update_player_rating, verify_user
+from app.api.accounts import attempt_update_rating, verify_user
 from config import default_character, default_background, default_frame, default_passname
 
 
@@ -33,6 +33,7 @@ def apply_default(preferences: UserPreferencePublic, db_preferences: UserPrefere
 @router.patch("")
 async def update_user(user_update: UserUpdate, username: str = Depends(verify_user), session: Session = Depends(require_session)):
     db_user = session.get(User, username)
+    db_user.updated_at = datetime.utcnow()
     database.partial_update_model(session, db_user, user_update)
     return {"message": "User has been updated"}
 
@@ -46,8 +47,7 @@ async def get_profile(username: str = Depends(verify_user), session: Session = D
         select(UserAccount).where(UserAccount.username == username, UserAccount.account_server == db_user.prefer_server)
     ).first()
     # we need to update the player rating if the user has not updated for 4 hours
-    if (datetime.utcnow() - db_user.updated_at).total_seconds() >= 3600 * 4:
-        asyncio.ensure_future(update_player_rating(username))
+    asyncio.ensure_future(attempt_update_rating(username))
     if not db_preference:
         db_preference = database.add(session, UserPreference(username=username))
     preferences = UserPreferencePublic.model_validate(db_preference)
@@ -71,6 +71,7 @@ async def update_profile(
     session: Session = Depends(require_session),
 ):
     db_preference = session.get(UserPreference, username)
+    db_user = session.get(User, username)
     if not db_preference:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User has not set up for his preference")
     if db_preference.username != username:
@@ -82,11 +83,7 @@ async def update_profile(
         frame_id=preference.frame.id if preference.frame else None,
         passname_id=preference.passname.id if preference.passname else None,
     )
+    db_user.updated_at = datetime.utcnow()
     # there's no problem with the image ids, we can update the preference
     database.partial_update_model(session, db_preference, update_preference)
     return {"message": "Preference has been updated"}
-
-
-@router.patch("/rating")
-async def update_rating(username: str = Depends(verify_user)):
-    await update_player_rating(username)

@@ -27,13 +27,7 @@ const patchPreferServer = async (prefer_server: number) => {
     const response = await userStore.axiosInstance.patch('/users', {
         prefer_server: prefer_server
     });
-    if (response.status === 200) await userStore.refreshUser()
-}
-
-const refreshRating = async () => {
-    await userStore.updateRating();
-    await userStore.refreshUser();
-    alert("DXRating已刷新");
+    if (response.status === 200) await userStore.refreshUser();
 }
 
 const openPicker = (kind: string) => {
@@ -41,7 +35,8 @@ const openPicker = (kind: string) => {
     imagePicker.value?.click();
 }
 
-onMounted(() => {
+onMounted(async () => {
+    if (!imageStore.images) await imageStore.refreshImages();
     imagePicker.value?.addEventListener('change', async () => {
         const file = imagePicker.value?.files?.[0];
         if (file && uploadKind.value) {
@@ -54,8 +49,6 @@ onMounted(() => {
         }
     });
 });
-
-if (!imageStore.images) await imageStore.refreshImages();
 </script>
 <template>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
@@ -99,11 +92,12 @@ if (!imageStore.images) await imageStore.refreshImages();
                 </span>
             </div>
             <div class="flex items-center">
-                <a class="bg-blue-500 text-white font-bold py-2 px-2 h-[40px] w-[40px] rounded hover:bg-blue-600 cursor-pointer"
-                    @click="refreshRating">
-                    <img src="../../assets/misc/refresh.svg">
-                </a>
-                <a class="ml-2 bg-blue-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-blue-600 text-sm cursor-pointer"
+                <button
+                    class="bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-2 px-2 rounded hover:from-pink-600 hover:to-blue-600"
+                    @click="userStore.attemptUploadScores">
+                    更新查分器
+                </button>
+                <a class="ml-2 bg-red-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-red-600 text-sm cursor-pointer"
                     @click="userStore.logout">
                     <img class="pl-1.5 pt-1" src="../../assets/misc/logout.svg">
                 </a>

@@ -102,6 +102,15 @@ class Music(Dict):
             return self[item]
         return super().__getattribute__(item)
 
+    @property
+    def id_lxns(self):
+        music_id = int(self.id)
+        if music_id < 10000:
+            return music_id
+        if music_id < 100000:
+            return music_id - 10000
+        return music_id - 100000
+
 
 class MusicList(List[Music]):
     def by_id(self, music_id: str) -> Optional[Music]:

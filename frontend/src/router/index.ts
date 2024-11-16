@@ -28,15 +28,20 @@ const router = createRouter({
                     component: () => import('../components/menus/Login.vue')
                 },
                 {
+                    path: 'preferences',
+                    name: 'preferences',
+                    component: () => import('../components/menus/Preferences.vue'),
+                },
+                {
+                    path: 'update',
+                    name: 'update',
+                    component: () => import('../components/menus/Update.vue')
+                },
+                {
                     path: 'bind/:server',
                     name: 'bind',
                     props: true,
                     component: () => import('../components/menus/Bind.vue')
-                },
-                {
-                    path: 'preferences',
-                    name: 'preferences',
-                    component: () => import('../components/menus/Preferences.vue'),
                 },
                 {
                     path: 'gallery/:kind',

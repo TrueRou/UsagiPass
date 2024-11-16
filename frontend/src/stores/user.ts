@@ -33,6 +33,13 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 
+    function logout() {
+        localStorage.removeItem('token')
+        token.value = null
+        isSignedIn.value = false
+        location.reload()
+    }
+
     async function bind(target: string, username: string, password: string) {
         try {
             await axiosInstance.value.post(`/accounts/bind/${target}`, new URLSearchParams({ username, password }))
@@ -41,19 +48,6 @@ export const useUserStore = defineStore('user', () => {
         } catch (error: any) {
             alert(error.response.data.detail)
             return false
-        }
-    }
-
-    function logout() {
-        localStorage.removeItem('token')
-        token.value = null
-        isSignedIn.value = false
-        location.reload()
-    }
-
-    async function updateRating() {
-        if (isSignedIn) {
-            await axiosInstance.value.patch('/users/rating')
         }
     }
 
@@ -75,5 +69,27 @@ export const useUserStore = defineStore('user', () => {
         return response.status === 200
     }
 
-    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, cropperImage, refreshUser, updateRating, patchPreferences, login, logout, bind }
+    const attemptUploadScores = async () => {
+        if (navigator.userAgent.toLowerCase().indexOf('micromessenger') == -1) {
+            alert("无法获取玩家信息, 请在微信环境中更新查分器");
+            return false;
+        }
+        try {
+            const testWahlap = await axios.get("http://tgk-wcaime.wahlap.com/test");
+            if (!testWahlap.data || testWahlap.data.proxy != "ok") throw new Error();
+        } catch (error: any) {
+            alert("当前代理配置已过时, 请更新订阅后重试");
+            return false;
+        }
+        try {
+            const resp = await axiosInstance.value.post("/accounts/update/oauth")
+            window.location.href = resp.data.url;
+            return true;
+        } catch (error: any) {
+            alert(error.response.data.detail);
+            return false;
+        }
+    }
+
+    return { axiosInstance, maimaiCode, timeLimit, simplifiedCode, userProfile, isSignedIn, cropperImage, refreshUser, patchPreferences, login, logout, bind, attemptUploadScores }
 })

@@ -2,17 +2,18 @@ import asyncio
 from httpx import ConnectError, ReadTimeout
 import jwt
 from typing import Annotated
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 
 from app.database import async_httpx_ctx, async_session_ctx, require_session
 from app.logging import Ansi, log
-from app.maimai import scores
+from app.maimai import crawler
+from app.maimai.crawler import CrawlerResult, DivingCrawler, LxnsCrawler
 from app.models.user import AccountServer, User, UserAccount, UserPreference
 from app.models.image import Image
-from config import jwt_secret, lxns_developer_token
+from config import jwt_secret
 
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
@@ -23,32 +24,6 @@ optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="accounts/token/diving", 
 def _grant_user(user: User):
     token = jwt.encode({"username": user.username}, jwt_secret, algorithm="HS256")
     return {"access_token": token, "token_type": "bearer"}
-
-
-async def _update_lxns(account_name: str):
-    async with async_session_ctx() as session:
-        async with async_httpx_ctx() as client:
-            try:
-                headers = {"Authorization": lxns_developer_token}
-                response_data = (await client.get("https://maimai.lxns.net/api/v0/maimai/player/" + account_name, headers=headers)).json()
-                if not response_data["success"]:
-                    raise Exception("Failed to fetch player data from lxns")
-                account = await session.get(UserAccount, (account_name, AccountServer.LXNS))
-                account.player_rating = response_data["data"]["rating"]
-            except:
-                log("Failed to update player rating from lxns for account: " + account_name, Ansi.LRED)
-
-
-async def _update_diving(account_name: str):
-    async with async_session_ctx() as session:
-        try:
-            player_rating = await scores.get_rating(account_name)
-            account = await session.get(UserAccount, (account_name, AccountServer.DIVING_FISH))
-            account.player_rating = player_rating
-            account.updated_at = datetime.utcnow()
-            await session.commit()
-        except:
-            log("Failed to update player rating from diving-fish for account: " + account_name, Ansi.LRED)
 
 
 async def _dispose_user(source: str, target: str):
@@ -94,17 +69,17 @@ def verify_user(token: Annotated[str, Depends(oauth2_scheme)]) -> str:
         )
 
 
-async def update_player_rating(username: str):
+async def attempt_update_rating(username: str, hard: bool = False):
     async with async_session_ctx() as session:
-        user = await session.get(User, username)
         accounts = await session.execute(select(UserAccount).where(UserAccount.username == username))
-        for account in accounts.scalars():
-            if account.account_server == AccountServer.DIVING_FISH:
-                asyncio.ensure_future(_update_diving(account.account_name))
-            if account.account_server == AccountServer.LXNS:
-                asyncio.ensure_future(_update_lxns(account.account_name))
-            account.updated_at = datetime.utcnow()
-        user.updated_at = datetime.utcnow()
+        tasks = [
+            (DivingCrawler if account.account_server == AccountServer.DIVING_FISH else LxnsCrawler).update_rating(session, account.account_name)
+            for account in accounts.scalars()
+            if datetime.utcnow() - account.updated_at > timedelta(minutes=30) or hard
+        ]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        if any(result is not None for result in results):
+            log(f"Failed to update rating for user: {username}", Ansi.LRED)
         await session.commit()
 
 
@@ -143,7 +118,7 @@ async def get_token_diving(form_data: Annotated[OAuth2PasswordRequestForm, Depen
                 account.account_password = form_data.password
                 account.nickname = profile["nickname"]
                 account.bind_qq = profile["bind_qq"]
-            asyncio.ensure_future(_update_diving(form_data.username))
+            asyncio.ensure_future(attempt_update_rating(form_data.username))
             session.commit()
             user = session.get(User, account.username)
             return _grant_user(user)
@@ -179,7 +154,6 @@ async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends
             )
         if response_data["success"]:
             account_name = str(response_data["data"]["friend_code"])
-            # verify if the friend code is ok (user has not bind to maimai?)
             account = session.get(UserAccount, (account_name, AccountServer.LXNS))
             if not account:
                 user = User(username=account_name, prefer_server=AccountServer.LXNS)
@@ -193,6 +167,7 @@ async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends
                 )
                 session.add_all([user, account])
                 session.commit()
+            asyncio.ensure_future(attempt_update_rating(account_name))
             user = session.get(User, account.username)
             return _grant_user(user)
         else:
@@ -283,3 +258,46 @@ async def bind_lxns(
                 detail="落雪个人 API 密钥不存在或已失效",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+
+
+@router.post("/update/oauth")
+async def update_prober_oauth():
+    async with async_httpx_ctx() as client:
+        try:
+            resp = await client.get("https://tgk-wcaime.wahlap.com/wc_auth/oauth/authorize/maimai-dx")
+        except (ConnectError, ReadTimeout):
+            raise HTTPException(status_code=503, detail="无法连接到华立 OAuth 服务", headers={"WWW-Authenticate": "Bearer"})
+        if not resp.headers.get("location"):
+            raise HTTPException(status_code=500, detail="华立 OAuth 服务返回不正确", headers={"WWW-Authenticate": "Bearer"})
+        # example: https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx1fcecfcbd16803b1&redirect_uri=https%3A%2F%2Ftgk-wcaime.wahlap.com%2Fwc_auth%2Foauth%2Fcallback%2Fmaimai-dx%3Fr%3DINesnJ5e%26t%3D214115533&response_type=code&scope=snsapi_base&state=5E7AB78BF1B35471B7BF8DD69E6B50F4361818FA6E01FC#wechat_redirect
+        return {"url": resp.headers["location"].replace("redirect_uri=https", "redirect_uri=http")}
+
+
+@router.get("/update/callback", response_model=list[CrawlerResult])
+async def update_prober_callback(
+    r: str,
+    t: str,
+    code: str,
+    state: str,
+    username: str = Depends(verify_user),
+    session: Session = Depends(require_session),
+):
+    params = {"r": r, "t": t, "code": code, "state": state}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36 NetType/WIFI MicroMessenger/7.0.20.1781(0x6700143B) WindowsWechat(0x6307001e)",
+        "Host": "tgk-wcaime.wahlap.com",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    }
+    async with async_httpx_ctx() as client:
+        try:
+            resp = await client.get("https://tgk-wcaime.wahlap.com/wc_auth/oauth/callback/maimai-dx", params=params, headers=headers)
+            if resp.status_code != 302:
+                raise TimeoutError
+            resp = await client.get(resp.next_request.url, headers=headers)
+            result = await crawler.crawl_async(resp.cookies, username, session)
+            asyncio.ensure_future(attempt_update_rating(username, hard=True))
+            return result
+        except (ConnectError, ReadTimeout):
+            raise HTTPException(status_code=503, detail="无法连接到华立服务器", headers={"WWW-Authenticate": "Bearer"})
+        except TimeoutError:
+            raise HTTPException(status_code=400, detail="华立 OAuth 已过期", headers={"WWW-Authenticate": "Bearer"})

@@ -129,3 +129,8 @@ async def get_rating(username: str):
             dx_best.push(ChartInfo.from_json(score))
         player_rating = sum(compute_rating(sd.ds, sd.achievement) for sd in sd_best) + sum(compute_rating(dx.ds, dx.achievement) for dx in dx_best)
         return player_rating
+
+
+def get_music_list():
+    global music_list
+    return music_list

@@ -24,9 +24,9 @@ interface UserPreferencePublic {
 }
 
 interface UserAccountPublic {
-    account_name: string
-    nickname: string
-    player_rating: number
+    account_name: string;
+    nickname: string;
+    player_rating: number;
 }
 
 interface UserProfile {
@@ -35,11 +35,18 @@ interface UserProfile {
     nickname: string;
     player_rating: number;
     preferences: UserPreferencePublic;
-    accounts: Record<string, UserAccountPublic>
+    accounts: Record<string, UserAccountPublic>;
 }
 
 interface ServerMessage {
     maimai_version: string;
     server_motd: string;
     author_motd: string;
+}
+
+interface CrawlerResult {
+    account_server: number;
+    diff_label: string;
+    success: boolean;
+    scores_num: number;
 }

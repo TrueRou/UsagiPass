@@ -57,6 +57,7 @@ sortedcontainers==2.4.0
 SQLAlchemy==2.0.34
 sqlmodel==0.0.22
 starlette==0.38.5
+tenacity==9.0.0
 tornado==6.4.1
 typing_extensions==4.12.2
 tzdata==2024.1
