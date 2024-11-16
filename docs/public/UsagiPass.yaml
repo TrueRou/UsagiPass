@@ -17,5 +17,5 @@ proxies:
 rules:
   - DOMAIN-SUFFIX,sys-all.cn,UsagiPass
   - DOMAIN-SUFFIX,sys-allnet.cn,UsagiPass
-  - AND,((DOMAIN,tgk-wcaime.wahlap.com),(DST-PORT,80)),UsagiPass
+  - DOMAIN,tgk-wcaime.wahlap.com,UsagiPass
   - MATCH,DIRECT
