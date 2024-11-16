@@ -9,7 +9,7 @@ from typing import Any
 from httpx import Cookies
 from pydantic import BaseModel
 from sqlmodel import Session, select
-from tenacity import retry, stop_after_attempt
+from tenacity import RetryError, retry, stop_after_attempt
 from app.database import async_httpx_ctx
 from app.models.user import AccountServer, UserAccount
 from app.logging import Ansi, log
@@ -54,7 +54,7 @@ class LxnsCrawler:
     def label() -> str:
         return "LXNS"
 
-    @retry(reraise=False, stop=stop_after_attempt(3))
+    @retry(reraise=False, stop=stop_after_attempt(5))
     async def upload_scores(diving_json: Any, username: str, password: str, diff: str) -> CrawlerResult:
         music_list = get_music_list()
         lxns_json = {
@@ -79,7 +79,7 @@ class LxnsCrawler:
             resp.raise_for_status()
             return CrawlerResult(account_server=AccountServer.LXNS, diff_label=diff, success=True, scores_num=len(lxns_json["scores"]))
 
-    @retry(reraise=False, stop=stop_after_attempt(3))
+    @retry(reraise=False, stop=stop_after_attempt(5))
     async def update_rating(session: Session, account_name: str):
         async with async_httpx_ctx() as client:
             headers = {"Authorization": lxns_developer_token}
@@ -106,6 +106,7 @@ async def upload_server(account: UserAccount, diving_json: Any, diff: str) -> Cr
         return CrawlerResult(account_server=account.account_server, diff_label=diff, success=False, scores_num=0)
 
 
+@retry(reraise=False, stop=stop_after_attempt(3))
 async def crawl_diff(diff: int, cookies: Cookies, accounts: list[UserAccount]) -> list[CrawlerResult]:
     async with async_httpx_ctx() as client:
         await asyncio.sleep(random.randint(0, 200) / 1000)  # sleep for a random amount of time between 0 and 200ms
@@ -121,4 +122,5 @@ async def crawl_async(cookies: Cookies, username: str, session: Session) -> list
     accounts = session.exec(select(UserAccount).where(UserAccount.username == username)).all()
     tasks = [crawl_diff(diff, cookies, accounts) for diff in [0, 1, 2, 3, 4]]
     results = await asyncio.gather(*tasks, return_exceptions=True)
+    results = [result for result in results if not isinstance(result, RetryError)]
     return functools.reduce(operator.concat, results)
