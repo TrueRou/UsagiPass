@@ -47,7 +47,7 @@ onMounted(async () => {
                 <h1 class="font-bold text-white">玩家分数上传</h1>
             </div>
             <div class="w-full flex flex-col items-center px-4 py-4">
-                <p class="text-gray-600 mb-2 mt-2">请稍候, 正在获取并上传分数数据 (大约需要60 ~ 120秒)...</p>
+                <p class="text-gray-600 mt-2">请稍候, 正在获取并上传分数数据<br>(大约需要60 ~ 120秒)...</p>
                 <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
                     <div ref="progressBar" class="bg-blue-600 h-2.5 rounded-full smooth pulse"
                         :style="{ 'width': progress + '%' }"></div>

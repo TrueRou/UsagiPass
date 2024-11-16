@@ -93,7 +93,7 @@ onMounted(async () => {
             </div>
             <div class="flex items-center">
                 <button
-                    class="bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-2 px-2 rounded hover:from-pink-600 hover:to-blue-600"
+                    class="bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-2 px-2 rounded hover:from-pink-600 hover:to-blue-600 text-nowrap"
                     @click="userStore.attemptUploadScores">
                     更新查分器
                 </button>
