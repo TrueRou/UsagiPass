@@ -11,9 +11,9 @@ const props = defineProps<{
         <div class="flex flex-col pt-1 pb-1 rounded-tr-lg" style="width: 80%; background-color: #fee37c;">
             <p class="text-center text-sm font-semibold text-nowrap font-sega">{{ props.chara }}</p>
         </div>
-        <div class="flex flex-col pb-1 rounded-tr-lg rounded-br-lg shadow-xl" style="background-color: #fee37c;">
+        <div class="flex flex-col pb-1 rounded-tr-lg rounded-br-lg shadow-xl px-4" style="background-color: #fee37c;">
             <p class="text-center text-nowrap text-sm font-sega">ブ一スト期限
-                <b class="ml-2 text-lg">{{ props.time }}</b>
+                <b class="text-lg">{{ props.time }}</b>
             </p>
         </div>
     </div>

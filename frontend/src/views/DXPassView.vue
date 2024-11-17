@@ -42,7 +42,7 @@ prepareDefaultPreferences();
                         :friend-code="userProfile.preferences.friend_code!" />
                 </div>
             </div>
-            <div class="absolute flex flex-col left-0" style="width: 50%; bottom: 8%;">
+            <div class="absolute flex flex-col left-0" style="bottom: 8%;">
                 <CharaInfo :chara="userProfile.preferences.character_name!" :time="userStore.timeLimit || '12:00:00'" />
             </div>
             <div class="qr-widget absolute" v-if="userStore.maimaiCode">
