@@ -137,7 +137,7 @@ onMounted(async () => {
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>背景图片</span>
-                <span class="text-gray-600" style="font-size: 12px;">选择作为卡面背景的图片</span>
+                <span class="text-gray-600" style="font-size: 12px;">选择卡面背景图片</span>
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
@@ -153,7 +153,7 @@ onMounted(async () => {
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>边框图片</span>
-                <span class="text-gray-600" style="font-size: 12px;">选择作为卡面边框的图片</span>
+                <span class="text-gray-600" style="font-size: 12px;">选择卡面边框图片</span>
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
@@ -169,7 +169,7 @@ onMounted(async () => {
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>人物图片</span>
-                <span class="text-gray-600" style="font-size: 12px;">选择作为卡面人物的图片</span>
+                <span class="text-gray-600" style="font-size: 12px;">选择卡面人物图片</span>
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
@@ -185,7 +185,7 @@ onMounted(async () => {
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>通行证图片</span>
-                <span class="text-gray-600" style="font-size: 12px;">选择作为卡面通行证的图片</span>
+                <span class="text-gray-600" style="font-size: 12px;">选择卡面通行证图片</span>
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
@@ -249,7 +249,7 @@ onMounted(async () => {
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>玩家昵称</span>
-                <span class="text-gray-600" style="font-size: 12px;">覆盖Diving-Fish返回的玩家昵称</span>
+                <span class="text-gray-600" style="font-size: 12px;">覆盖查分器返回的玩家昵称</span>
             </div>
             <div><input v-model="userProfile!.preferences.display_name"></div>
         </div>
@@ -257,7 +257,7 @@ onMounted(async () => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>DX分数</span>
-                <span class="text-gray-600" style="font-size: 12px;">覆盖Diving-Fish返回的DX分数</span>
+                <span class="text-gray-600" style="font-size: 12px;">覆盖查分器返回的DX分数</span>
             </div>
             <div><input v-model="userProfile!.preferences.dx_rating"></div>
         </div>
@@ -273,7 +273,7 @@ onMounted(async () => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>卡片号码</span>
-                <span class="text-gray-600" style="font-size: 12px;">覆盖卡面下方的20位卡片号码</span>
+                <span class="text-gray-600" style="font-size: 12px;">覆盖卡面下方的20位号码</span>
             </div>
             <div><input v-model="userProfile!.preferences.simplified_code"></div>
         </div>
@@ -281,7 +281,7 @@ onMounted(async () => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>游戏版本</span>
-                <span class="text-gray-600" style="font-size: 12px;">覆盖卡面下方的maimai版本</span>
+                <span class="text-gray-600" style="font-size: 12px;">覆盖卡面下方的游戏版本</span>
             </div>
             <div><input v-model="userProfile!.preferences.maimai_version"></div>
         </div>
