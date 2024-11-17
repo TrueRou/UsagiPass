@@ -35,7 +35,6 @@ async def _dispose_user(source: str, target: str):
         target_preferences = await session.get(UserPreference, target)
         for account in source_accounts.scalars():
             await session.delete(account)
-            session.expire
         for image in source_images.scalars():
             image.uploaded_by = target
         for field in UserPreference.__table__.columns:
@@ -44,7 +43,8 @@ async def _dispose_user(source: str, target: str):
             target_value = getattr(target_preferences, field_name, None)
             if target_value is None and source_value is not None:
                 setattr(target_preferences, field_name, source_value)
-        await session.delete(source_preferences)
+        if source_preferences:
+            await session.delete(source_preferences)
         await session.delete(source_user)
         await session.commit()
 
@@ -118,8 +118,8 @@ async def get_token_diving(form_data: Annotated[OAuth2PasswordRequestForm, Depen
                 account.account_password = form_data.password
                 account.nickname = profile["nickname"]
                 account.bind_qq = profile["bind_qq"]
-            asyncio.ensure_future(attempt_update_rating(form_data.username))
             session.commit()
+            asyncio.ensure_future(attempt_update_rating(form_data.username))
             user = session.get(User, account.username)
             return _grant_user(user)
         else:
@@ -166,7 +166,7 @@ async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends
                     player_rating=response_data["data"]["rating"],
                 )
                 session.add_all([user, account])
-                session.commit()
+            session.commit()
             asyncio.ensure_future(attempt_update_rating(account_name))
             user = session.get(User, account.username)
             return _grant_user(user)
@@ -211,6 +211,7 @@ async def bind_diving(
             )
             session.merge(new_account)
             session.commit()
+            asyncio.ensure_future(attempt_update_rating(username, hard=True))
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -252,6 +253,7 @@ async def bind_lxns(
             )
             session.merge(new_account)
             session.commit()
+            asyncio.ensure_future(attempt_update_rating(username, hard=True))
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

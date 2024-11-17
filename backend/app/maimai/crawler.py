@@ -123,4 +123,4 @@ async def crawl_async(cookies: Cookies, username: str, session: Session) -> list
     tasks = [crawl_diff(diff, cookies, accounts) for diff in [0, 1, 2, 3, 4]]
     results = await asyncio.gather(*tasks, return_exceptions=True)
     results = [result for result in results if not isinstance(result, RetryError)]
-    return functools.reduce(operator.concat, results)
+    return functools.reduce(operator.concat, results, [])
