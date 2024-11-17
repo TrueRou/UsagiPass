@@ -6,19 +6,23 @@ outline: deep
 
 ## 开源仓库
 
+UsagiPass的前端 & 后端 & 官网均已开源，欢迎提出Issues和PullRequests。
+
 我们的 GitHub 仓库: https://github.com/TrueRou/UsagiPass
 
-## 帮助我们
+## 配置私人MITM
 
-UsagiPass 使用代理转发来自 sys-all 的流量，这使我们的代理服务器压力较大。
+UsagiPass 使用 [MITM中间人](https://developer.mozilla.org/zh-CN/docs/Glossary/MitM) 转发并修改来自华立服务器的流量。
 
-有条件的开发者可以搭建属于自己的代理服务器，或者协助我们搭建分布式的代理服务器组。
+当前版本的 UsagiPass 会修改来自 wq.sys-all.cn 和 tgk-wcaime.wahlap.com 的流量，后者主要用于更新查分器。
+
+有条件的开发者可以搭建属于自己的代理服务器，可以在降低服务器负载的同时提升安全性。
 
 ### 前置环境
 
 - 合适的 Linux 发行版，这里以 Debian 为例
 - 能够连接至 GitHub 的网络环境
-- Python 3.9+
+- Python 3.11+
 
 ### 搭建方式
 

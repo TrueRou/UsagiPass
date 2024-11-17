@@ -34,7 +34,8 @@ export default defineConfig({
         text: '手册',
         items: [
           { text: '实现方式', link: '/implementation' },
-          { text: '参与开发', link: '/development' }
+          { text: '参与开发', link: '/development' },
+          { text: '特别感谢', link: '/thanks' }
         ]
       }
     ],
