@@ -74,7 +74,7 @@
                     },
                     {
                         "domain": "tgk-wcaime.wahlap.com",
-                        "port": "80"
+                        "port": 80
                     }
                 ],
                 "outbound": "UsagiPass"
