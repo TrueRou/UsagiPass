@@ -17,7 +17,8 @@
                 "server": "dns_resolver"
             }
         ],
-        "final": "dns_resolver"
+        "final": "dns_resolver",
+        "strategy": "prefer_ipv4"
     },
     "inbounds": [
         {
@@ -26,10 +27,12 @@
             "mtu": 1400,
             "auto_route": true,
             "strict_route": true,
-            "stack": "gvisor",
+            "stack": "mixed",
             "sniff": true,
-            "inet4_address": "172.16.0.1/30",
-            "inet6_address": "fd00::1/126"
+            "address": [
+                "172.18.0.1/30",
+                "fdfe:dcba:9876::1/126"
+            ]
         }
     ],
     "outbounds": [
@@ -63,19 +66,15 @@
                 "outbound": "dns-out"
             },
             {
-                "type": "logical",
-                "mode": "and",
-                "rules": [
-                    {
-                        "domain_suffix": [
-                            "sys-all.cn",
-                            "sys-allnet.cn"
-                        ]
-                    },
-                    {
-                        "domain": "tgk-wcaime.wahlap.com",
-                        "port": 80
-                    }
+                "domain": [
+                    "wq.sys-all.cn",
+                    "wq.sys-allnet.cn",
+                    "tgk-wcaime.wahlap.com"
+                ],
+                "ip_cidr": [
+                    "152.136.21.46/32",
+                    "42.193.74.107/32",
+                    "129.28.248.89/32"
                 ],
                 "outbound": "UsagiPass"
             },
@@ -85,7 +84,8 @@
             }
         ],
         "final": "direct",
-        "auto_detect_interface": true
+        "auto_detect_interface": true,
+        "override_android_vpn": true
     },
     "experimental": {
         "cache_file": {

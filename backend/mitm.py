@@ -9,6 +9,7 @@ sysall_hosts = [
 ]
 
 wahlap_hosts = [
+    "152.136.21.46",
     "tgk-wcaime.wahlap.com",
 ]
 
