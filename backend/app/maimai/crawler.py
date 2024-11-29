@@ -1,9 +1,11 @@
 import asyncio
 from datetime import datetime
 import functools
+import json
 import operator
 import random
 import re
+import traceback
 from typing import Any
 
 from httpx import Cookies
@@ -14,6 +16,7 @@ from app.database import async_httpx_ctx
 from app.models.user import AccountServer, UserAccount
 from app.logging import Ansi, log
 from app.maimai.scores import get_music_list, get_rating
+from app.models.crawler import CrawlerHistory
 from config import lxns_developer_token
 
 diff_list = ["Basic", "Advanced", "Expert", "Master", "Re:Master"]
@@ -92,35 +95,49 @@ class LxnsCrawler:
             log(f"Updated rating for user {account_name}({LxnsCrawler.label()}) to {account.player_rating}.", Ansi.LGREEN)
 
 
-async def upload_server(account: UserAccount, diving_json: Any, diff: str) -> CrawlerResult:
+async def upload_server(account: UserAccount, diving_json: Any, diff: str, session: Session) -> CrawlerResult:
     crawler = DivingCrawler if account.account_server == AccountServer.DIVING_FISH else LxnsCrawler
     if not account.account_password or account.account_password == "":
         log(f"User {account.username}({crawler.label()}) has no password saved, skipping.", Ansi.LYELLOW)
         return CrawlerResult(account_server=account.account_server, diff_label=diff, success=False, scores_num=0)
     try:
+        exc_stack = None
         results = await crawler.upload_scores(diving_json, account.username, account.account_password, diff)
         log(f"Uploaded {diff} diff scores for user {account.username}({crawler.label()}).", Ansi.LGREEN)
-        return results
     except Exception as e:
+        exc_stack = traceback.format_exc()
+        results = CrawlerResult(account_server=account.account_server, diff_label=diff, success=False, scores_num=0)
         log(f"Failed to upload {diff} diff scores for for user {account.username}({crawler.label()}): {str(e)}.", Ansi.LRED)
-        return CrawlerResult(account_server=account.account_server, diff_label=diff, success=False, scores_num=0)
+    history = CrawlerHistory(
+        game_name="maimai",
+        username=account.username,
+        account_server=account.account_server,
+        diff_label=diff,
+        success=results.success,
+        scores_num=results.scores_num,
+        parsed_json=json.dumps(diving_json, ensure_ascii=False),
+        exc_stack=exc_stack,
+    )
+    session.add(history)
+    return results
 
 
 @retry(reraise=False, stop=stop_after_attempt(3))
-async def crawl_diff(diff: int, cookies: Cookies, accounts: list[UserAccount]) -> list[CrawlerResult]:
+async def crawl_diff(diff: int, cookies: Cookies, accounts: list[UserAccount], session: Session) -> list[CrawlerResult]:
     async with async_httpx_ctx() as client:
         await asyncio.sleep(random.randint(0, 200) / 1000)  # sleep for a random amount of time between 0 and 200ms
         resp1 = await client.get(f"https://maimai.wahlap.com/maimai-mobile/record/musicGenre/search/?genre=99&diff={diff}", cookies=cookies)
         body = re.search(r"<html.*?>([\s\S]*?)</html>", resp1.text).group(1).replace(r"\s+", " ")
         # we use diving fish page parser to parse the html to readable json format
         diving_json = (await client.post("http://8.138.164.51:8089/page", headers={"content-type": "text/plain"}, content=body)).json()
-        tasks = [upload_server(account, diving_json, diff_list[diff]) for account in accounts]
+        tasks = [upload_server(account, diving_json, diff_list[diff], session) for account in accounts]
         return await asyncio.gather(*tasks, return_exceptions=True)
 
 
 async def crawl_async(cookies: Cookies, username: str, session: Session) -> list[CrawlerResult]:
     accounts = session.exec(select(UserAccount).where(UserAccount.username == username)).all()
-    tasks = [crawl_diff(diff, cookies, accounts) for diff in [0, 1, 2, 3, 4]]
+    tasks = [crawl_diff(diff, cookies, accounts, session) for diff in [0, 1, 2, 3, 4]]
     results = await asyncio.gather(*tasks, return_exceptions=True)
     results = [result for result in results if not isinstance(result, RetryError)]
+    session.commit()
     return functools.reduce(operator.concat, results, [])
