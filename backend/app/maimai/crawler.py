@@ -102,7 +102,7 @@ async def upload_server(account: UserAccount, diving_json: Any, diff: str, sessi
         return CrawlerResult(account_server=account.account_server, diff_label=diff, success=False, scores_num=0)
     try:
         exc_stack = None
-        results = await crawler.upload_scores(diving_json, account.username, account.account_password, diff)
+        results = await crawler.upload_scores(diving_json, account.account_name, account.account_password, diff)
         log(f"Uploaded {diff} diff scores for user {account.username}({crawler.label()}).", Ansi.LGREEN)
     except Exception as e:
         exc_stack = traceback.format_exc()

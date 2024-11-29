@@ -11,8 +11,7 @@ from app.database import async_httpx_ctx, async_session_ctx, require_session
 from app.logging import Ansi, log
 from app.maimai import crawler
 from app.maimai.crawler import CrawlerResult, DivingCrawler, LxnsCrawler
-from app.models.user import AccountServer, User, UserAccount, UserPreference
-from app.models.image import Image
+from app.models.user import AccountServer, User, UserAccount
 from config import jwt_secret
 
 
@@ -24,29 +23,6 @@ optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="accounts/token/diving", 
 def _grant_user(user: User):
     token = jwt.encode({"username": user.username}, jwt_secret, algorithm="HS256")
     return {"access_token": token, "token_type": "bearer"}
-
-
-async def _dispose_user(source: str, target: str):
-    async with async_session_ctx() as session:
-        source_user = await session.get(User, source)
-        source_accounts = await session.execute(select(UserAccount).where(UserAccount.username == source))
-        source_images = await session.execute(select(Image).where(Image.uploaded_by == source))
-        source_preferences = await session.get(UserPreference, source)
-        target_preferences = await session.get(UserPreference, target)
-        for account in source_accounts.scalars():
-            await session.delete(account)
-        for image in source_images.scalars():
-            image.uploaded_by = target
-        for field in UserPreference.__table__.columns:
-            field_name = field.name
-            source_value = getattr(source_preferences, field_name, None)
-            target_value = getattr(target_preferences, field_name, None)
-            if target_value is None and source_value is not None:
-                setattr(target_preferences, field_name, source_value)
-        if source_preferences:
-            await session.delete(source_preferences)
-        await session.delete(source_user)
-        await session.commit()
 
 
 def verify_user_optional(token: Annotated[str | None, Depends(optional_oauth2_scheme)]) -> str | None:
@@ -199,8 +175,11 @@ async def bind_diving(
             profile = (await client.get("https://www.diving-fish.com/api/maimaidxprober/player/profile", cookies=response.cookies)).json()
             # verify if the account has been binded, if so, dispose the old account and user.
             if account:
-                # dispose the old account and user, transfer the data to the new account
-                await _dispose_user(account.username, username)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="账号已被其他用户绑定, 请联系管理员",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
             new_account = UserAccount(
                 account_name=form_data.username,
                 account_server=AccountServer.DIVING_FISH,
@@ -241,8 +220,11 @@ async def bind_lxns(
             if account and account.username == username:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="无法重复绑定自己的账号", headers={"WWW-Authenticate": "Bearer"})
             if account:
-                # dispose the old account and user, transfer the data to the new account
-                await _dispose_user(account.username, username)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="账号已被其他用户绑定, 请联系管理员",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
             new_account = UserAccount(
                 account_name=account_name,
                 account_server=AccountServer.LXNS,
