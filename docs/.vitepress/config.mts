@@ -28,6 +28,7 @@ export default defineConfig({
           { text: 'Clash', link: '/proxies/clash' },
           { text: 'Shadowrocket', link: '/proxies/rocket' },
           { text: 'Sing-box', link: '/proxies/singbox' },
+          { text: 'Quantumult X', link: '/proxies/quantx' },
         ]
       },
       {
