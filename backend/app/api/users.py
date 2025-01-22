@@ -7,7 +7,7 @@ from app import database
 from app.database import require_session
 from app.models.user import User, UserAccount, UserAccountPublic, UserPreference, UserPreferencePublic, UserPreferenceUpdate, UserProfile, UserUpdate
 from app.models.image import Image, ImagePublic
-from app.api.accounts import attempt_update_rating, verify_user
+from app.api.accounts import update_rating_passive, verify_user
 from config import default_character, default_background, default_frame, default_passname
 
 
@@ -47,7 +47,7 @@ async def get_profile(username: str = Depends(verify_user), session: Session = D
         select(UserAccount).where(UserAccount.username == username, UserAccount.account_server == db_user.prefer_server)
     ).first()
     # we need to update the player rating if the user has not updated for 4 hours
-    asyncio.ensure_future(attempt_update_rating(username))
+    asyncio.ensure_future(update_rating_passive(username))
     if not db_preference:
         db_preference = database.add(session, UserPreference(username=username))
     preferences = UserPreferencePublic.model_validate(db_preference)

@@ -46,7 +46,10 @@ interface ServerMessage {
 
 interface CrawlerResult {
     account_server: number;
-    diff_label: string;
     success: boolean;
     scores_num: number;
+    from_rating: number;
+    to_rating: number;
+    err_msg: string;
+    elapsed_time: number;
 }

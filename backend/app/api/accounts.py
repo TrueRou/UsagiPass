@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from httpx import ConnectError, ReadTimeout
 import jwt
 from typing import Annotated
@@ -8,9 +9,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 
 from app.database import async_httpx_ctx, async_session_ctx, require_session
-from app.logging import Ansi, log
 from app.maimai import crawler
-from app.maimai.crawler import CrawlerResult, DivingCrawler, LxnsCrawler
+from app.maimai.crawler import CrawlerResult
 from app.models.user import AccountServer, User, UserAccount
 from config import jwt_secret
 
@@ -45,23 +45,19 @@ def verify_user(token: Annotated[str, Depends(oauth2_scheme)]) -> str:
         )
 
 
-async def attempt_update_rating(username: str, hard: bool = False):
+async def update_rating_passive(username: str):
     async with async_session_ctx() as session:
         accounts = await session.execute(select(UserAccount).where(UserAccount.username == username))
-        tasks = [
-            (DivingCrawler if account.account_server == AccountServer.DIVING_FISH else LxnsCrawler).update_rating(session, account.account_name)
-            for account in accounts.scalars()
-            if datetime.utcnow() - account.updated_at > timedelta(minutes=30) or hard
-        ]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        if any(result is not None for result in results):
-            log(f"Failed to update rating for user: {username}", Ansi.LRED)
-        await session.commit()
+        async with asyncio.TaskGroup() as tg:
+            for account in accounts.scalars():
+                if datetime.utcnow() - account.updated_at > timedelta(minutes=30):
+                    tg.create_task(crawler.update_rating(account))
 
 
 @router.post("/token/diving")
 async def get_token_diving(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
     account = session.get(UserAccount, (form_data.username, AccountServer.DIVING_FISH))
+    asyncio.ensure_future(update_rating_passive(form_data.username))
 
     if account and account.account_name == form_data.username and account.account_password == form_data.password:
         user = session.get(User, account.username)
@@ -95,7 +91,6 @@ async def get_token_diving(form_data: Annotated[OAuth2PasswordRequestForm, Depen
                 account.nickname = profile["nickname"]
                 account.bind_qq = profile["bind_qq"]
             session.commit()
-            asyncio.ensure_future(attempt_update_rating(form_data.username))
             user = session.get(User, account.username)
             return _grant_user(user)
         else:
@@ -113,6 +108,8 @@ async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends
     account = session.exec(
         select(UserAccount).where(UserAccount.account_password == personal_token, UserAccount.account_server == AccountServer.LXNS)
     ).first()
+
+    asyncio.ensure_future(update_rating_passive(account.username))
 
     if account and account.account_name == form_data.username and account.account_password == form_data.password:
         user = session.get(User, account.username)
@@ -143,7 +140,6 @@ async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends
                 )
                 session.add_all([user, account])
             session.commit()
-            asyncio.ensure_future(attempt_update_rating(account_name))
             user = session.get(User, account.username)
             return _grant_user(user)
         else:
@@ -190,7 +186,7 @@ async def bind_diving(
             )
             session.merge(new_account)
             session.commit()
-            asyncio.ensure_future(attempt_update_rating(username, hard=True))
+            asyncio.ensure_future(update_rating_passive(username))
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -235,7 +231,7 @@ async def bind_lxns(
             )
             session.merge(new_account)
             session.commit()
-            asyncio.ensure_future(attempt_update_rating(username, hard=True))
+            asyncio.ensure_future(update_rating_passive(username))
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -278,9 +274,8 @@ async def update_prober_callback(
             if resp.status_code != 302:
                 raise TimeoutError
             resp = await client.get(resp.next_request.url, headers=headers)
-            result = await crawler.crawl_async(resp.cookies, username, session)
-            asyncio.ensure_future(attempt_update_rating(username, hard=True))
-            return result
+            results = await crawler.crawl_async(resp.cookies, username, session)
+            return results
         except (ConnectError, ReadTimeout):
             raise HTTPException(status_code=503, detail="无法连接到华立服务器", headers={"WWW-Authenticate": "Bearer"})
         except TimeoutError:

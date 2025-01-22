@@ -8,6 +8,7 @@ from app.models.image import ImagePublic
 class AccountServer(IntEnum):
     DIVING_FISH = auto()  # 水鱼查分器
     LXNS = auto()  # 落雪咖啡屋
+    WECHAT = auto()  # 微信小程序
 
 
 class User(SQLModel, table=True):

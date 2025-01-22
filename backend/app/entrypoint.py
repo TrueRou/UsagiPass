@@ -10,7 +10,7 @@ from app import database
 from app import api
 from app.database import async_session_ctx
 from app.logging import log, Ansi
-from app.maimai import music, scores
+from app.maimai import crawler
 
 
 def init_middlewares(asgi_app: FastAPI) -> None:
@@ -30,27 +30,29 @@ def init_middlewares(asgi_app: FastAPI) -> None:
     database.register_middleware(asgi_app)
 
 
-def init_events(asgi_app: FastAPI) -> None:
+async def init_lifespan(asgi_app: FastAPI):
     async def download_music_list() -> None:
-        await asyncio.sleep(1)  # Wait for web server to start
-        log("Started downloading maimai music list.", Ansi.LYELLOW)
         try:
-            scores.music_list = await music.download_music_list()
+            await crawler.maimai.songs(alias_provider=None, curve_provider=None)
             log("Finished downloading maimai music list.", Ansi.LGREEN)
         except (ConnectError, ReadTimeout):
             log("Failed to download maimai music list.", Ansi.LRED)
 
-    @asgi_app.on_event("startup")
-    async def on_startup() -> None:
-        async with async_session_ctx() as session:
-            await session.execute(text("SELECT 1"))  # Test connection
-            database.create_db_and_tables(database.engine)  # TODO: Sql migration
-            asyncio.ensure_future(download_music_list())  # Download music list from diving-fish
-            log("Startup process complete.", Ansi.LGREEN)
+    async def connect_to_database() -> None:
+        try:
+            async with async_session_ctx() as session:
+                await session.execute(text("SELECT 1"))
+                database.create_db_and_tables(database.engine)
+            log("Finished connecting to the database.", Ansi.LGREEN)
+        except (ConnectError, ReadTimeout):
+            log("Failed to connect to the database.", Ansi.LRED)
 
-    @asgi_app.on_event("shutdown")
-    async def on_shutdown() -> None:
-        await database.async_engine.dispose()
+    async with asyncio.TaskGroup() as tg:
+        tg.create_task(connect_to_database())
+        tg.create_task(download_music_list())
+    yield
+    async with asyncio.TaskGroup() as tg:
+        tg.create_task(database.async_engine.dispose())
         database.engine.dispose()
 
 
@@ -60,10 +62,9 @@ def init_routes(asgi_app: FastAPI) -> None:
 
 def init_api() -> FastAPI:
     """Create & initialize our app."""
-    asgi_app = FastAPI()
+    asgi_app = FastAPI(lifespan=init_lifespan)
 
     init_middlewares(asgi_app)
-    init_events(asgi_app)
     init_routes(asgi_app)
 
     return asgi_app

@@ -8,7 +8,7 @@ const userStore = useUserStore();
 const serverStore = useServerStore();
 const route = useRoute();
 const router = useRouter();
-const crawlerResults = ref<CrawlerResult[][]>([]);
+const crawlerResults = ref<CrawlerResult[]>([]);
 
 const progress = ref(0);
 const progressBar = ref<HTMLDivElement | null>(null);
@@ -25,8 +25,7 @@ onMounted(async () => {
         const params = route.fullPath.replace(route.path, '');
         const resp = await userStore.axiosInstance.get("/accounts/update/callback" + params, { timeout: 120000 });
         if (resp.status !== 200) throw new Error("页面等待超时, 但您的分数可能已经上传成功");
-        crawlerResults.value[0] = resp.data.filter((result: CrawlerResult) => result.account_server === 1);
-        crawlerResults.value[1] = resp.data.filter((result: CrawlerResult) => result.account_server === 2);
+        crawlerResults.value = resp.data
         progress.value = 100;
     } catch (error: any) {
         progress.value = 100;
@@ -47,7 +46,7 @@ onMounted(async () => {
                 <h1 class="font-bold text-white">玩家分数上传</h1>
             </div>
             <div class="w-full flex flex-col items-center px-4 py-4">
-                <p class="text-gray-600 mt-2 mb-2">请稍候, 正在获取并上传分数数据<br>(大约需要60 ~ 120秒)...</p>
+                <p class="text-gray-600 mt-2 mb-2">请稍候, 正在获取并上传分数数据<br>(大约需要30 ~ 60秒)</p>
                 <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
                     <div ref="progressBar" class="bg-blue-600 h-2.5 rounded-full smooth pulse"
                         :style="{ 'width': progress + '%' }"></div>
@@ -55,19 +54,35 @@ onMounted(async () => {
             </div>
         </div>
     </template>
-    <template v-for="(results, index) in crawlerResults" v-if="progress >= 100">
+    <template v-for="result in crawlerResults" v-if="progress >= 100">
         <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mb-2">
             <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
-                <h1 class="font-bold text-white">{{ serverStore.serverNames[index + 1] }}上传结果</h1>
+                <h1 v-if="result.account_server == 3" class="font-bold text-white">微信查询结果</h1>
+                <h1 v-else class="font-bold text-white">{{ serverStore.serverNames[result.account_server] }}上传结果</h1>
             </div>
-            <div class="flex items-center w-full mt-2" v-for="result in results">
+            <div class="flex items-center w-full mt-2">
                 <div :class="result.success ? 'bg-green-500' : 'bg-red-500'" class="w-4 h-4 rounded-full ml-2 mr-1" />
-                <div class="flex flex-col p-2">
+                <div v-if="result.account_server == 3" class="flex flex-col p-2">
                     <span>
-                        更新 <b>{{ result.diff_label }}</b> 难度 {{ result.success ? '成功' : '失败' }}
+                        获取 {{ result.scores_num }} 个成绩 {{ result.success ? '成功' : '失败' }}
                     </span>
-                    <span class="text-gray-600" style="font-size: 12px;">
-                        上传了 {{ result.scores_num }} 条数据
+                    <span v-if="result.success" class="text-gray-600" style="font-size: 12px;">
+                        用时: {{ result.elapsed_time.toFixed(2) }} 秒
+                    </span>
+                    <span v-if="!result.success" class="text-gray-600" style="font-size: 12px;">
+                        失败原因: {{ result.err_msg }}
+                    </span>
+                </div>
+                <div v-else class="flex flex-col p-2">
+                    <span>
+                        更新 {{ result.scores_num }} 个成绩 {{ result.success ? '成功' : '失败' }}
+                    </span>
+                    <span v-if="result.success" class="text-gray-600" style="font-size: 12px;">
+                        用时: {{ result.elapsed_time.toFixed(2) }} 秒 <br>
+                        Rating 变化: {{ result.from_rating }} -> {{ result.to_rating }}
+                    </span>
+                    <span v-if="!result.success" class="text-gray-600" style="font-size: 12px;">
+                        失败原因: {{ result.err_msg }}
                     </span>
                 </div>
             </div>

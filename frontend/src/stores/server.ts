@@ -3,7 +3,7 @@ import { defineStore } from "pinia"
 import { ref } from "vue";
 
 export const useServerStore = defineStore('server', () => {
-    const serverNames: Record<number, string> = { 1: "水鱼", 2: "落雪" }
+    const serverNames: Record<number, string> = { 1: "水鱼", 2: "落雪", 3: "微信" }
     const serverMessage = ref<ServerMessage | null>(null)
     const serverKinds = ref<Record<string, Record<string, number[][]>> | null>(null)
 

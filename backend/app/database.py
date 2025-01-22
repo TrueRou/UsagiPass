@@ -48,7 +48,7 @@ async def async_session_ctx():
 
 @contextlib.asynccontextmanager
 async def async_httpx_ctx():
-    async with httpx.AsyncClient(proxies=config.httpx_proxy, timeout=20) as session:
+    async with httpx.AsyncClient(proxy=config.httpx_proxy, timeout=20) as session:
         yield session
 
 
