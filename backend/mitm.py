@@ -4,6 +4,9 @@ import mitmproxy.http
 sysall_hosts = [
     "42.193.74.107",
     "129.28.248.89",
+    "43.137.91.207",
+    "81.71.193.236",
+    "43.145.45.124",
     "wq.sys-all.cn",
     "wq.sys-allnet.cn",
 ]
