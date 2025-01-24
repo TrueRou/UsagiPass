@@ -57,7 +57,9 @@ async def update_rating_passive(username: str):
 @router.post("/token/diving")
 async def get_token_diving(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
     account = session.get(UserAccount, (form_data.username, AccountServer.DIVING_FISH))
-    asyncio.ensure_future(update_rating_passive(form_data.username))
+
+    if account:
+        asyncio.ensure_future(update_rating_passive(account.username))
 
     if account and account.account_name == form_data.username and account.account_password == form_data.password:
         user = session.get(User, account.username)
@@ -109,7 +111,8 @@ async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends
         select(UserAccount).where(UserAccount.account_password == personal_token, UserAccount.account_server == AccountServer.LXNS)
     ).first()
 
-    asyncio.ensure_future(update_rating_passive(account.username))
+    if account:
+        asyncio.ensure_future(update_rating_passive(account.username))
 
     if account and account.account_name == form_data.username and account.account_password == form_data.password:
         user = session.get(User, account.username)

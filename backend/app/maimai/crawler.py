@@ -50,7 +50,7 @@ async def upload_server_retry(account: UserAccount, scores: list[Score]):
         ident = PlayerIdentifier(username=account.account_name, credentials=account.account_password)
         provider = DivingFishProvider(divingfish_developer_token)
     elif account.account_server == AccountServer.LXNS:
-        ident = PlayerIdentifier(friend_code=account.account_name)
+        ident = PlayerIdentifier(credentials=account.account_password)
         provider = LXNSProvider(lxns_developer_token)
     await maimai.updates(ident, scores, provider)
 
