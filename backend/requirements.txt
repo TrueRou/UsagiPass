@@ -28,7 +28,7 @@ itsdangerous==2.2.0
 Jinja2==3.1.4
 kaitaistruct==0.10
 ldap3==2.9.1
-maimai-py==0.7.3
+maimai-py==0.7.6
 maimai_ffi==0.3.1
 MarkupSafe==3.0.1
 mitmproxy==11.0.0
