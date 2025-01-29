@@ -142,6 +142,9 @@ async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends
                     player_rating=response_data["data"]["rating"],
                 )
                 session.add_all([user, account])
+            else:
+                # user might update the personal token, so we need to update the account_password
+                account.account_password = personal_token
             session.commit()
             user = session.get(User, account.username)
             return _grant_user(user)
