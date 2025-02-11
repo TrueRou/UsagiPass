@@ -1,17 +1,18 @@
 import io
-from pathlib import Path
 import uuid
 import PIL.Image
+from pathlib import Path
+from sqlmodel import Session, select
+from fastapi.responses import FileResponse
 from PIL.Image import Image as PILImage, Resampling
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from fastapi.responses import FileResponse
-from sqlmodel import Session, select
 
-from app.database import require_session
-from app.models.image import Image, ImageDetail
-from app.api.accounts import verify_user
-from app.maimai import kinds
 from app import database
+from app.database import require_session
+from app.constants import sega_prefixs, image_kinds
+from app.models.image import Image, ImageDetail
+from app.usecases.authorize import verify_user
+from app.models.user import User
 
 
 router = APIRouter(prefix="/images", tags=["images"])
@@ -33,23 +34,30 @@ def require_image(image_id: uuid.UUID, session: Session = Depends(require_sessio
     return image
 
 
+def _remove_sega_prefix(name: str) -> str:
+    for prefix in sega_prefixs:
+        if name.startswith(prefix):
+            return name[len(prefix) :]
+    return name
+
+
 @router.post("", response_model=ImageDetail, status_code=status.HTTP_201_CREATED)
 async def upload_image(
     name: str,
     kind: str,
-    user: str = Depends(verify_user),
+    user: User = Depends(verify_user),
     file: UploadFile = File(...),
     session: Session = Depends(require_session),
 ):
-    if kind not in kinds.image_kinds.keys():
+    if kind not in image_kinds.keys():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid kind of image")
     image_bytes = await file.read()
     try:
         file_name = str(uuid.uuid4())
         image: PILImage = PIL.Image.open(io.BytesIO(image_bytes)).convert("RGBA")
-        image = image.resize(kinds.image_kinds[kind]["hw"][0], resample=Resampling.BILINEAR)
+        image = image.resize(image_kinds[kind]["hw"][0], resample=Resampling.BILINEAR)
         image.save(images_folder / f"{file_name}.webp", "webp", optimize=True, quality=80)
-        db_image: Image = database.add(session, Image(id=file_name, name=name, kind=kind, uploaded_by=user))
+        db_image: Image = database.add(session, Image(id=file_name, name=name, kind=kind, uploaded_by=user.username))
         return db_image
     except PIL.UnidentifiedImageError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to load image file")
@@ -65,11 +73,11 @@ async def get_image(image: Image = Depends(require_image)):
 
 @router.delete("/{image_id}")
 async def delete_image(
-    user: str = Depends(verify_user),
+    user: User = Depends(verify_user),
     session: Session = Depends(require_session),
     image: Image = Depends(require_image),
 ):
-    if image.uploaded_by != user:
+    if image.uploaded_by != user.username:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this image")
     session.delete(image)
     session.commit()
@@ -81,11 +89,11 @@ async def delete_image(
 @router.patch("/{image_id}")
 async def patch_image(
     name: str,
-    user: str = Depends(verify_user),
+    user: User = Depends(verify_user),
     session: Session = Depends(require_session),
     image: Image = Depends(require_image),
 ):
-    if image.uploaded_by != user:
+    if image.uploaded_by != user.username:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this image")
     image.name = name
     session.commit()
@@ -97,7 +105,7 @@ async def get_images_related(session: Session = Depends(require_session), image:
     # we don't verify the image here, due to related images are usually from SEGA
     if not image.sega_name:
         return []
-    suffix = kinds.remove_sega_prefix(image.sega_name)
+    suffix = _remove_sega_prefix(image.sega_name)
     results = session.exec(select(Image).where(Image.sega_name.endswith(suffix)))
     return results.all()
 

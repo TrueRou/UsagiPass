@@ -7,7 +7,7 @@ import uuid
 import PIL
 import httpx
 from sqlmodel import Session, and_, select
-from PIL import Image as PILImage, ImageChops
+from PIL import Image as PILImage, ImageChops, ImageFile
 
 sys.path.insert(0, os.path.dirname(os.getcwd()))
 os.chdir(os.path.dirname(os.getcwd()))
@@ -16,13 +16,36 @@ from app.api.images import images_folder
 from app.logging import log, Ansi
 from app.database import session_ctx, create_db_and_tables, engine
 from app.models.image import Image
-from app.maimai import kinds
+from app.constants import image_kinds
 
 data_folder = Path.cwd() / ".data"
 import_folder = Path.cwd() / ".data" / "import"
 data_folder.mkdir(exist_ok=True)
 import_folder.mkdir(exist_ok=True)
 mask_base = PILImage.open(io.BytesIO(httpx.get("https://s2.loli.net/2024/11/01/gDCfokPySl32srL.png").content))
+
+
+def _verify_kind(img: ImageFile, kind: str):
+    if kind not in image_kinds:
+        raise ValueError(f"Invalid kind of image.")
+
+    for hw in image_kinds[kind]["hw"]:
+        if img.width == hw[0] and img.height == hw[1]:
+            return
+    raise ValueError(f"Irregular width or height.")
+
+
+def _parse_dictionary(file: Path):
+    result = {}
+    if file.exists():
+        with open(file, "r", encoding="utf-8") as f:
+            for line in f.read().splitlines():
+                file, name = line.split(" ", maxsplit=1)
+                file1 = file.replace("cardChara0", "UI_CardChara_")
+                result[file1] = name
+                file2 = file.replace("cardChara00", "UI_CardChara_")  # SBGA what are you doing?
+                result[file2] = name
+    return result
 
 
 def post_process(kind: str, img: PILImage.Image) -> PILImage.Image:
@@ -45,12 +68,12 @@ def import_images(kind: str, session: Session):
     failed = 0
     overwritten = 0
 
-    if kind not in kinds.image_kinds.keys():
+    if kind not in image_kinds.keys():
         log(f"Invalid kind of image: {kind}", Ansi.LRED)
         return
 
     images_path.mkdir(exist_ok=True)  # create the folder if it doesn't exist
-    dictionary = kinds.parse_dictionary(list_path)  # load the dictionary
+    dictionary = _parse_dictionary(list_path)  # load the dictionary
 
     for file in images_path.iterdir():
         if file.is_file() and file.suffix in [".png", ".jpg", ".jpeg", ".webp"]:
@@ -66,7 +89,7 @@ def import_images(kind: str, session: Session):
                     overwritten += 1
                 idx = str(uuid.uuid4())
                 img = PILImage.open(file)
-                kinds.verify_kind(img, kind)  # check if the image is of the correct kind
+                _verify_kind(img, kind)  # check if the image is of the correct kind
                 img = post_process(kind, img)  # post-process the image for the specific kind to perform effects
                 img.save(images_folder / f"{idx}.webp", "webp", optimize=True, quality=80)
                 session.add(Image(id=idx, name=matched_name, sega_name=file.stem, kind=kind))

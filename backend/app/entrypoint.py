@@ -10,7 +10,7 @@ from app import database
 from app import api
 from app.database import async_session_ctx
 from app.logging import log, Ansi
-from app.maimai import crawler
+from app.usecases import crawler
 
 
 def init_middlewares(asgi_app: FastAPI) -> None:

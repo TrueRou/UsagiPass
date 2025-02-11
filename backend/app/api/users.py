@@ -1,13 +1,14 @@
 import asyncio
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import database
+from app.usecases import maimai
+from app.usecases.authorize import verify_user
 from app.database import require_session
-from app.models.user import User, UserAccount, UserAccountPublic, UserPreference, UserPreferencePublic, UserPreferenceUpdate, UserProfile, UserUpdate
 from app.models.image import Image, ImagePublic
-from app.api.accounts import update_rating_passive, verify_user
+from app.models.user import User, UserAccount, UserAccountPublic, UserPreference, UserPreferencePublic, UserPreferenceUpdate, UserProfile, UserUpdate
 from config import default_character, default_background, default_frame, default_passname
 
 
@@ -31,31 +32,29 @@ def apply_default(preferences: UserPreferencePublic, db_preferences: UserPrefere
 
 
 @router.patch("")
-async def update_user(user_update: UserUpdate, username: str = Depends(verify_user), session: Session = Depends(require_session)):
-    db_user = session.get(User, username)
-    db_user.updated_at = datetime.utcnow()
-    database.partial_update_model(session, db_user, user_update)
+async def update_user(user_update: UserUpdate, user: User = Depends(verify_user), session: Session = Depends(require_session)):
+    user.updated_at = datetime.utcnow()
+    database.partial_update_model(session, user, user_update)
     return {"message": "User has been updated"}
 
 
 @router.get("/profile", response_model=UserProfile)
-async def get_profile(username: str = Depends(verify_user), session: Session = Depends(require_session)):
-    db_user = session.get(User, username)
-    db_accounts = session.exec(select(UserAccount).where(UserAccount.username == username)).all()
-    db_preference = session.get(UserPreference, username)
+async def get_profile(user: User = Depends(verify_user), session: Session = Depends(require_session)):
+    db_accounts = session.exec(select(UserAccount).where(UserAccount.username == user.username)).all()
+    db_preference = session.get(UserPreference, user.username)
     prefer_account = session.exec(
-        select(UserAccount).where(UserAccount.username == username, UserAccount.account_server == db_user.prefer_server)
+        select(UserAccount).where(UserAccount.username == user.username, UserAccount.account_server == user.prefer_server)
     ).first()
     # we need to update the player rating if the user has not updated for 4 hours
-    asyncio.ensure_future(update_rating_passive(username))
+    asyncio.ensure_future(maimai.update_rating_passive(user.username))
     if not db_preference:
-        db_preference = database.add(session, UserPreference(username=username))
+        db_preference = database.add(session, UserPreference(username=user.username))
     preferences = UserPreferencePublic.model_validate(db_preference)
     accounts = {account.account_server: UserAccountPublic.model_validate(account) for account in db_accounts}
     apply_default(preferences, db_preference, session)  # apply the default images if the user has not set up
     user_profile = UserProfile(
-        username=username,
-        prefer_server=db_user.prefer_server,
+        username=user.username,
+        prefer_server=user.prefer_server,
         nickname=prefer_account.nickname,
         player_rating=prefer_account.player_rating,
         preferences=preferences,
@@ -67,14 +66,13 @@ async def get_profile(username: str = Depends(verify_user), session: Session = D
 @router.patch("/preference")
 async def update_profile(
     preference: UserPreferencePublic,
-    username: str = Depends(verify_user),
+    user: User = Depends(verify_user),
     session: Session = Depends(require_session),
 ):
-    db_preference = session.get(UserPreference, username)
-    db_user = session.get(User, username)
+    db_preference = session.get(UserPreference, user.username)
     if not db_preference:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User has not set up for his preference")
-    if db_preference.username != username:
+    if db_preference.username != user.username:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this preference")
     update_preference = UserPreferenceUpdate(
         **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
@@ -83,7 +81,7 @@ async def update_profile(
         frame_id=preference.frame.id if preference.frame else None,
         passname_id=preference.passname.id if preference.passname else None,
     )
-    db_user.updated_at = datetime.utcnow()
+    user.updated_at = datetime.utcnow()
     # there's no problem with the image ids, we can update the preference
     database.partial_update_model(session, db_preference, update_preference)
     return {"message": "Preference has been updated"}

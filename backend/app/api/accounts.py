@@ -1,253 +1,64 @@
 import asyncio
-import logging
-from httpx import ConnectError, ReadTimeout
-import jwt
 from typing import Annotated
-from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlmodel import Session, select
+from sqlmodel import Session
+from httpx import ConnectError, ReadTimeout
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException
 
-from app.database import async_httpx_ctx, async_session_ctx, require_session
-from app.maimai import crawler
-from app.maimai.crawler import CrawlerResult
-from app.models.user import AccountServer, User, UserAccount
-from config import jwt_secret
+from app.usecases import crawler
+from app.usecases.crawler import CrawlerResult
+from app.database import async_httpx_ctx, require_session
+from app.models.user import AccountServer, User
+from app.usecases import accounts, authorize, maimai
+from app.usecases.authorize import verify_user
 
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="accounts/token/diving")
-optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="accounts/token/diving", auto_error=False)
 
 
-def _grant_user(user: User):
-    token = jwt.encode({"username": user.username}, jwt_secret, algorithm="HS256")
-    return {"access_token": token, "token_type": "bearer"}
-
-
-def verify_user_optional(token: Annotated[str | None, Depends(optional_oauth2_scheme)]) -> str | None:
-    try:
-        payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
-        return payload["username"]
-    except jwt.InvalidTokenError:
-        return None
-
-
-def verify_user(token: Annotated[str, Depends(oauth2_scheme)]) -> str:
-    try:
-        payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
-        return payload["username"]
-    except jwt.InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-
-async def update_rating_passive(username: str):
-    async with async_session_ctx() as session:
-        accounts = await session.execute(select(UserAccount).where(UserAccount.username == username))
-        async with asyncio.TaskGroup() as tg:
-            for account in accounts.scalars():
-                if datetime.utcnow() - account.updated_at > timedelta(minutes=30):
-                    tg.create_task(crawler.update_rating(account))
-
-
-@router.post("/token/diving")
-async def get_token_diving(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
-    account = session.get(UserAccount, (form_data.username, AccountServer.DIVING_FISH))
-
-    if account:
-        asyncio.ensure_future(update_rating_passive(account.username))
-
-    if account and account.account_name == form_data.username and account.account_password == form_data.password:
-        user = session.get(User, account.username)
-        return _grant_user(user)
-
-    async with async_httpx_ctx() as client:
-        try:
-            json = {"username": form_data.username, "password": form_data.password}
-            response = await client.post("https://www.diving-fish.com/api/maimaidxprober/login", json=json)
-        except (ConnectError, ReadTimeout):
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="无法连接到水鱼查分器服务",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        if "errcode" not in response.json():
-            profile = (await client.get("https://www.diving-fish.com/api/maimaidxprober/player/profile", cookies=response.cookies)).json()
-            if not account:
-                user = User(username=form_data.username.lower(), prefer_server=AccountServer.DIVING_FISH)
-                account = UserAccount(
-                    account_name=form_data.username,
-                    account_server=AccountServer.DIVING_FISH,
-                    account_password=form_data.password,
-                    username=user.username,
-                    nickname=profile["nickname"],
-                    bind_qq=profile["bind_qq"],
-                )
-                session.add_all([user, account])
-            else:
-                account.account_password = form_data.password
-                account.nickname = profile["nickname"]
-                account.bind_qq = profile["bind_qq"]
-            session.commit()
-            user = session.get(User, account.username)
-            return _grant_user(user)
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="水鱼查分器用户名或密码错误",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+@router.post("/token/divingfish")
+async def get_token_divingfish(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
+    account_name = form_data.username
+    if await accounts.auth_divingfish(account_name, form_data.password):
+        user = await accounts.merge_user(session, account_name, AccountServer.DIVING_FISH)
+        await accounts.merge_divingfish(session, user, account_name, form_data.password)
+        session.commit()
+        return authorize.grant_user(user)
 
 
 @router.post("/token/lxns")
 async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
     personal_token = form_data.password
-
-    account = session.exec(
-        select(UserAccount).where(UserAccount.account_password == personal_token, UserAccount.account_server == AccountServer.LXNS)
-    ).first()
-
-    if account:
-        asyncio.ensure_future(update_rating_passive(account.username))
-
-    if account and account.account_name == form_data.username and account.account_password == form_data.password:
-        user = session.get(User, account.username)
-        return _grant_user(user)
-
-    async with async_httpx_ctx() as client:
-        try:
-            headers = {"X-User-Token": personal_token.encode()}
-            response_data = (await client.get("https://maimai.lxns.net/api/v0/user/maimai/player", headers=headers)).json()
-        except (ConnectError, ReadTimeout):
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="无法连接到落雪服务",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        if response_data["success"]:
-            account_name = str(response_data["data"]["friend_code"])
-            account = session.get(UserAccount, (account_name, AccountServer.LXNS))
-            if not account:
-                user = User(username=account_name, prefer_server=AccountServer.LXNS)
-                account = UserAccount(
-                    account_name=account_name,
-                    account_server=AccountServer.LXNS,
-                    account_password=personal_token,
-                    username=user.username,
-                    nickname=response_data["data"]["name"],
-                    player_rating=response_data["data"]["rating"],
-                )
-                session.add_all([user, account])
-            else:
-                # user might update the personal token, so we need to update the account_password
-                account.account_password = personal_token
-            session.commit()
-            user = session.get(User, account.username)
-            return _grant_user(user)
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="落雪个人 API 密钥不存在或已失效",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+    if profile := await accounts.auth_lxns(personal_token):
+        account_name = str(profile["friend_code"])
+        user = await accounts.merge_user(session, account_name, AccountServer.LXNS)
+        await accounts.merge_lxns(session, user, personal_token)
+        session.commit()
+        return authorize.grant_user(user)
 
 
 @router.post("/bind/diving")
 async def bind_diving(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session), username: str = Depends(verify_user)
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session), user: User = Depends(verify_user)
 ):
-    account = session.get(UserAccount, (form_data.username, AccountServer.DIVING_FISH))
-    if account and account.username == username:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="无法重复绑定自己的账号", headers={"WWW-Authenticate": "Bearer"})
-    async with async_httpx_ctx() as client:
-        try:
-            json = {"username": form_data.username, "password": form_data.password}
-            response = await client.post("https://www.diving-fish.com/api/maimaidxprober/login", json=json)
-        except (ConnectError, ReadTimeout):
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="无法连接到水鱼查分器服务",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        if "errcode" not in response.json():
-            profile = (await client.get("https://www.diving-fish.com/api/maimaidxprober/player/profile", cookies=response.cookies)).json()
-            # verify if the account has been binded, if so, dispose the old account and user.
-            if account:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="账号已被其他用户绑定, 请联系管理员",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-            new_account = UserAccount(
-                account_name=form_data.username,
-                account_server=AccountServer.DIVING_FISH,
-                account_password=form_data.password,
-                username=username,
-                nickname=profile["nickname"],
-                bind_qq=profile["bind_qq"],
-            )
-            session.merge(new_account)
-            session.commit()
-            asyncio.ensure_future(update_rating_passive(username))
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="水鱼查分器用户名或密码错误",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+    await accounts.merge_divingfish(session, user, form_data.username, form_data.password)
+    asyncio.ensure_future(maimai.update_rating_passive(user.username))
+    session.commit()
 
 
 @router.post("/bind/lxns")
 async def bind_lxns(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session), username: str = Depends(verify_user)
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session), user: User = Depends(verify_user)
 ):
     personal_token = form_data.password
-    async with async_httpx_ctx() as client:
-        try:
-            headers = {"X-User-Token": personal_token.encode()}
-            response_data = (await client.get("https://maimai.lxns.net/api/v0/user/maimai/player", headers=headers)).json()
-        except (ConnectError, ReadTimeout):
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="无法连接到落雪服务",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        if response_data["success"]:
-            account_name = str(response_data["data"]["friend_code"])
-            account = session.get(UserAccount, (account_name, AccountServer.LXNS))
-            if account and account.username == username:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="无法重复绑定自己的账号", headers={"WWW-Authenticate": "Bearer"})
-            if account:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="账号已被其他用户绑定, 请联系管理员",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-            new_account = UserAccount(
-                account_name=account_name,
-                account_server=AccountServer.LXNS,
-                account_password=personal_token,
-                username=username,
-                nickname=response_data["data"]["name"],
-                player_rating=response_data["data"]["rating"],
-            )
-            session.merge(new_account)
-            session.commit()
-            asyncio.ensure_future(update_rating_passive(username))
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="落雪个人 API 密钥不存在或已失效",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+    await accounts.merge_lxns(session, user, personal_token)
+    asyncio.ensure_future(maimai.update_rating_passive(user.username))
+    session.commit()
 
 
 @router.post("/update/oauth")
 async def update_prober_oauth():
+
     async with async_httpx_ctx() as client:
         try:
             resp = await client.get("https://tgk-wcaime.wahlap.com/wc_auth/oauth/authorize/maimai-dx")
@@ -265,7 +76,7 @@ async def update_prober_callback(
     t: str,
     code: str,
     state: str,
-    username: str = Depends(verify_user),
+    user: User = Depends(verify_user),
     session: Session = Depends(require_session),
 ):
     params = {"r": r, "t": t, "code": code, "state": state}
@@ -280,7 +91,7 @@ async def update_prober_callback(
             if resp.status_code != 302:
                 raise TimeoutError
             resp = await client.get(resp.next_request.url, headers=headers)
-            results = await crawler.crawl_async(resp.cookies, username, session)
+            results = await crawler.crawl_async(resp.cookies, user, session)
             return results
         except (ConnectError, ReadTimeout):
             raise HTTPException(status_code=503, detail="无法连接到华立服务器", headers={"WWW-Authenticate": "Bearer"})

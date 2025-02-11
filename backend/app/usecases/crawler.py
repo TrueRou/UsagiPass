@@ -1,17 +1,17 @@
 import asyncio
-from datetime import datetime
 import time
 import traceback
-
 from httpx import Cookies
-from maimai_py import MaimaiClient, PlayerIdentifier, WechatProvider, DivingFishProvider, LXNSProvider
-from maimai_py.models import Score, Player, MaimaiScores
+from datetime import datetime
 from pydantic import BaseModel
 from sqlmodel import Session, select
 from tenacity import retry, stop_after_attempt
-from app.models.user import AccountServer, UserAccount
+from maimai_py.models import Score, Player, MaimaiScores
+from maimai_py import MaimaiClient, PlayerIdentifier, WechatProvider, DivingFishProvider, LXNSProvider
+
 from app.logging import Ansi, log
 from app.database import session_ctx
+from app.models.user import AccountServer, User, UserAccount
 from config import lxns_developer_token, divingfish_developer_token
 
 maimai = MaimaiClient()
@@ -106,10 +106,10 @@ async def upload_server(account: UserAccount, scores: list[Score]) -> CrawlerRes
         return CrawlerResult(account_server=account.account_server, success=False, scores_num=len(scores), err_msg=str(e))
 
 
-async def crawl_async(cookies: Cookies, username: str, session: Session) -> list[CrawlerResult]:
-    accounts = session.exec(select(UserAccount).where(UserAccount.username == username)).all()
+async def crawl_async(cookies: Cookies, user: User, session: Session) -> list[CrawlerResult]:
+    accounts = session.exec(select(UserAccount).where(UserAccount.username == user.username)).all()
     begin = time.time()
-    scores, result = await fetch_wechat(username, cookies)
+    scores, result = await fetch_wechat(user.username, cookies)
     result.elapsed_time = time.time() - begin
     if result.success:
         uploads = await asyncio.gather(*[upload_server(account, scores) for account in accounts])
