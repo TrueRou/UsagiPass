@@ -88,10 +88,9 @@ async def update_rating(account: UserAccount, result: CrawlerResult = CrawlerRes
             result.to_rating = result.from_rating
             log(f"Failed to fetch rating for {account.username}: {e}", Ansi.RED)
             log(traceback.format_exc(), Ansi.RED)
-        if result.to_rating > result.from_rating:
-            account.player_rating = result.to_rating
-            account.updated_at = datetime.utcnow()
-            session.commit()
+        account.player_rating = result.to_rating
+        account.updated_at = datetime.utcnow()
+        session.commit()
     return result
 
 
