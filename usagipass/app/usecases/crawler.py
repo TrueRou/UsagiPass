@@ -9,10 +9,10 @@ from tenacity import retry, stop_after_attempt
 from maimai_py.models import Score, Player, MaimaiScores
 from maimai_py import MaimaiClient, PlayerIdentifier, WechatProvider, DivingFishProvider, LXNSProvider
 
-from app.logging import Ansi, log
-from app.database import session_ctx
-from app.models.user import AccountServer, User, UserAccount
-from config import lxns_developer_token, divingfish_developer_token
+from usagipass.app.logging import Ansi, log
+from usagipass.app.database import session_ctx
+from usagipass.app.models.user import AccountServer, User, UserAccount
+from usagipass.app.settings import lxns_developer_token, divingfish_developer_token
 
 maimai = MaimaiClient()
 

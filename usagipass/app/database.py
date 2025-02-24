@@ -1,23 +1,34 @@
 import contextlib
+import httpx
 from typing import TypeVar
 from fastapi import Request
-import httpx
+from sqlalchemy import text
+from alembic import command
+from alembic.config import Config as AlembicConfig
+from sqlalchemy.exc import OperationalError
 from sqlmodel import SQLModel, create_engine, Session
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
-import config
+from usagipass.app import settings
+from usagipass.app.logging import log, Ansi
 
 
-engine = create_engine(config.database_url)
-async_engine = create_async_engine(config.database_url.replace("sqlite://", "sqlite+aiosqlite://").replace("mysql+pymysql://", "mysql+aiomysql://"))
+engine = create_engine(settings.mysql_url)
+async_engine = create_async_engine(settings.mysql_url.replace("sqlite://", "sqlite+aiosqlite://").replace("mysql+pymysql://", "mysql+aiomysql://"))
 
 V = TypeVar("V")
 
 
-def create_db_and_tables(engine):
-    import app.models  # make sure all models are imported (keep its record in metadata)
-
-    app.models.SQLModel.metadata.create_all(engine)
+def init_db():
+    try:
+        with session_ctx() as session:
+            session.exec(text("SELECT 1"))
+    except OperationalError:
+        log("Failed to connect to the database.", Ansi.RED)
+    try:
+        command.upgrade(AlembicConfig(config_args={"script_location": "alembic"}), "head")
+    except Exception as e:
+        log(f"Failed to run database migration: {e}", Ansi.RED)
 
 
 # https://stackoverflow.com/questions/75487025/how-to-avoid-creating-multiple-sessions-when-using-fastapi-dependencies-with-sec
@@ -48,15 +59,14 @@ async def async_session_ctx():
 
 @contextlib.asynccontextmanager
 async def async_httpx_ctx():
-    async with httpx.AsyncClient(proxy=config.httpx_proxy, timeout=20) as session:
+    async with httpx.AsyncClient(proxy=settings.httpx_proxy, timeout=20) as session:
         yield session
 
 
-def add(session: Session, obj: V) -> V:
-    session.add(obj)
+def add_model(session: Session, *models):
+    [session.add(model) for model in models if model]
     session.commit()
-    session.refresh(obj)
-    return obj
+    [session.refresh(model) for model in models if model]
 
 
 def partial_update_model(session: Session, item: SQLModel, updates: SQLModel):

@@ -4,12 +4,21 @@ from sqlmodel import Session, select
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import database
-from app.usecases import maimai
-from app.usecases.authorize import verify_user
-from app.database import require_session
-from app.models.image import Image, ImagePublic
-from app.models.user import User, UserAccount, UserAccountPublic, UserPreference, UserPreferencePublic, UserPreferenceUpdate, UserProfile, UserUpdate
-from config import default_character, default_background, default_frame, default_passname
+from usagipass.app.usecases import maimai
+from usagipass.app.usecases.authorize import verify_user
+from usagipass.app.database import require_session
+from usagipass.app.models.image import Image, ImagePublic
+from usagipass.app.models.user import (
+    User,
+    UserAccount,
+    UserAccountPublic,
+    UserPreference,
+    UserPreferencePublic,
+    UserPreferenceUpdate,
+    UserProfile,
+    UserUpdate,
+)
+from usagipass.app.settings import default_character, default_background, default_frame, default_passname
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -48,7 +57,7 @@ async def get_profile(user: User = Depends(verify_user), session: Session = Depe
     # we need to update the player rating if the user has not updated for 4 hours
     asyncio.ensure_future(maimai.update_rating_passive(user.username))
     if not db_preference:
-        db_preference = database.add(session, UserPreference(username=user.username))
+        db_preference = database.add_model(session, UserPreference(username=user.username))
     preferences = UserPreferencePublic.model_validate(db_preference)
     accounts = {account.account_server: UserAccountPublic.model_validate(account) for account in db_accounts}
     apply_default(preferences, db_preference, session)  # apply the default images if the user has not set up

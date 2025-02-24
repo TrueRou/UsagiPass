@@ -5,12 +5,12 @@ from httpx import ConnectError, ReadTimeout
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.usecases import crawler
-from app.usecases.crawler import CrawlerResult
-from app.database import async_httpx_ctx, require_session
-from app.models.user import AccountServer, User
-from app.usecases import accounts, authorize, maimai
-from app.usecases.authorize import verify_user
+from usagipass.app.usecases import crawler
+from usagipass.app.usecases.crawler import CrawlerResult
+from usagipass.app.database import async_httpx_ctx, require_session
+from usagipass.app.models.user import AccountServer, User
+from usagipass.app.usecases import accounts, authorize, maimai
+from usagipass.app.usecases.authorize import verify_user
 
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
@@ -58,7 +58,6 @@ async def bind_lxns(
 
 @router.post("/update/oauth")
 async def update_prober_oauth():
-
     async with async_httpx_ctx() as client:
         try:
             resp = await client.get("https://tgk-wcaime.wahlap.com/wc_auth/oauth/authorize/maimai-dx")

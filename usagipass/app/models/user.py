@@ -2,7 +2,7 @@ import datetime
 from enum import IntEnum, auto
 from sqlmodel import Field, SQLModel
 
-from app.models.image import ImagePublic
+from usagipass.app.models.image import ImagePublic
 
 
 class AccountServer(IntEnum):

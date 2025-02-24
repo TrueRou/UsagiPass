@@ -5,9 +5,9 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import Session
 
 
-from app.models.user import User
-from app.database import require_session
-from config import jwt_secret
+from usagipass.app.models.user import User
+from usagipass.app.database import require_session
+from usagipass.app.settings import jwt_secret
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="accounts/token/diving")

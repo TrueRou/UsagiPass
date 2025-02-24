@@ -2,8 +2,8 @@ from httpx import ConnectError, ReadTimeout
 from fastapi import HTTPException, status
 from sqlmodel import Session
 
-from app.database import async_httpx_ctx
-from app.models.user import AccountServer, User, UserAccount
+from usagipass.app.database import async_httpx_ctx
+from usagipass.app.models.user import AccountServer, User, UserAccount
 
 
 async def auth_divingfish(account_name: str, account_password: str) -> dict:

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api import users, images, servers, accounts
+from usagipass.app.api import users, images, servers, accounts
 
 router = APIRouter()
 router.include_router(users.router)

@@ -1,22 +1,21 @@
 import io
 import os
-from pathlib import Path
 import sys
 import uuid
-
 import PIL
 import httpx
+from pathlib import Path
 from sqlmodel import Session, and_, select
 from PIL import Image as PILImage, ImageChops, ImageFile
 
 sys.path.insert(0, os.path.dirname(os.getcwd()))
 os.chdir(os.path.dirname(os.getcwd()))
 
-from app.api.images import images_folder
-from app.logging import log, Ansi
-from app.database import session_ctx, create_db_and_tables, engine
-from app.models.image import Image
-from app.constants import image_kinds
+from usagipass.app.api.images import images_folder
+from usagipass.app.logging import log, Ansi
+from usagipass.app.database import session_ctx, init_db
+from usagipass.app.models.image import Image
+from usagipass.app.constants import image_kinds
 
 data_folder = Path.cwd() / ".data"
 import_folder = Path.cwd() / ".data" / "import"
@@ -104,7 +103,7 @@ def import_images(kind: str, session: Session):
 
 
 if __name__ == "__main__":
-    create_db_and_tables(engine)  # ensure the database is created
+    init_db()  # ensure the database is created
     with session_ctx() as session:
         import_images("background", session)
         import_images("frame", session)

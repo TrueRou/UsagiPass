@@ -7,12 +7,11 @@ from fastapi.responses import FileResponse
 from PIL.Image import Image as PILImage, Resampling
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
-from app import database
-from app.database import require_session
-from app.constants import sega_prefixs, image_kinds
-from app.models.image import Image, ImageDetail
-from app.usecases.authorize import verify_user
-from app.models.user import User
+from usagipass.app.database import require_session, add_model
+from usagipass.app.constants import sega_prefixs, image_kinds
+from usagipass.app.models.image import Image, ImageDetail
+from usagipass.app.usecases.authorize import verify_user
+from usagipass.app.models.user import User
 
 
 router = APIRouter(prefix="/images", tags=["images"])
@@ -57,7 +56,7 @@ async def upload_image(
         image: PILImage = PIL.Image.open(io.BytesIO(image_bytes)).convert("RGBA")
         image = image.resize(image_kinds[kind]["hw"][0], resample=Resampling.BILINEAR)
         image.save(images_folder / f"{file_name}.webp", "webp", optimize=True, quality=80)
-        db_image: Image = database.add(session, Image(id=file_name, name=name, kind=kind, uploaded_by=user.username))
+        db_image: Image = add_model(session, Image(id=file_name, name=name, kind=kind, uploaded_by=user.username))
         return db_image
     except PIL.UnidentifiedImageError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to load image file")

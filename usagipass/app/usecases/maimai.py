@@ -1,9 +1,10 @@
 import asyncio
 from datetime import datetime, timedelta
 from sqlmodel import select
-from app.database import async_session_ctx
-from app.models.user import UserAccount
-from app.usecases import crawler
+
+from usagipass.app.database import async_session_ctx
+from usagipass.app.models.user import UserAccount
+from usagipass.app.usecases import crawler
 
 
 async def update_rating_passive(username: str):
