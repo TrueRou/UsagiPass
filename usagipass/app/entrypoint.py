@@ -1,12 +1,38 @@
 from __future__ import annotations
 
+import asyncio
 from contextlib import asynccontextmanager
+import logging
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
+from mitmproxy.master import Master
+from mitmproxy.options import Options
+from mitmproxy.addons import default_addons
 
-from usagipass.app import database
+from usagipass.app import database, settings
 from usagipass.app.logging import log, Ansi
 from usagipass.app.usecases import crawler
+from usagipass.app.usecases.addons import WechatWahlapAddon
+
+
+class MitmMaster(Master):
+    def _asyncio_exception_handler(self, loop, context):
+        exc: Exception = context["exception"]
+        logging.exception(exc)
+        return super()._asyncio_exception_handler(loop, context)
+
+
+def init_mitmproxy():
+    master = MitmMaster(Options())
+    master.addons.add(*default_addons())
+    master.addons.add(WechatWahlapAddon())
+    master.options.update(
+        listen_host=settings.mitm_host,
+        listen_port=settings.mitm_port,
+        block_global=False,
+        connection_strategy="lazy",
+    )
+    asyncio.create_task(master.run())
 
 
 def init_middlewares(asgi_app: FastAPI) -> None:
@@ -29,6 +55,7 @@ def init_middlewares(asgi_app: FastAPI) -> None:
 @asynccontextmanager
 async def init_lifespan(asgi_app: FastAPI):
     database.init_db()
+    init_mitmproxy()
     await crawler.maimai.songs(alias_provider=None, curve_provider=None)
     log("Startup process complete.", Ansi.LGREEN)
     yield  # Above: Startup process Below: Shutdown process

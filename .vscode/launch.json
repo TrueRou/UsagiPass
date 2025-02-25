@@ -4,8 +4,8 @@
             "name": "Run Backend",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/backend/main.py",
-            "cwd": "${workspaceFolder}/backend",
+            "program": "${workspaceFolder}/usagipass/main.py",
+            "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {
