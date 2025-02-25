@@ -1,8 +1,16 @@
-import datetime
+from datetime import datetime
 from enum import IntEnum, auto
 from sqlmodel import Field, SQLModel
 
-from usagipass.app.models.image import ImagePublic
+image_kinds = {
+    "background": {"hw": [(768, 1052)]},
+    "frame": {"hw": [(768, 1052)]},
+    "character": {"hw": [(768, 1052), (1024, 1408)]},
+    "mask": {"hw": [(768, 1052), (1024, 1408)]},
+    "passname": {"hw": [(338, 112), (363, 110), (374, 105), (415, 115)]},
+}
+
+sega_prefixs = ["UI_CardChara_", "UI_CardBase_", "UI_CMA_", "UI_CardCharaMask_"]
 
 
 class AccountServer(IntEnum):
@@ -11,13 +19,37 @@ class AccountServer(IntEnum):
     WECHAT = auto()  # 微信小程序
 
 
+class Image(SQLModel, table=True):
+    __tablename__ = "images"
+
+    id: str = Field(primary_key=True)
+    name: str
+    kind: str
+    sega_name: str | None = Field(default=None, index=True)
+    uploaded_by: str | None = Field(default=None)
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ImageDetail(SQLModel):
+    id: str
+    name: str
+    kind: str
+    uploaded_by: str | None
+
+
+class ImagePublic(SQLModel):
+    id: str
+    name: str
+    uploaded_by: str | None
+
+
 class User(SQLModel, table=True):
     __tablename__ = "users"
 
     username: str = Field(primary_key=True)
     prefer_server: AccountServer
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
-    updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class UserUpdate(SQLModel):
@@ -34,8 +66,8 @@ class UserAccount(SQLModel, table=True):
     bind_qq: str = Field(default="")
     player_rating: int = Field(default=10000)
     username: str = Field(index=True)
-    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
-    updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class UserPreferenceBase(SQLModel):
@@ -86,3 +118,9 @@ class UserProfile(SQLModel):
     player_rating: int
     preferences: UserPreferencePublic
     accounts: dict[int, UserAccountPublic]
+
+
+class ServerMessage(SQLModel):
+    maimai_version: str
+    server_motd: str
+    author_motd: str

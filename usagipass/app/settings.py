@@ -16,8 +16,8 @@ httpx_proxy = os.environ.get("HTTPX_PROXY", None) or None
 arcade_proxy = os.environ.get("ARCADE_PROXY", None) or None
 
 # provider settings
-lxns_developer_token = os.environ.get("LXNS_DEVELOPER_TOKEN", None)
-divingfish_developer_token = os.environ.get("DIVINGFISH_DEVELOPER_TOKEN", None)
+lxns_developer_token = os.environ.get("LXNS_DEVELOPER_TOKEN", None) or None
+divingfish_developer_token = os.environ.get("DIVINGFISH_DEVELOPER_TOKEN", None) or None
 
 default_character = os.environ.get("DEFAULT_CHARACTER", "default")
 default_background = os.environ.get("DEFAULT_BACKGROUND", "default")

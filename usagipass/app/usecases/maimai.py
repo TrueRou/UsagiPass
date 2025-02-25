@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from sqlmodel import select
 
 from usagipass.app.database import async_session_ctx
-from usagipass.app.models.user import UserAccount
+from usagipass.app.models import UserAccount
 from usagipass.app.usecases import crawler
 
 

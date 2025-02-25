@@ -11,11 +11,10 @@ from PIL import Image as PILImage, ImageChops, ImageFile
 sys.path.insert(0, os.path.dirname(os.getcwd()))
 os.chdir(os.path.dirname(os.getcwd()))
 
-from usagipass.app.api.images import images_folder
 from usagipass.app.logging import log, Ansi
+from usagipass.app.api.images import images_folder
 from usagipass.app.database import session_ctx, init_db
-from usagipass.app.models.image import Image
-from usagipass.app.constants import image_kinds
+from usagipass.app.models import Image, image_kinds
 
 data_folder = Path.cwd() / ".data"
 import_folder = Path.cwd() / ".data" / "import"

@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, or_, select
 
-from usagipass.app.models.server import ServerMessage
+from usagipass.app.models import ServerMessage, Image, ImageDetail, image_kinds
 from usagipass.app.database import require_session
-from usagipass.app.constants import image_kinds
-from usagipass.app.models.image import Image, ImageDetail
 from usagipass.app.usecases import authorize
 from usagipass.app.settings import maimai_version, server_motd, author_motd
 

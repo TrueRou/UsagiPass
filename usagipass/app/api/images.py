@@ -8,10 +8,8 @@ from PIL.Image import Image as PILImage, Resampling
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
 from usagipass.app.database import require_session, add_model
-from usagipass.app.constants import sega_prefixs, image_kinds
-from usagipass.app.models.image import Image, ImageDetail
+from usagipass.app.models import sega_prefixs, image_kinds, Image, ImageDetail, User
 from usagipass.app.usecases.authorize import verify_user
-from usagipass.app.models.user import User
 
 
 router = APIRouter(prefix="/images", tags=["images"])

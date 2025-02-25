@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from usagipass.app.usecases import crawler
 from usagipass.app.usecases.crawler import CrawlerResult
 from usagipass.app.database import async_httpx_ctx, require_session
-from usagipass.app.models.user import AccountServer, User
+from usagipass.app.models import AccountServer, User
 from usagipass.app.usecases import accounts, authorize, maimai
 from usagipass.app.usecases.authorize import verify_user
 

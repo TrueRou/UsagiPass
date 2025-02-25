@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import Session
 
 
-from usagipass.app.models.user import User
+from usagipass.app.models import User
 from usagipass.app.database import require_session
 from usagipass.app.settings import jwt_secret
 

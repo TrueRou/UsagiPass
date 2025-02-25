@@ -11,7 +11,7 @@ from maimai_py import MaimaiClient, PlayerIdentifier, WechatProvider, DivingFish
 
 from usagipass.app.logging import Ansi, log
 from usagipass.app.database import session_ctx
-from usagipass.app.models.user import AccountServer, User, UserAccount
+from usagipass.app.models import AccountServer, User, UserAccount
 from usagipass.app.settings import lxns_developer_token, divingfish_developer_token
 
 maimai = MaimaiClient()

@@ -3,21 +3,10 @@ from datetime import datetime
 from sqlmodel import Session, select
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app import database
+from usagipass.app.models import *
 from usagipass.app.usecases import maimai
 from usagipass.app.usecases.authorize import verify_user
-from usagipass.app.database import require_session
-from usagipass.app.models.image import Image, ImagePublic
-from usagipass.app.models.user import (
-    User,
-    UserAccount,
-    UserAccountPublic,
-    UserPreference,
-    UserPreferencePublic,
-    UserPreferenceUpdate,
-    UserProfile,
-    UserUpdate,
-)
+from usagipass.app.database import require_session, partial_update_model, add_model
 from usagipass.app.settings import default_character, default_background, default_frame, default_passname
 
 
@@ -43,7 +32,7 @@ def apply_default(preferences: UserPreferencePublic, db_preferences: UserPrefere
 @router.patch("")
 async def update_user(user_update: UserUpdate, user: User = Depends(verify_user), session: Session = Depends(require_session)):
     user.updated_at = datetime.utcnow()
-    database.partial_update_model(session, user, user_update)
+    partial_update_model(session, user, user_update)
     return {"message": "User has been updated"}
 
 
@@ -57,7 +46,7 @@ async def get_profile(user: User = Depends(verify_user), session: Session = Depe
     # we need to update the player rating if the user has not updated for 4 hours
     asyncio.ensure_future(maimai.update_rating_passive(user.username))
     if not db_preference:
-        db_preference = database.add_model(session, UserPreference(username=user.username))
+        db_preference = add_model(session, UserPreference(username=user.username))
     preferences = UserPreferencePublic.model_validate(db_preference)
     accounts = {account.account_server: UserAccountPublic.model_validate(account) for account in db_accounts}
     apply_default(preferences, db_preference, session)  # apply the default images if the user has not set up
@@ -92,5 +81,5 @@ async def update_profile(
     )
     user.updated_at = datetime.utcnow()
     # there's no problem with the image ids, we can update the preference
-    database.partial_update_model(session, db_preference, update_preference)
+    partial_update_model(session, db_preference, update_preference)
     return {"message": "Preference has been updated"}
