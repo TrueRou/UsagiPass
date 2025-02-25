@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - 'backend/**'
+      - "pyproject.toml" # we consider version has been bumped
 
 jobs:
   backend:
@@ -14,15 +14,14 @@ jobs:
     steps:
       - name: Fetch the repository
         uses: actions/checkout@v4
-      
+
       - name: Deploy to Server
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SCRIPT_AFTER: "cd /UsagiPass && python3 -m venv .venv && ./.venv/bin/pip3 install -r requirements.txt && pm2 restart up-backend"
-          ARGS: "-rlgoDzvc -i --delete --exclude=\".data\" --exclude=\".venv\" --exclude=\"config.py\""
-          SOURCE: "backend/"
+          SCRIPT_AFTER: "cd /UsagiPass && poetry install && pm2 restart up-backend"
+          ARGS: '-rlgoDzvc -i --delete --exclude=".data" --exclude=".venv" --exclude=".env"'
+          SOURCE: "/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: /UsagiPass
-          

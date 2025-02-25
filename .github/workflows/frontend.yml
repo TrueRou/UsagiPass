@@ -9,7 +9,7 @@ on:
     branches:
       - main
     paths:
-      - 'frontend/src/**'
+      - "pyproject.toml" # we consider version has been bumped
 
 jobs:
   frontend:
@@ -17,26 +17,26 @@ jobs:
     steps:
       - name: Fetch the repository
         uses: actions/checkout@v4
-      
+
       - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      
+
       - name: Install npm dependencies
-        working-directory: ./frontend
+        working-directory: ./web
         run: npm install
-        
+
       - name: Run build task
-        working-directory: ./frontend
+        working-directory: ./web
         run: npm run build
-      
+
       - name: Deploy to Server
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rlgoDzvc -i --delete"
-          SOURCE: "frontend/dist/"
+          SOURCE: "web/dist/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: ${{ secrets.REMOTE_TARGET }}/up.turou.fun
