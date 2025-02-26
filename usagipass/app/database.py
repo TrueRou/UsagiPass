@@ -24,6 +24,13 @@ def init_db():
     except OperationalError:
         log("Failed to connect to the database.", Ansi.RED)
     try:
+        with engine.connect() as connection:
+            result1 = connection.execute(text("SHOW TABLES LIKE 'alembic_version'"))
+            result2 = connection.execute(text("SHOW TABLES LIKE 'users'"))
+            if not result1.fetchone() and result2.fetchone():
+                # If alembic_version table does not exist but users table does, then the database is outdated
+                log("You are running an outdated database schema. Running migration...", Ansi.YELLOW)
+                command.stamp(AlembicConfig(config_args={"script_location": "alembic"}), "9cdcf6f8ca8c")
         command.upgrade(AlembicConfig(config_args={"script_location": "alembic"}), "head")
     except Exception as e:
         log(f"Failed to run database migration: {e}", Ansi.RED)
