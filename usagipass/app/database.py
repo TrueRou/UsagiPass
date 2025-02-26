@@ -7,14 +7,12 @@ from alembic import command
 from alembic.config import Config as AlembicConfig
 from sqlalchemy.exc import OperationalError
 from sqlmodel import SQLModel, create_engine, Session
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from usagipass.app import settings
 from usagipass.app.logging import log, Ansi
 
 
 engine = create_engine(settings.mysql_url)
-async_engine = create_async_engine(settings.mysql_url.replace("sqlite://", "sqlite+aiosqlite://").replace("mysql+pymysql://", "mysql+aiomysql://"))
 
 V = TypeVar("V")
 
@@ -48,12 +46,6 @@ def require_session(request: Request):
 @contextlib.contextmanager
 def session_ctx():
     with Session(engine, expire_on_commit=False) as session:
-        yield session
-
-
-@contextlib.asynccontextmanager
-async def async_session_ctx():
-    async with AsyncSession(async_engine, expire_on_commit=False) as session:
         yield session
 
 

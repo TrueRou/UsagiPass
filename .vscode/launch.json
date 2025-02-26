@@ -17,7 +17,7 @@
             "command": "npm run dev",
             "request": "launch",
             "type": "node-terminal",
-            "cwd": "${workspaceFolder}/frontend"
+            "cwd": "${workspaceFolder}/web"
         },
     ]
 }

@@ -66,18 +66,6 @@ async def fetch_wechat(username: str, cookies: Cookies) -> tuple[list[Score], Cr
         return [], CrawlerResult(account_server=AccountServer.WECHAT, success=False, scores_num=0, err_msg=str(e))
 
 
-async def fetch_rating(account: UserAccount, result: CrawlerResult = CrawlerResult()) -> CrawlerResult:
-    try:
-        ratings = await fetch_rating_retry(account)
-        result.from_rating = account.player_rating
-        result.to_rating = ratings
-        return result
-    except Exception as e:
-        log(f"Failed to fetch rating for {account.username}: {e}", Ansi.RED)
-        log(traceback.format_exc(), Ansi.RED)
-        return -1
-
-
 async def update_rating(account: UserAccount, result: CrawlerResult = CrawlerResult()) -> CrawlerResult:
     with session_ctx() as session:
         account = session.get(UserAccount, (account.account_name, account.account_server))
@@ -88,10 +76,9 @@ async def update_rating(account: UserAccount, result: CrawlerResult = CrawlerRes
             result.to_rating = result.from_rating
             log(f"Failed to fetch rating for {account.username}: {e}", Ansi.RED)
             log(traceback.format_exc(), Ansi.RED)
-        if result.to_rating > result.from_rating:
-            account.player_rating = result.to_rating
-            account.updated_at = datetime.utcnow()
-            session.commit()
+        account.player_rating = result.to_rating
+        account.updated_at = datetime.utcnow()
+        session.commit()
     return result
 
 

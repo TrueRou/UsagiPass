@@ -59,7 +59,6 @@ async def init_lifespan(asgi_app: FastAPI):
     await crawler.maimai.songs(alias_provider=None, curve_provider=None)
     log("Startup process complete.", Ansi.LGREEN)
     yield  # Above: Startup process Below: Shutdown process
-    await database.async_engine.dispose()
     database.engine.dispose()
 
 

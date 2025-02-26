@@ -22,7 +22,7 @@ const login = async (target: string) => {
         <input type="text" v-model="username" placeholder="用户名" />
         <input class="mt-2" type="password" v-model="password" placeholder="密码 / 个人 API 密钥" />
         <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mt-2 w-[200px]"
-            @click="login('diving')">使用水鱼登录</button>
+            @click="login('divingfish')">使用水鱼登录</button>
         <button class="bg-pink-500 text-white font-bold py-2 px-4 rounded hover:bg-pink-600 mt-2 mb-2 w-[200px]"
             @click="login('lxns')">使用落雪登录</button>
     </div>
