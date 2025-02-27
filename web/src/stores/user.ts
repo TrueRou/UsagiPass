@@ -10,7 +10,7 @@ export const useUserStore = defineStore('user', () => {
 
     const axiosInstance = computed(() => axios.create({
         baseURL: import.meta.env.VITE_URL,
-        timeout: 3000,
+        timeout: 10000,
         headers: { 'Authorization': `Bearer ${token.value}` },
     }));
     const isSignedIn = ref(false)

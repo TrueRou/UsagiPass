@@ -46,7 +46,8 @@ async def get_profile(user: User = Depends(verify_user), session: Session = Depe
     # we need to update the player rating if the user has not updated for 4 hours
     asyncio.ensure_future(maimai.update_rating_passive(user.username))
     if not db_preference:
-        db_preference = add_model(session, UserPreference(username=user.username))
+        db_preference = UserPreference(username=user.username)
+        add_model(session, db_preference)
     preferences = UserPreferencePublic.model_validate(db_preference)
     accounts = {account.account_server: UserAccountPublic.model_validate(account) for account in db_accounts}
     apply_default(preferences, db_preference, session)  # apply the default images if the user has not set up

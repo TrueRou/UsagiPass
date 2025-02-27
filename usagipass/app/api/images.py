@@ -54,7 +54,8 @@ async def upload_image(
         image: PILImage = PIL.Image.open(io.BytesIO(image_bytes)).convert("RGBA")
         image = image.resize(image_kinds[kind]["hw"][0], resample=Resampling.BILINEAR)
         image.save(images_folder / f"{file_name}.webp", "webp", optimize=True, quality=80)
-        db_image: Image = add_model(session, Image(id=file_name, name=name, kind=kind, uploaded_by=user.username))
+        db_image = Image(id=file_name, name=name, kind=kind, uploaded_by=user.username)
+        add_model(session, db_image)
         return db_image
     except PIL.UnidentifiedImageError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to load image file")
