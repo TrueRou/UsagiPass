@@ -13,14 +13,14 @@ const serverLang: Record<string, any> = {
         'username': '用户名',
         'password': '密码',
         'subtitle': '请使用水鱼用户名与密码进行鉴权并绑定',
-        'subtitle2': '若水鱼账户已经绑定过, 将会迁移对应账号数据'
+        'subtitle2': '若水鱼账户已经绑定过其他账号, 请联系开发者'
     },
     'lxns': {
         'title': '绑定落雪账户',
         'username': '用户名',
         'password': '个人 API 密钥',
         'subtitle': '请使用落雪用户名与个人 API 密钥进行鉴权并绑定',
-        'subtitle2': '若落雪账户已经绑定过, 将会迁移对应账号数据'
+        'subtitle2': '若落雪账户已经绑定过其他账号, 请联系开发者'
     },
 }
 
@@ -35,7 +35,7 @@ const tryBind = async () => {
     if (result) router.back()
 };
 
-if (props.server !== 'diving' && props.server !== 'lxns') {
+if (props.server !== 'divingfish' && props.server !== 'lxns') {
     alert(`访问的资源 ${props.server} 不存在`)
     router.push({ name: 'home' }); // Redirect to home page
 }

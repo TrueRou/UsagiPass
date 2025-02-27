@@ -1,9 +1,11 @@
+from datetime import datetime
 from httpx import ConnectError, ReadTimeout
 from fastapi import HTTPException, status
 from sqlmodel import Session
 
 from usagipass.app.database import async_httpx_ctx
 from usagipass.app.models import AccountServer, User, UserAccount
+from usagipass.app.usecases.crawler import fetch_rating_retry
 
 
 async def auth_divingfish(account_name: str, account_password: str) -> dict:
@@ -51,6 +53,7 @@ async def merge_divingfish(session: Session, user: User, account_name: str, acco
         nickname=profile["nickname"],
         bind_qq=profile["bind_qq"],
     )
+    new_account.player_rating = await fetch_rating_retry(new_account)
     session.merge(new_account)
     return new_account
 
@@ -68,5 +71,6 @@ async def merge_lxns(session: Session, user: User, personal_token: str) -> UserA
         username=user.username,
         nickname=profile["name"],
     )
+    new_account.player_rating = await fetch_rating_retry(new_account)
     session.merge(new_account)
     return new_account

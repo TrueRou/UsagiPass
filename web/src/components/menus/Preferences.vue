@@ -307,11 +307,11 @@ onMounted(async () => {
                     优先
                 </button>
                 <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
-                    v-if="userStore.userProfile!.accounts['1']" @click="router.push('/bind/diving')">
+                    v-if="userStore.userProfile!.accounts['1']" @click="router.push('/bind/divingfish')">
                     改绑
                 </button>
                 <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600" v-else
-                    @click="router.push('/bind/diving')">
+                    @click="router.push('/bind/divingfish')">
                     绑定
                 </button>
             </div>

@@ -37,7 +37,7 @@ async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends
         return authorize.grant_user(user)
 
 
-@router.post("/bind/diving")
+@router.post("/bind/divingfish")
 async def bind_diving(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session), user: User = Depends(verify_user)
 ):
