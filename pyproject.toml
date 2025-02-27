@@ -31,6 +31,11 @@ dependencies = [
 [tool.poetry.scripts]
 app = "usagipass.main:main"
 
+[[tool.poetry.source]]
+name = "mirrors"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+priority = "primary"
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
