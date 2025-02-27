@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlmodel import Session
 
 from usagipass.app.database import async_httpx_ctx
+from usagipass.app.logging import Ansi, log
 from usagipass.app.models import AccountServer, User, UserAccount
 from usagipass.app.usecases.crawler import fetch_rating_retry
 

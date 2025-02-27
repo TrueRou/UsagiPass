@@ -33,6 +33,7 @@ def init_mitmproxy():
         connection_strategy="lazy",
     )
     asyncio.create_task(master.run())
+    log(f"Mitmproxy running on http://{settings.mitm_host}:{str(settings.mitm_port)} (Press CTRL+C to quit)", Ansi.LCYAN)
 
 
 def init_middlewares(asgi_app: FastAPI) -> None:

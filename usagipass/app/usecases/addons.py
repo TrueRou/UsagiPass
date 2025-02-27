@@ -2,6 +2,7 @@ from datetime import datetime
 from mitmproxy.http import HTTPFlow, Response
 
 from usagipass.app import settings
+from usagipass.app.logging import Ansi, log
 
 
 class WechatWahlapAddon:
@@ -29,6 +30,7 @@ class WechatWahlapAddon:
             timestr = datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
             location = settings.app_url + f"?maid={maid}&time={timestr}"
             flow.response = Response.make(302, headers={"Location": location})
+            log(f"Redirect qrcode request to {location}", Ansi.GREEN)
 
         # response wahlap mitm connection test
         # example: http://tgk-wcaime.wahlap.com/test
@@ -41,6 +43,7 @@ class WechatWahlapAddon:
         elif flow.request.host in self.wahlap_hosts and flow.request.path.startswith("/wc_auth/oauth/callback/maimai-dx"):
             location = settings.app_url + "update" + flow.request.path.removeprefix("/wc_auth/oauth/callback/maimai-dx")
             flow.response = Response.make(302, headers={"Location": location})
+            log(f"Redirect oauth callback to {location}", Ansi.GREEN)
 
         # block all other requests
         else:
