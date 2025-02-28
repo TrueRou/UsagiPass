@@ -1,12 +1,27 @@
-from datetime import datetime
 from httpx import ConnectError, ReadTimeout
 from fastapi import HTTPException, status
 from sqlmodel import Session
 
 from usagipass.app.database import async_httpx_ctx
-from usagipass.app.logging import Ansi, log
-from usagipass.app.models import AccountServer, User, UserAccount
+from usagipass.app.models import AccountServer, CardPreference, Image, ImagePublic, PreferencePublic, User, UserAccount, UserPreference
+from usagipass.app.settings import default_background, default_character, default_frame, default_passname
 from usagipass.app.usecases.crawler import fetch_rating_retry
+
+
+def apply_preference(preferences: PreferencePublic, db_preferences: UserPreference | CardPreference, session: Session):
+    # we need to get the image objects from the database
+    character = session.get(Image, db_preferences.character_id or default_character)
+    background = session.get(Image, db_preferences.background_id or default_background)
+    frame = session.get(Image, db_preferences.frame_id or default_frame)
+    passname = session.get(Image, db_preferences.passname_id or default_passname)
+    if None in [character, background, frame, passname]:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Default image not found in database, please contact the administrator"
+        )
+    preferences.character = ImagePublic.model_validate(character)
+    preferences.background = ImagePublic.model_validate(background)
+    preferences.frame = ImagePublic.model_validate(frame)
+    preferences.passname = ImagePublic.model_validate(passname)
 
 
 async def auth_divingfish(account_name: str, account_password: str) -> dict:
