@@ -5,28 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from usagipass.app.models import *
 from usagipass.app.usecases import maimai
+from usagipass.app.usecases.accounts import apply_preference
 from usagipass.app.usecases.authorize import verify_user
 from usagipass.app.database import require_session, partial_update_model, add_model
-from usagipass.app.settings import default_character, default_background, default_frame, default_passname
 
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-
-def apply_default(preferences: UserPreferencePublic, db_preferences: UserPreference, session: Session):
-    # we need to get the image objects from the database
-    character = session.get(Image, db_preferences.character_id or default_character)
-    background = session.get(Image, db_preferences.background_id or default_background)
-    frame = session.get(Image, db_preferences.frame_id or default_frame)
-    passname = session.get(Image, db_preferences.passname_id or default_passname)
-    if None in [character, background, frame, passname]:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Default image not found in database, please contact the administrator"
-        )
-    preferences.character = ImagePublic.model_validate(character)
-    preferences.background = ImagePublic.model_validate(background)
-    preferences.frame = ImagePublic.model_validate(frame)
-    preferences.passname = ImagePublic.model_validate(passname)
 
 
 @router.patch("")
@@ -48,9 +32,9 @@ async def get_profile(user: User = Depends(verify_user), session: Session = Depe
     if not db_preference:
         db_preference = UserPreference(username=user.username)
         add_model(session, db_preference)
-    preferences = UserPreferencePublic.model_validate(db_preference)
+    preferences = PreferencePublic.model_validate(db_preference)
     accounts = {account.account_server: UserAccountPublic.model_validate(account) for account in db_accounts}
-    apply_default(preferences, db_preference, session)  # apply the default images if the user has not set up
+    apply_preference(preferences, db_preference, session)  # apply the default images if the user has not set up
     user_profile = UserProfile(
         username=user.username,
         prefer_server=user.prefer_server,
@@ -64,7 +48,7 @@ async def get_profile(user: User = Depends(verify_user), session: Session = Depe
 
 @router.patch("/preference")
 async def update_profile(
-    preference: UserPreferencePublic,
+    preference: PreferencePublic,
     user: User = Depends(verify_user),
     session: Session = Depends(require_session),
 ):

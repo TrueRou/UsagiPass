@@ -93,6 +93,13 @@ class PreferenceUpdate(PreferenceBase):
     passname_id: str | None = None
 
 
+class PreferencePublic(PreferenceBase):
+    character: ImagePublic | None = None
+    background: ImagePublic | None = None
+    frame: ImagePublic | None = None
+    passname: ImagePublic | None = None
+
+
 class UserPreference(PreferenceBase, table=True):
     __tablename__ = "user_preferences"
 
@@ -101,13 +108,6 @@ class UserPreference(PreferenceBase, table=True):
     background_id: str | None = Field(foreign_key="images.id")
     frame_id: str | None = Field(foreign_key="images.id")
     passname_id: str | None = Field(foreign_key="images.id")
-
-
-class UserPreferencePublic(PreferenceBase):
-    character: ImagePublic | None = None
-    background: ImagePublic | None = None
-    frame: ImagePublic | None = None
-    passname: ImagePublic | None = None
 
 
 class UserAccountPublic(SQLModel):
@@ -121,7 +121,7 @@ class UserProfile(SQLModel):
     prefer_server: AccountServer
     nickname: str
     player_rating: int
-    preferences: UserPreferencePublic
+    preferences: PreferencePublic
     accounts: dict[int, UserAccountPublic]
 
 
@@ -167,6 +167,12 @@ class Card(SQLModel, table=True):
     uuid: str = Field(unique=True, index=True)
     user_id: int = Field(foreign_key="card_users.id", index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class CardProfile(SQLModel):
+    cid: int
+    player_rating: int
+    preferences: PreferencePublic
 
 
 class Score(SQLModel, table=True):
