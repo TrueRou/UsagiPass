@@ -71,10 +71,10 @@ async def update_rating(account: UserAccount, result: CrawlerResult = CrawlerRes
         result.from_rating = account.player_rating
         try:
             result.to_rating = await fetch_rating_retry(account)
-            log(f"Rating for {account.username} updated: {result.from_rating} -> {result.to_rating}", Ansi.GREEN)
+            log(f"{account.username}({account.account_server.name} {account.account_name}) {result.from_rating} -> {result.to_rating})", Ansi.GREEN)
         except Exception as e:
             result.to_rating = result.from_rating
-            log(f"Failed to fetch rating for {account.username}: {e}", Ansi.RED)
+            log(f"Failed to update rating for {account.username}: {repr(e)}", Ansi.RED)
             log(traceback.format_exc(), Ansi.RED)
         account.player_rating = result.to_rating
         account.updated_at = datetime.utcnow()
@@ -88,7 +88,7 @@ async def upload_server(account: UserAccount, scores: list[Score]) -> CrawlerRes
         await upload_server_retry(account, scores)
         return CrawlerResult(account_server=account.account_server, success=True, scores_num=len(scores), elapsed_time=time.time() - begin)
     except Exception as e:
-        log(f"Failed to upload {account.account_server.name} for {account.username}: {e}", Ansi.RED)
+        log(f"Failed to upload {account.account_server.name} for {account.username}: {repr(e)}", Ansi.RED)
         log(traceback.format_exc(), Ansi.RED)
         return CrawlerResult(account_server=account.account_server, success=False, scores_num=len(scores), err_msg=str(e))
 
