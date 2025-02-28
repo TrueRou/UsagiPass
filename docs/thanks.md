@@ -21,3 +21,4 @@ outline: deep
 - Diving-Fish: https://www.diving-fish.com/maimaidx/prober/
 - LXNS: https://maimai.lxns.net/
 - Bakapiano: https://github.com/bakapiano/maimaidx-prober-proxy-updater
+- maimai.py: https://github.com/TrueRou/maimai.py

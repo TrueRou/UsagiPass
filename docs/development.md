@@ -22,41 +22,20 @@ UsagiPass 使用 [MITM中间人](https://developer.mozilla.org/zh-CN/docs/Glossa
 
 - 合适的 Linux 发行版，这里以 Debian 为例
 - 能够连接至 GitHub 的网络环境
-- Python 3.11+
+- Python 3.12+
 
 ### 搭建方式
 
-1. 依次输入以下命令
+- Python 3.12 以上版本
+- 在 项目根目录 下创建 `.env` 文件, 可以根据 `.env.example.mitm-only` 模板文件进行配置
+- 执行 `pip install poetry` 全局安装 Poetry
+- 执行 `poetry install` 安装项目依赖
+- 执行 `poetry run mitm` 单独运行代理
 
-```shell
-apt-get update && apt install -y git python3-pip
-git clone https://github.com/TrueRou/UsagiPass.git
-cd UsagiPass/backend
-pip3 install mitmproxy
-mitmweb -s mitm.py --listen-port 2560 --set block_global=false --set connection_strategy=lazy
-```
+> 更新项目: `git pull && poetry install && poetry run mitm`
 
 ::: tip
 切记：必须暴露 TCP `2560` 端口，如部署防火墙的请在规则允许 `2560` 端口的外网访问
+
+端口可以在 `.env` 文件中进行配置
 :::
-
-### Docker
-
-::: tip
-感谢群友 原味零花 提供的 Dockerfile, 需要的开发者可以加群获取
-:::
-
-```docker
-FROM debian AS fetch
-RUN apt update && apt install git ca-certificates -y && update-ca-certificates
-RUN git clone https://github.com/TrueRou/UsagiPass.git
-
-FROM debian
-EXPOSE 2560
-COPY --from=fetch /UsagiPass/backend/* /app/backend/
-RUN apt update && apt install pipx python3-minimal ca-certificates -y && update-ca-certificates
-RUN pipx install mitmproxy
-WORKDIR /app/backend
-ENTRYPOINT [ "/root/.local/bin/mitmweb" ]
-CMD [ "-s", "mitm.py", "--listen-port", "2560", "--set", "block_global=false", "--set", "connection_strategy=lazy" ]
-```
