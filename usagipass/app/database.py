@@ -2,17 +2,21 @@ import contextlib
 import httpx
 from typing import TypeVar
 from fastapi import Request
+from maimai_py import MaimaiClient
 from sqlalchemy import text
 from alembic import command
 from alembic.config import Config as AlembicConfig
 from sqlalchemy.exc import OperationalError
 from sqlmodel import SQLModel, create_engine, Session
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from usagipass.app import settings
 from usagipass.app.logging import log, Ansi
 
 
 engine = create_engine(settings.mysql_url)
+maimai_client = MaimaiClient()
+scheduler = AsyncIOScheduler()
 
 V = TypeVar("V")
 
