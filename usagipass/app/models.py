@@ -1,6 +1,11 @@
 from datetime import datetime
 from enum import IntEnum, auto
 from sqlmodel import Field, SQLModel
+from maimai_py import PlayerIdentifier, ArcadeProvider, Score as MpyScore
+from maimai_py.models import FCType, FSType, LevelIndex, RateType, SongType
+
+from usagipass.app import settings
+from usagipass.app.database import maimai_client
 
 image_kinds = {
     "background": {"hw": [(768, 1052)]},
@@ -70,7 +75,7 @@ class UserAccount(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
-class UserPreferenceBase(SQLModel):
+class PreferenceBase(SQLModel):
     maimai_version: str | None = None
     simplified_code: str | None = None
     character_name: str | None = None
@@ -81,14 +86,14 @@ class UserPreferenceBase(SQLModel):
     mask_type: int = Field(default=0)
 
 
-class UserPreferenceUpdate(UserPreferenceBase):
+class PreferenceUpdate(PreferenceBase):
     character_id: str | None = None
     background_id: str | None = None
     frame_id: str | None = None
     passname_id: str | None = None
 
 
-class UserPreference(UserPreferenceBase, table=True):
+class UserPreference(PreferenceBase, table=True):
     __tablename__ = "user_preferences"
 
     username: str = Field(primary_key=True)
@@ -98,7 +103,7 @@ class UserPreference(UserPreferenceBase, table=True):
     passname_id: str | None = Field(foreign_key="images.id")
 
 
-class UserPreferencePublic(UserPreferenceBase):
+class UserPreferencePublic(PreferenceBase):
     character: ImagePublic | None = None
     background: ImagePublic | None = None
     frame: ImagePublic | None = None
@@ -124,3 +129,90 @@ class ServerMessage(SQLModel):
     maimai_version: str
     server_motd: str
     author_motd: str
+
+
+class CardUser(SQLModel, table=True):
+    __tablename__ = "card_users"
+
+    id: int = Field(primary_key=True)
+    mai_userid: str = Field(unique=True, index=True)
+    mai_rating: int
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_updated_at: datetime = Field(default_factory=datetime.utcnow)
+    last_activity_at: datetime = Field(default_factory=datetime.utcnow)
+
+    @property
+    def as_identifier(self):
+        return PlayerIdentifier(credentials=self.mai_userid)
+
+    @property
+    def as_provider(self):
+        return ArcadeProvider(settings.arcade_proxy)
+
+
+class CardPreference(PreferenceBase, table=True):
+    __tablename__ = "card_preferences"
+
+    cid: int = Field(primary_key=True)
+    character_id: str | None = Field(foreign_key="images.id")
+    background_id: str | None = Field(foreign_key="images.id")
+    frame_id: str | None = Field(foreign_key="images.id")
+    passname_id: str | None = Field(foreign_key="images.id")
+
+
+class Card(SQLModel, table=True):
+    __tablename__ = "cards"
+
+    cid: int = Field(primary_key=True, unique=True, index=True)
+    uuid: str = Field(unique=True, index=True)
+    user_id: int = Field(foreign_key="card_users.id", index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Score(SQLModel, table=True):
+    __tablename__ = "scores"
+
+    id: int | None = Field(default=None, primary_key=True)
+    song_id: int = Field(index=True)
+    level_index: LevelIndex
+    achievements: float | None
+    fc: FCType | None
+    fs: FSType | None
+    dx_score: int | None
+    dx_rating: float | None
+    rate: RateType
+    type: SongType
+    user_id: int = Field(foreign_key="card_users.id", index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    @staticmethod
+    def from_mpy(mpy_score: MpyScore, user_id: int):
+        return Score(
+            song_id=mpy_score.id,
+            level_index=mpy_score.level_index,
+            achievements=mpy_score.achievements,
+            fc=mpy_score.fc,
+            fs=mpy_score.fs,
+            dx_score=mpy_score.dx_score,
+            dx_rating=mpy_score.dx_rating,
+            rate=mpy_score.rate,
+            type=mpy_score.type,
+            user_id=user_id,
+        )
+
+    async def as_mpy(self):
+        song = (await maimai_client.songs()).by_id(self.song_id)
+        return MpyScore(
+            id=self.song_id,
+            song_name=song.title if song else "Unknown",
+            level=song.get_difficulty(self.type, self.level_index).level if song else "Unknown",
+            level_index=self.level_index,
+            achievements=self.achievements,
+            fc=self.fc,
+            fs=self.fs,
+            dx_score=self.dx_score,
+            dx_rating=self.dx_rating,
+            rate=self.rate,
+            type=self.type,
+        )

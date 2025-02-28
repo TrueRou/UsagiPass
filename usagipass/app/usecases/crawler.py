@@ -7,14 +7,12 @@ from pydantic import BaseModel
 from sqlmodel import Session, select
 from tenacity import retry, stop_after_attempt
 from maimai_py.models import Score, Player, MaimaiScores
-from maimai_py import MaimaiClient, PlayerIdentifier, WechatProvider, DivingFishProvider, LXNSProvider
+from maimai_py import PlayerIdentifier, WechatProvider, DivingFishProvider, LXNSProvider
 
 from usagipass.app.logging import Ansi, log
-from usagipass.app.database import session_ctx
+from usagipass.app.database import session_ctx, maimai_client
 from usagipass.app.models import AccountServer, User, UserAccount
 from usagipass.app.settings import lxns_developer_token, divingfish_developer_token
-
-maimai = MaimaiClient()
 
 
 class CrawlerResult(BaseModel):
@@ -29,7 +27,7 @@ class CrawlerResult(BaseModel):
 
 @retry(stop=stop_after_attempt(3), reraise=True)
 async def fetch_wechat_retry(cookies: Cookies) -> MaimaiScores:
-    return await maimai.scores(PlayerIdentifier(credentials=cookies), provider=WechatProvider())
+    return await maimai_client.scores(PlayerIdentifier(credentials=cookies), provider=WechatProvider())
 
 
 @retry(stop=stop_after_attempt(3))
@@ -40,7 +38,7 @@ async def fetch_rating_retry(account: UserAccount) -> int:
     elif account.account_server == AccountServer.LXNS:
         ident = PlayerIdentifier(friend_code=account.account_name)
         provider = LXNSProvider(lxns_developer_token)
-    player: Player = await maimai.players(ident, provider)
+    player: Player = await maimai_client.players(ident, provider)
     return player.rating
 
 
@@ -52,7 +50,7 @@ async def upload_server_retry(account: UserAccount, scores: list[Score]):
     elif account.account_server == AccountServer.LXNS:
         ident = PlayerIdentifier(credentials=account.account_password)
         provider = LXNSProvider(lxns_developer_token)
-    await maimai.updates(ident, scores, provider)
+    await maimai_client.updates(ident, scores, provider)
 
 
 async def fetch_wechat(username: str, cookies: Cookies) -> tuple[list[Score], CrawlerResult]:

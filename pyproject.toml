@@ -26,7 +26,8 @@ dependencies = [
     "tenacity (>=9.0.0,<10.0.0)",
     "python-multipart (>=0.0.20,<0.0.21)",
     "pymysql (>=1.1.1,<2.0.0)",
-    "tzdata (>=2025.1,<2026.0)"
+    "tzdata (>=2025.1,<2026.0)",
+    "apscheduler (>=3.11.0,<4.0.0)"
 ]
 
 [tool.poetry.scripts]

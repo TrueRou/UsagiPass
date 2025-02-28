@@ -73,7 +73,7 @@ async def update_profile(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User has not set up for his preference")
     if db_preference.username != user.username:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this preference")
-    update_preference = UserPreferenceUpdate(
+    update_preference = PreferenceUpdate(
         **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
         character_id=preference.character.id if preference.character else None,
         background_id=preference.background.id if preference.background else None,
