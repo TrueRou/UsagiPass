@@ -165,7 +165,7 @@ class Card(SQLModel, table=True):
 
     cid: int = Field(primary_key=True, unique=True, index=True)
     uuid: str = Field(unique=True, index=True)
-    user_id: int = Field(foreign_key="card_users.id", index=True)
+    user_id: int | None = Field(foreign_key="card_users.id", index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
