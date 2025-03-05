@@ -47,7 +47,7 @@ async def get_profile(user: User = Depends(verify_user), session: Session = Depe
 
 
 @router.patch("/preference")
-async def update_profile(
+async def update_preference(
     preference: PreferencePublic,
     user: User = Depends(verify_user),
     session: Session = Depends(require_session),

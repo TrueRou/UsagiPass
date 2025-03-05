@@ -24,6 +24,12 @@ class AccountServer(IntEnum):
     WECHAT = auto()  # 微信小程序
 
 
+class Privilege(IntEnum):
+    BANNED = auto()
+    NORMAL = auto()
+    ADMIN = auto()
+
+
 class Image(SQLModel, table=True):
     __tablename__ = "images"
 
@@ -53,6 +59,7 @@ class User(SQLModel, table=True):
 
     username: str = Field(primary_key=True)
     prefer_server: AccountServer
+    privilege: Privilege = Field(default=Privilege.NORMAL)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -222,3 +229,29 @@ class Score(SQLModel, table=True):
             rate=self.rate,
             type=self.type,
         )
+
+
+class ScorePublic(SQLModel):
+    id: int
+    song_id: int
+    song_name: str
+    level: str
+    level_index: LevelIndex
+    achievements: float | None
+    fc: FCType | None
+    fs: FSType | None
+    dx_score: int | None
+    dx_rating: float | None
+    rate: RateType
+    type: SongType
+    user_id: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class CardBests(SQLModel):
+    b35_scores: list[ScorePublic]
+    b15_scores: list[ScorePublic]
+    b35_rating: int
+    b15_rating: int
+    all_rating: int
