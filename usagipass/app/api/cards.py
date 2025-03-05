@@ -1,8 +1,8 @@
 import asyncio
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
-from maimai_py import MaimaiScores, MaimaiSongs
 from sqlmodel import Session, select
+from maimai_py import MaimaiScores, MaimaiSongs, Score as MpyScore
 from maimai_py.exceptions import AimeServerError
 
 from usagipass.app import settings
@@ -110,24 +110,24 @@ async def get_profile(
     return card_profile
 
 
-@router.get("/bests", response_model=list[ScorePublic])
+@router.get("/bests", response_model=CardBests)
 async def get_bests(
     db_account: CardUser = Depends(require_card_user),
     session: Session = Depends(require_session),
 ):
-    def _ser_scores(scores: list[Score], songs: MaimaiSongs) -> list[ScorePublic]:
+    def _ser_scores(mpy_scores: list[MpyScore], songs: MaimaiSongs) -> list[ScorePublic]:
         return [
             ScorePublic(
-                **score.model_dump(),
+                **(Score.from_mpy(score, db_account.id).model_dump()),
                 song_name=song.title,
                 level=song.get_difficulty(score.type, score.level_index).level,
             )
-            for score in scores
-            if (song := songs.by_id(score.song_id))
+            for score in mpy_scores
+            if (song := songs.by_id(score.id))
         ]
 
     songs = await maimai_client.songs()
-    scores = MaimaiScores(all=[await Score.as_mpy(score) for score in session.exec(select(Score).where(Score.user_id == db_account.id))])
+    scores = MaimaiScores(all=[await Score.as_mpy(score) for score in session.exec(select(Score).where(Score.user_id == db_account.id))], songs=songs)
     return CardBests(
         b35_scores=_ser_scores(scores.scores_b35, songs),
         b15_scores=_ser_scores(scores.scores_b15, songs),
