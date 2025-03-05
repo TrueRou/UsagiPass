@@ -232,7 +232,6 @@ class Score(SQLModel, table=True):
 
 
 class ScorePublic(SQLModel):
-    id: int
     song_id: int
     song_name: str
     level: str
