@@ -8,7 +8,7 @@ interface ImageDetail extends ImagePublic {
     kind: string;
 }
 
-interface UserPreferencePublic {
+interface PreferencePublic {
     character: ImagePublic;
     background: ImagePublic;
     frame: ImagePublic;
@@ -34,8 +34,14 @@ interface UserProfile {
     prefer_server: number;
     nickname: string;
     player_rating: number;
-    preferences: UserPreferencePublic;
+    preferences: PreferencePublic;
     accounts: Record<string, UserAccountPublic>;
+}
+
+interface CardProfile {
+    cid: number;
+    player_rating: number;
+    preferences: PreferencePublic;
 }
 
 interface ServerMessage {

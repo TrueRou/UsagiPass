@@ -1,6 +1,5 @@
-import asyncio
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlmodel import Session, select
 from maimai_py import MaimaiScores, MaimaiSongs, Score as MpyScore
 from maimai_py.exceptions import AimeServerError
@@ -18,7 +17,7 @@ from usagipass.app.usecases.accounts import apply_preference
 router = APIRouter(prefix="/cards", tags=["cards"])
 
 
-def require_card(uuid: str, session: Session = Depends(require_session)) -> Card:
+def require_card(uuid: str = Path(...), session: Session = Depends(require_session)) -> Card:
     if card := session.exec(select(Card).where(Card.uuid == uuid)).first():
         return card
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
@@ -51,7 +50,7 @@ async def create_card(session: Session = Depends(require_session), user: User = 
     return card
 
 
-@router.post("/accounts")
+@router.post("/{uuid}/accounts")
 async def create_card_account(qrcode: str, card: Card = Depends(require_card), session: Session = Depends(require_session)):
     if card.user_id is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card has already been activated")
@@ -72,7 +71,7 @@ async def create_card_account(qrcode: str, card: Card = Depends(require_card), s
     return {"message": "Card has been activated"}
 
 
-@router.patch("/preferences")
+@router.patch("/{uuid}/preferences")
 async def update_preference(
     preference: PreferencePublic,
     db_preference: CardPreference = Depends(require_preference),
@@ -91,15 +90,13 @@ async def update_preference(
     return {"message": "Preference has been updated"}
 
 
-@router.get("/profile", response_model=CardProfile)
+@router.get("/{uuid}/profile", response_model=CardProfile)
 async def get_profile(
     card: Card = Depends(require_card),
     db_preference: CardPreference = Depends(require_preference),
     db_account: CardUser | None = Depends(require_card_user_optional),
     session: Session = Depends(require_session),
 ):
-    # we need to trigger the scores updating if the user has not updated for a while
-    asyncio.create_task(maimai.update_scores_passive(card))
     preferences = PreferencePublic.model_validate(db_preference)
     apply_preference(preferences, db_preference, session)
     card_profile = CardProfile(
@@ -110,7 +107,7 @@ async def get_profile(
     return card_profile
 
 
-@router.get("/bests", response_model=CardBests)
+@router.get("/{uuid}/bests", response_model=CardBests)
 async def get_bests(
     db_account: CardUser = Depends(require_card_user),
     session: Session = Depends(require_session),
@@ -135,3 +132,12 @@ async def get_bests(
         b15_rating=scores.rating_b15,
         all_rating=scores.rating,
     )
+
+
+@router.patch("/{uuid}/bests", response_model=CardBests)
+async def update_bests(
+    db_account: CardUser = Depends(require_card_user),
+    session: Session = Depends(require_session),
+):
+    await maimai.update_scores(db_account)
+    return await get_bests(db_account, session)

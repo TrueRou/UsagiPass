@@ -51,22 +51,3 @@ async def update_rating_passive(username: str):
             for account in accounts:
                 if datetime.utcnow() - account.updated_at > timedelta(minutes=30):
                     tg.create_task(crawler.update_rating(account))
-
-
-# attempt to refresh the card user depends on check_delta
-async def update_scores_passive(user: CardUser) -> bool:
-    with session_ctx() as session:
-        user = session.get(CardUser, user.id)
-        current_datetime = datetime.now()
-        inactive_period = current_datetime - user.last_activity_at
-
-        # with a minimum of 8 hours, add 12 hours per hour since user last activity
-        check_delta = timedelta(hours=8 + 12 * inactive_period.days)
-        # these players are more likely to be active, so we reduce the check delta
-        if 12000 <= user.mai_rating <= 15000:
-            check_delta *= 0.5
-        # we'll wait for an absolute maximum of 7 day.
-        check_delta = min(check_delta, timedelta(days=7))
-
-    if current_datetime - user.last_updated_at > check_delta:
-        asyncio.create_task(update_scores(user))
