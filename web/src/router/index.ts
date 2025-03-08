@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useServerStore } from '@/stores/server'
 import DXPassView from '@/views/DXPassView.vue'
+import DXCardView from '@/views/DXCardView.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -10,6 +11,12 @@ const router = createRouter({
             path: '/',
             name: 'home',
             component: DXPassView
+        },
+        {
+            path: '/card/:uuid',
+            name: 'card',
+            props: true,
+            component: DXCardView,
         },
         {
             path: '/cropper/:kind',

@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { useServerStore } from '@/stores/server';
 
 const props = defineProps<{
-    preferences: UserPreferencePublic;
+    preferences: PreferencePublic;
 }>()
 
 const mask = ref<ImageDetail | undefined>(undefined);

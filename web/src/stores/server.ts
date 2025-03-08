@@ -13,16 +13,22 @@ export const useServerStore = defineStore('server', () => {
     }));
 
     async function refreshMotd() {
-        const response = (await axiosInstance.value.get('/motd'))
-        if (response.status === 200) {
+        try {
+            const response = (await axiosInstance.value.get('/motd'))
             serverMessage.value = response.data
+        } catch (error) {
+            alert("无法获取服务器信息，可能是服务器正在维护")
+            console.error(error)
         }
     }
 
     async function refreshKind() {
-        const response = (await axiosInstance.value.get('/kinds'))
-        if (response.status === 200) {
+        try {
+            const response = (await axiosInstance.value.get('/kinds'))
             serverKinds.value = response.data
+        } catch (error) {
+            alert("无法刷新图片类型信息，请联系开发者")
+            console.error(error)
         }
     }
 
