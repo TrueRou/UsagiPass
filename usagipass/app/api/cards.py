@@ -1,4 +1,5 @@
 import uuid
+from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlmodel import Session, select
 from maimai_py import MaimaiScores, MaimaiSongs, Score as MpyScore
@@ -18,13 +19,13 @@ router = APIRouter(prefix="/cards", tags=["cards"])
 
 
 def require_card(uuid: str = Path(...), session: Session = Depends(require_session)) -> Card:
-    if card := session.exec(select(Card).where(Card.uuid == uuid)).first():
+    if card := session.get(Card, uuid):
         return card
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
 
 
 def require_preference(card: Card = Depends(require_card), session: Session = Depends(require_session)) -> CardPreference:
-    if preference := session.get(CardPreference, card.cid):
+    if preference := session.get(CardPreference, card.uuid):
         return preference
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card has not been initialized")
 
@@ -42,12 +43,62 @@ def require_card_user_optional(card: Card = Depends(require_card), session: Sess
 
 @router.post("", response_model=Card)
 async def create_card(session: Session = Depends(require_session), user: User = Depends(verify_admin)):
-    new_uuid = str(uuid.uuid4())
-    card = Card(uuid=new_uuid)
+    latest_card = session.exec(select(Card).where(Card.card_id != None).order_by(Card.card_id.desc())).first()
+    new_card_id = 1 if latest_card is None else latest_card.card_id + 1
+    # admin can create a card without a phone number, and skip the draft state
+    card = Card(uuid=str(uuid.uuid4()), card_id=new_card_id)
     database.add_model(session, card)
-    preference = CardPreference(cid=card.cid)
+    preference = CardPreference(uuid=card.uuid)
     database.add_model(session, preference)
     return card
+
+
+@router.get("", response_model=list[Card])
+async def get_card(session: Session = Depends(require_session), user: User = Depends(verify_admin)):
+    return session.exec(select(Card).order_by(Card.created_at.desc())).all()
+
+
+@router.patch("/{uuid}")
+async def update_card(
+    mode: Literal["UNSET", "CONFIRMED"],
+    card: Card = Depends(require_card),
+    session: Session = Depends(require_session),
+    user: User = Depends(verify_admin),
+):
+    if mode == "UNSET":
+        card.card_id = None
+    elif mode == "CONFIRMED":
+        latest_card = session.exec(select(Card).where(Card.card_id != None).order_by(Card.card_id.desc())).first()
+        card.card_id = 1 if latest_card is None else latest_card.card_id + 1
+    session.commit()
+    return {"message": "Card has been updated"}
+
+
+@router.delete("/{uuid}")
+async def delete_card(card: Card = Depends(require_card), session: Session = Depends(require_session), user: User = Depends(verify_admin)):
+    if card.user_id is not None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card has already been activated")
+    session.delete(card)
+    return {"message": "Card has been deleted"}
+
+
+@router.patch("/{uuid}/preferences")
+async def update_preference(
+    preference: PreferencePublic,
+    db_preference: CardPreference = Depends(require_preference),
+    session: Session = Depends(require_session),
+    user: User = Depends(verify_admin),
+):
+    update_preference = PreferenceUpdate(
+        **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
+        character_id=preference.character.id if preference.character else None,
+        background_id=preference.background.id if preference.background else None,
+        frame_id=preference.frame.id if preference.frame else None,
+        passname_id=preference.passname.id if preference.passname else None,
+    )
+    # there's no problem with the image ids, we can update the preference
+    partial_update_model(session, db_preference, update_preference)
+    return {"message": "Preference has been updated"}
 
 
 @router.post("/{uuid}/accounts")
@@ -71,25 +122,6 @@ async def create_card_account(qrcode: str, card: Card = Depends(require_card), s
     return {"message": "Card has been activated"}
 
 
-@router.patch("/{uuid}/preferences")
-async def update_preference(
-    preference: PreferencePublic,
-    db_preference: CardPreference = Depends(require_preference),
-    session: Session = Depends(require_session),
-    user: User = Depends(verify_admin),
-):
-    update_preference = PreferenceUpdate(
-        **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
-        character_id=preference.character.id if preference.character else None,
-        background_id=preference.background.id if preference.background else None,
-        frame_id=preference.frame.id if preference.frame else None,
-        passname_id=preference.passname.id if preference.passname else None,
-    )
-    # there's no problem with the image ids, we can update the preference
-    partial_update_model(session, db_preference, update_preference)
-    return {"message": "Preference has been updated"}
-
-
 @router.get("/{uuid}/profile", response_model=CardProfile)
 async def get_profile(
     card: Card = Depends(require_card),
@@ -100,7 +132,7 @@ async def get_profile(
     preferences = PreferencePublic.model_validate(db_preference)
     apply_preference(preferences, db_preference, session)
     card_profile = CardProfile(
-        cid=card.cid,
+        card_id=card.card_id,
         player_rating=db_account.mai_rating if db_account else -1,
         preferences=preferences,
     )

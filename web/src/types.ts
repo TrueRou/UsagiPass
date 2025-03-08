@@ -39,7 +39,7 @@ interface UserProfile {
 }
 
 interface CardProfile {
-    cid: number;
+    card_id: number;
     player_rating: number;
     preferences: PreferencePublic;
 }

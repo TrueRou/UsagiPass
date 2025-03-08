@@ -59,7 +59,7 @@ class User(SQLModel, table=True):
 
     username: str = Field(primary_key=True)
     prefer_server: AccountServer
-    privilege: Privilege = Field(default=Privilege.NORMAL)
+    privilege: Privilege = Field(default=Privilege.NORMAL, sa_column_kwargs={"server_default": "NORMAL"})
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -110,11 +110,11 @@ class PreferencePublic(PreferenceBase):
 class UserPreference(PreferenceBase, table=True):
     __tablename__ = "user_preferences"
 
-    username: str = Field(primary_key=True)
-    character_id: str | None = Field(foreign_key="images.id")
-    background_id: str | None = Field(foreign_key="images.id")
-    frame_id: str | None = Field(foreign_key="images.id")
-    passname_id: str | None = Field(foreign_key="images.id")
+    username: str = Field(primary_key=True, foreign_key="users.username")
+    character_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
+    background_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
+    frame_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
+    passname_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
 
 
 class UserAccountPublic(SQLModel):
@@ -160,24 +160,25 @@ class CardUser(SQLModel, table=True):
 class CardPreference(PreferenceBase, table=True):
     __tablename__ = "card_preferences"
 
-    cid: int = Field(primary_key=True)
-    character_id: str | None = Field(foreign_key="images.id")
-    background_id: str | None = Field(foreign_key="images.id")
-    frame_id: str | None = Field(foreign_key="images.id")
-    passname_id: str | None = Field(foreign_key="images.id")
+    uuid: str = Field(primary_key=True, foreign_key="cards.uuid", ondelete="CASCADE")
+    character_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
+    background_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
+    frame_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
+    passname_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
 
 
 class Card(SQLModel, table=True):
     __tablename__ = "cards"
 
-    cid: int = Field(primary_key=True, unique=True, index=True)
-    uuid: str = Field(unique=True, index=True)
-    user_id: int | None = Field(foreign_key="card_users.id", index=True)
+    uuid: str = Field(primary_key=True)
+    card_id: int | None = Field(default=None, unique=True, index=True)
+    user_id: int | None = Field(default=None, foreign_key="card_users.id", ondelete="CASCADE")
+    phone_number: str | None = Field(default=None, index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class CardProfile(SQLModel):
-    cid: int
+    card_id: int
     player_rating: int
     preferences: PreferencePublic
 
@@ -195,7 +196,7 @@ class Score(SQLModel, table=True):
     dx_rating: float | None
     rate: RateType
     type: SongType
-    user_id: int = Field(foreign_key="card_users.id", index=True)
+    user_id: int = Field(foreign_key="card_users.id", index=True, ondelete="CASCADE")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
