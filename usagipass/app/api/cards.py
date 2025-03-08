@@ -24,6 +24,12 @@ def require_card(uuid: str = Path(...), session: Session = Depends(require_sessi
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
 
 
+def require_card_strict(card: Card = Depends(require_card), session: Session = Depends(require_session)) -> Card:
+    if card.card_id is not None:
+        return card
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card was in draft state")
+
+
 def require_preference(card: Card = Depends(require_card), session: Session = Depends(require_session)) -> CardPreference:
     if preference := session.get(CardPreference, card.uuid):
         return preference
@@ -102,7 +108,7 @@ async def update_preference(
 
 
 @router.post("/{uuid}/accounts")
-async def create_card_account(qrcode: str, card: Card = Depends(require_card), session: Session = Depends(require_session)):
+async def create_card_account(qrcode: str, card: Card = Depends(require_card_strict), session: Session = Depends(require_session)):
     if card.user_id is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card has already been activated")
     try:
@@ -115,7 +121,7 @@ async def create_card_account(qrcode: str, card: Card = Depends(require_card), s
     except AimeServerError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid QR code or expired")
     except Exception as e:
-        log(f"Failed to activate card of {card.cid}: {repr(e)}", Ansi.LRED)
+        log(f"Failed to activate card of {card.card_id}: {repr(e)}", Ansi.LRED)
         session.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to activate card")
     await maimai.update_scores(card_user)
@@ -124,7 +130,7 @@ async def create_card_account(qrcode: str, card: Card = Depends(require_card), s
 
 @router.get("/{uuid}/profile", response_model=CardProfile)
 async def get_profile(
-    card: Card = Depends(require_card),
+    card: Card = Depends(require_card_strict),
     db_preference: CardPreference = Depends(require_preference),
     db_account: CardUser | None = Depends(require_card_user_optional),
     session: Session = Depends(require_session),
@@ -141,6 +147,7 @@ async def get_profile(
 
 @router.get("/{uuid}/bests", response_model=CardBests)
 async def get_bests(
+    card: Card = Depends(require_card_strict),
     db_account: CardUser = Depends(require_card_user),
     session: Session = Depends(require_session),
 ):
@@ -168,6 +175,7 @@ async def get_bests(
 
 @router.patch("/{uuid}/bests", response_model=CardBests)
 async def update_bests(
+    card: Card = Depends(require_card_strict),
     db_account: CardUser = Depends(require_card_user),
     session: Session = Depends(require_session),
 ):

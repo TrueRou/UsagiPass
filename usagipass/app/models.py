@@ -178,7 +178,7 @@ class Card(SQLModel, table=True):
 
 
 class CardProfile(SQLModel):
-    card_id: int
+    card_id: int | None
     player_rating: int
     preferences: PreferencePublic
 

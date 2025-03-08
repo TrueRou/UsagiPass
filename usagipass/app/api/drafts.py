@@ -12,7 +12,7 @@ from usagipass.app.usecases.accounts import apply_preference
 router = APIRouter(prefix="/drafts", tags=["drafts"])
 
 
-def require_phone(phone: str = Path(...)) -> str:
+def require_phone(phone: str) -> str:
     if not phone.isdigit() or len(phone) != 11:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid phone number")
     return phone
