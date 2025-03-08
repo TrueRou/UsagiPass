@@ -85,6 +85,7 @@ async def delete_card(card: Card = Depends(require_card), session: Session = Dep
     if card.user_id is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card has already been activated")
     session.delete(card)
+    session.commit()
     return {"message": "Card has been deleted"}
 
 

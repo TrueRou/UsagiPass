@@ -39,14 +39,16 @@ async def create_draft(session: Session = Depends(require_session)):
 
 
 @router.patch("/{uuid}", response_model=Card)
-async def update_draft(phone: str = Depends(require_phone), draft: Card = Depends(require_draft)):
+async def update_draft(phone: str = Depends(require_phone), draft: Card = Depends(require_draft), session: Session = Depends(require_session)):
     draft.phone_number = phone
+    session.commit()
     return draft
 
 
 @router.delete("/{uuid}")
 async def delete_draft(draft: Card = Depends(require_draft), session: Session = Depends(require_session)):
     session.delete(draft)
+    session.commit()
     return {"message": "Draft has been deleted"}
 
 
