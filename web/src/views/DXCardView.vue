@@ -22,7 +22,7 @@ const r = (image: ImagePublic) => import.meta.env.VITE_URL + "/images/" + image!
 const prepareDefaultPreferences = () => {
     cardProfile.value!.preferences.character_name ||= cardProfile.value!.preferences.character.name;
     cardProfile.value!.preferences.display_name ||= cardProfile.value!.preferences.display_name;
-    cardProfile.value!.preferences.dx_rating ||= cardProfile.value!.player_rating;
+    cardProfile.value!.preferences.dx_rating ||= String(cardProfile.value!.player_rating);
     cardProfile.value!.preferences.maimai_version ||= serverStore.serverMessage!.maimai_version;
 }
 
@@ -36,7 +36,7 @@ prepareDefaultPreferences();
             <div class="flex flex-col absolute top-0 w-full h-full">
                 <div class="header-widget flex relative w-full justify-between">
                     <img class="object-cover w-1/2" :src="r(cardProfile?.preferences.passname)">
-                    <DXRating class="w-1/2" :rating="cardProfile?.preferences.dx_rating || 0" />
+                    <DXRating class="w-1/2" :rating="Number(cardProfile?.preferences.dx_rating) || 0" />
                 </div>
                 <div class="header-widget flex relative w-full flex-row-reverse">
                     <PlayerInfo class="w-1/2" :username="cardProfile?.preferences.display_name!"

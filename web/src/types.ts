@@ -18,7 +18,7 @@ interface PreferencePublic {
     character_name?: string;
     friend_code?: string;
     display_name?: string;
-    dx_rating?: number;
+    dx_rating?: string;
     qr_size?: number;
     mask_type?: number;
 }

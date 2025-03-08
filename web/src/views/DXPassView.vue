@@ -19,7 +19,7 @@ const r = (image: ImagePublic) => import.meta.env.VITE_URL + "/images/" + image!
 const prepareDefaultPreferences = () => {
     userProfile.value!.preferences.character_name ||= userProfile.value!.preferences.character.name;
     userProfile.value!.preferences.display_name ||= userProfile.value!.nickname;
-    userProfile.value!.preferences.dx_rating ||= userProfile.value!.player_rating;
+    userProfile.value!.preferences.dx_rating ||= String(userProfile.value!.player_rating);
     userProfile.value!.preferences.friend_code ||= "664994421382429"; // this is my friend code
     userProfile.value!.preferences.simplified_code ||= userStore.simplifiedCode;
     userProfile.value!.preferences.maimai_version ||= serverStore.serverMessage!.maimai_version;
@@ -35,7 +35,7 @@ prepareDefaultPreferences();
             <div class="flex flex-col absolute top-0 w-full h-full">
                 <div class="header-widget flex relative w-full justify-between">
                     <img class="object-cover w-1/2" :src="r(userProfile?.preferences.passname)">
-                    <DXRating class="w-1/2" :rating="userProfile.preferences.dx_rating || 0" />
+                    <DXRating class="w-1/2" :rating="Number(userProfile.preferences.dx_rating) || 0" />
                 </div>
                 <div class="header-widget flex relative w-full flex-row-reverse">
                     <PlayerInfo class="w-1/2" :username="userProfile.preferences.display_name!"
