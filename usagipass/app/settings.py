@@ -30,7 +30,6 @@ default_frame = os.environ.get("DEFAULT_FRAME", "default")
 default_passname = os.environ.get("DEFAULT_PASSNAME", "default")
 
 # refresh settings
-refresh_credits_daily = int(os.environ.get("REFRESH_CREDITS_DAILY", 3))
 refresh_hour_threshold = int(os.environ.get("REFRESH_HOUR_THRESHOLD", 24))
 refresh_hour_active = os.environ.get("REFRESH_HOUR_ACTIVE", "10-17")
 refresh_hour_inactive = os.environ.get("REFRESH_HOUR_INACTIVE", "0-9,18-23")
