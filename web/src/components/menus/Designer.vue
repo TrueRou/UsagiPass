@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useDraftStore } from '@/stores/draft';
 import { useImageStore } from '@/stores/image';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import Prompt from '../widgets/Prompt.vue';
 import { useServerStore } from '@/stores/server';
+import DXBaseView from '@/views/DXBaseView.vue';
 
 
 const props = defineProps<{
@@ -42,8 +43,11 @@ const updateDraft = async () => {
 onMounted(async () => {
     if (!imageStore.images) await imageStore.refreshImages();
 });
+
+const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences.value)));
 </script>
 <template>
+    <DXBaseView :preferences="preferencesReadOnly" />
     <Prompt text="请输入您的手机号码: <br>  手机号码只用于跟踪和确认订单" v-model="newDraftPhone" :show="showDialog" @confirm="createDraft"
         @cancel="showDialog = false;"></Prompt>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
@@ -111,34 +115,6 @@ onMounted(async () => {
                 <select v-model="preferences!.passname.id">
                     <option v-for="item in imageStore.images?.passname" :value="item.id">{{ item.name }}</option>
                 </select>
-            </div>
-        </div>
-        <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex flex-col ml-2 mr-2">
-            <div class="flex justify-between items-center w-full mt-2">
-                <div class="flex flex-col flex-1 items-center justify-between"><img
-                        :src="r(preferences!.background.id)">
-                </div>
-                <div class="flex flex-col flex-1 items-center justify-between"><img :src="r(preferences!.frame.id)">
-                </div>
-                <div class="flex flex-col flex-1 items-center justify-between"><img :src="r(preferences!.character.id)">
-                </div>
-                <div class="flex flex-col flex-1 items-center justify-between"><img :src="r(preferences!.passname.id)">
-                </div>
-            </div>
-            <div class="flex justify-between items-center w-full mt-2">
-                <div class="flex flex-col flex-1 items-center justify-between">
-                    <p class="text-gray-600" style="font-size: 12px;">背景预览</p>
-                </div>
-                <div class="flex flex-col flex-1 items-center justify-between">
-                    <p class="text-gray-600" style="font-size: 12px;">边框预览</p>
-                </div>
-                <div class="flex flex-col flex-1 items-center justify-between">
-                    <p class="text-gray-600" style="font-size: 12px;">人物预览</p>
-                </div>
-                <div class="flex flex-col flex-1 items-center justify-between">
-                    <p class="text-gray-600" style="font-size: 12px;">PASS预览</p>
-                </div>
             </div>
         </div>
     </div>

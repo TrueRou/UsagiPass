@@ -5,8 +5,10 @@ import QRCode from '@/components/QRCode.vue';
 import CharaInfo from '@/components/CharaInfo.vue';
 import PlayerInfo from '@/components/PlayerInfo.vue';
 import CardBack from '@/components/CardBack.vue';
+import { useServerStore } from '@/stores/server';
+import { watch } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     preferences: PreferencePublic;
     timeLimit?: string;
     maimaiCode?: string;
@@ -14,8 +16,16 @@ defineProps<{
 }>()
 
 const router = useRouter();
+const serverStore = useServerStore();
 
 const r = (image: ImagePublic) => import.meta.env.VITE_URL + "/images/" + image!.id;
+
+const applyPreferences = () => {
+    props.preferences.character_name ||= props.preferences.character.name;
+    props.preferences.maimai_version ||= serverStore.serverMessage!.maimai_version;
+}
+
+watch(() => props.preferences, applyPreferences, { immediate: true });
 </script>
 <template>
     <div class="flex items-center justify-center h-full w-full">
