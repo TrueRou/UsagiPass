@@ -60,7 +60,7 @@ async def create_card(session: Session = Depends(require_session), user: User = 
 
 
 @router.get("", response_model=list[Card])
-async def get_card(session: Session = Depends(require_session), user: User = Depends(verify_admin)):
+async def get_cards(session: Session = Depends(require_session), user: User = Depends(verify_admin)):
     return session.exec(select(Card).order_by(Card.created_at.desc())).all()
 
 
@@ -89,7 +89,7 @@ async def delete_card(card: Card = Depends(require_card), session: Session = Dep
     return {"message": "Card has been deleted"}
 
 
-@router.patch("/{uuid}/preferences")
+@router.patch("/{uuid}/preference")
 async def update_preference(
     preference: PreferencePublic,
     db_preference: CardPreference = Depends(require_preference),

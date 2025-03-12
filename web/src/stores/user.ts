@@ -62,11 +62,16 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function patchPreferences() {
-        const response = await axiosInstance.value.patch('/users/preference', userProfile.value!.preferences)
-        if (response.status === 200) {
-            await refreshUser()
+        try {
+            const response = await axiosInstance.value.patch('/users/preference', userProfile.value!.preferences)
+            if (response.status === 200) {
+                await refreshUser()
+            }
+            return response.status === 200
+        } catch (error: any) {
+            alert(error.response.data.detail)
+            return false
         }
-        return response.status === 200
     }
 
     const attemptUploadScores = async () => {

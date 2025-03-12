@@ -6,7 +6,7 @@ const emits = defineEmits(['confirm', 'cancel'])
 <template>
     <div v-if="props.show" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20">
         <div class="bg-white p-4 rounded shadow-lg">
-            <label for="imageName" class="block text-md font-bold text-gray-700">{{ props.text }}</label>
+            <label for="imageName" class="block text-md font-bold text-gray-700" v-html="props.text" />
             <input v-model="model" type="text"
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             <div class="mt-2 flex justify-end">
@@ -23,7 +23,6 @@ input {
     outline-style: none;
     border: 2px solid #000;
     border-radius: 5px;
-    width: 200px;
     height: 44.5px;
     padding: 0;
     padding: 10px 10px;

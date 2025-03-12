@@ -56,6 +56,13 @@ const router = createRouter({
                     props: true,
                     component: () => import('../components/menus/Gallery.vue'),
                 },
+                {
+                    path: 'designer/:uuid?',
+                    name: 'designer',
+                    props: true,
+                    meta: { skipAuth: true },
+                    component: () => import('../components/menus/Designer.vue'),
+                },
             ]
         },
         {
@@ -79,6 +86,9 @@ router.beforeEach(async (to, from, next) => {
     }
     else if (userStore.isSignedIn && to.name === 'login') {
         next({ name: 'home' })
+    }
+    else if (to.meta.skipAuth) {
+        next()
     }
 
     else next()

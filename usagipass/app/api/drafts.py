@@ -25,24 +25,17 @@ def require_draft(card: Card = Depends(require_card)) -> Card:
 
 
 @router.get("", response_model=list[Card])
-async def get_draft(phone: str = Depends(require_phone), session: Session = Depends(require_session)):
+async def get_drafts(phone: str = Depends(require_phone), session: Session = Depends(require_session)):
     return session.exec(select(Card).where(Card.phone_number == phone)).all()
 
 
 @router.post("", response_model=Card)
-async def create_draft(session: Session = Depends(require_session)):
-    card = Card(uuid=str(uuid.uuid4()))
+async def create_draft(phone: str = Depends(require_phone), session: Session = Depends(require_session)):
+    card = Card(uuid=str(uuid.uuid4()), phone_number=phone)
     database.add_model(session, card)
     preference = CardPreference(uuid=card.uuid)
     database.add_model(session, preference)
     return card
-
-
-@router.patch("/{uuid}", response_model=Card)
-async def update_draft(phone: str = Depends(require_phone), draft: Card = Depends(require_draft), session: Session = Depends(require_session)):
-    draft.phone_number = phone
-    session.commit()
-    return draft
 
 
 @router.delete("/{uuid}")
@@ -52,8 +45,8 @@ async def delete_draft(draft: Card = Depends(require_draft), session: Session = 
     return {"message": "Draft has been deleted"}
 
 
-@router.get("/{uuid}/preferences", response_model=PreferencePublic)
-async def get_preferences(
+@router.get("/{uuid}/preference", response_model=PreferencePublic)
+async def get_preference(
     draft: Card = Depends(require_draft),
     db_preference: CardPreference = Depends(require_preference),
     session: Session = Depends(require_session),
@@ -63,7 +56,7 @@ async def get_preferences(
     return preferences
 
 
-@router.patch("/{uuid}/preferences")
+@router.patch("/{uuid}/preference")
 async def update_preference(
     preference: PreferencePublic,
     draft: Card = Depends(require_draft),

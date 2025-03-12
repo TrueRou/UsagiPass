@@ -38,6 +38,13 @@ interface UserProfile {
     accounts: Record<string, UserAccountPublic>;
 }
 
+interface Card {
+    uuid: string;
+    card_id?: number;
+    user_id?: number;
+    phone_number?: string;
+}
+
 interface CardProfile {
     card_id: number;
     player_rating: number;
