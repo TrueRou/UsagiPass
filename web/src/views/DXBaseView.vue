@@ -13,6 +13,7 @@ const props = defineProps<{
     timeLimit?: string;
     maimaiCode?: string;
     settingsRoute?: string;
+    cardBack?: boolean;
 }>()
 
 const router = useRouter();
@@ -29,7 +30,10 @@ watch(() => props.preferences, applyPreferences, { immediate: true });
 </script>
 <template>
     <div class="flex items-center justify-center h-full w-full">
-        <div class="flex relative flex-col items-center justify-center h-full">
+        <div v-if="cardBack">
+            <img class="h-full object-cover -z-[20]" src="../assets/misc/UI_CardBase_Back.png">
+        </div>
+        <div class="flex relative flex-col items-center justify-center h-full" v-else>
             <CardBack :preferences="preferences" />
             <div class="flex flex-col absolute top-0 w-full h-full">
                 <div class="header-widget flex relative w-full justify-between">

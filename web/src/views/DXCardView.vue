@@ -18,5 +18,6 @@ const applyPreferences = () => {
 applyPreferences();
 </script>
 <template>
-    <DXBaseView :preferences="cardPreference" timeLimit="12:00:00" :maimaiCode="null" settingsRoute="preferences" />
+    <DXBaseView :preferences="cardPreference" timeLimit="12:00:00" :maimaiCode="undefined"
+        settingsRoute="preferences" />
 </template>

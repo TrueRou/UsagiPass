@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router';
 import Prompt from '../widgets/Prompt.vue';
 import { useServerStore } from '@/stores/server';
 import DXBaseView from '@/views/DXBaseView.vue';
+import CardBack from '../CardBack.vue';
 
 
 const props = defineProps<{
@@ -20,8 +21,6 @@ const router = useRouter();
 const showDialog = ref<boolean>(false);
 const newDraftPhone = ref<string>("");
 const preferences = ref<PreferencePublic>(await draftStore.fetchPreferences(props.uuid));
-
-const r = (resource_id: string) => import.meta.env.VITE_URL + "/images/" + resource_id;
 
 const createDraft = async () => {
     var re = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
@@ -47,7 +46,34 @@ onMounted(async () => {
 const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences.value)));
 </script>
 <template>
-    <DXBaseView :preferences="preferencesReadOnly" />
+    <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
+        <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
+            <h1 class="font-bold text-white">卡面预览</h1>
+        </div>
+        <div class="flex justify-between items-center w-full mt-2">
+            <div class="flex flex-col p-2">
+                <span>成品遵循: ISO 7810 ID-1 (85.60 x 53.98 mm)</span>
+                <span class="text-gray-600" style="font-size: 12px;">下方预览的比例可能不是 100% 准确</span>
+            </div>
+        </div>
+        <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+        <div class="flex justify-between items-center w-full mt-2">
+            <div class="flex flex-1 preview-radius mr-5" style="zoom: 0.4;">
+                <DXBaseView :preferences="preferencesReadOnly" />
+            </div>
+            <div class="flex flex-1 preview-radius" style="zoom: 0.4;">
+                <DXBaseView :preferences="preferencesReadOnly" card-back />
+            </div>
+        </div>
+        <div class="flex justify-between items-center w-full mt-2">
+            <div class="flex flex-col flex-1 items-center justify-between">
+                <p class="text-gray-600" style="font-size: 12px;">正面预览</p>
+            </div>
+            <div class="flex flex-col flex-1 items-center justify-between">
+                <p class="text-gray-600" style="font-size: 12px;">背面预览</p>
+            </div>
+        </div>
+    </div>
     <Prompt text="请输入您的手机号码: <br>  手机号码只用于跟踪和确认订单" v-model="newDraftPhone" :show="showDialog" @confirm="createDraft"
         @cancel="showDialog = false;"></Prompt>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
@@ -217,7 +243,6 @@ input {
     }
 }
 
-
 select {
     background: #fafdfe;
     width: 200px;
@@ -235,5 +260,11 @@ select {
     box-sizing: border-box;
     border: 2px solid #000;
     border-radius: 5px;
+}
+
+.preview-radius {
+    border-radius: 16px;
+    mask-image: radial-gradient(circle, white 100%, black 100%);
+    -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
 }
 </style>
