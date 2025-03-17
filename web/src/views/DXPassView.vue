@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useUserStore } from '@/stores/user';
+import type { PreferencePublic } from '@/types';
 import DXBaseView from './DXBaseView.vue';
+
 
 const userStore = useUserStore();
 const preferences = ref<PreferencePublic>(JSON.parse(JSON.stringify(userStore.userProfile!.preferences))); // Deep copy

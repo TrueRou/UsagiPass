@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user';
+import type { Kind, Server } from '@/types';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const props = defineProps<{
-    server: string;
+    server: Server;
 }>()
 
-const serverLang: Record<string, any> = {
-    'diving': {
+const serverLang: Record<Server, any> = {
+    'divingfish': {
         'title': '绑定水鱼账户',
         'username': '用户名',
         'password': '密码',

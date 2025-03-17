@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useCardStore } from '@/stores/card';
 import DXBaseView from './DXBaseView.vue';
+import type { CardProfile, PreferencePublic } from '@/types';
 
 const props = defineProps<{
     uuid: string;

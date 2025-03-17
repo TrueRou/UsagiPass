@@ -7,6 +7,7 @@ import PlayerInfo from '@/components/PlayerInfo.vue';
 import CardBack from '@/components/CardBack.vue';
 import { useServerStore } from '@/stores/server';
 import { watch } from 'vue';
+import type { ImagePublic, PreferencePublic } from '@/types';
 
 const props = defineProps<{
     preferences: PreferencePublic;
@@ -57,9 +58,11 @@ watch(() => props.preferences, applyPreferences, { immediate: true });
                     <p class="footer-text font-sega">{{ preferences.maimai_version }}</p>
                 </div>
                 <template v-if="settingsRoute">
-                    <div class="p-1 rounded-full bg-white" @click="router.push({ name: settingsRoute })">
-                        <img src="../assets/misc/settings.svg" style="width: 2vh;"></img>
-                    </div>
+                    <RouterLink :to="{ name: settingsRoute }">
+                        <div class="p-1 rounded-full bg-white">
+                            <img src="../assets/misc/settings.svg" style="width: 2vh;"></img>
+                        </div>
+                    </RouterLink>
                 </template>
             </div>
         </div>

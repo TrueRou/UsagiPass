@@ -4,6 +4,7 @@ import { defineStore } from "pinia"
 import { computed, ref, type Ref } from "vue"
 import { type Router } from "vue-router"
 import { useImageStore } from "./image"
+import type { Kind, UserProfile } from "@/types"
 
 export const useUserStore = defineStore('user', () => {
     const imageStore = useImageStore();
@@ -105,19 +106,19 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 
-    const changeImagePicker = (imagePicker: HTMLInputElement, uploadKind: string, cropperImage: Ref<string | null, string | null>, router: Router) => {
+    const changeImagePicker = (imagePicker: HTMLInputElement, kind: Kind, cropperImage: Ref<string | null, string | null>, router: Router) => {
         const file = imagePicker.files?.[0];
-        if (file && uploadKind) {
+        if (file && kind) {
             const reader = new FileReader();
             reader.onload = function (ev) {
                 cropperImage.value = ev.target?.result as string;
-                router.push({ name: 'cropper', params: { kind: uploadKind } });
+                router.push({ name: 'cropper', params: { kind: kind } });
             }
             reader.readAsDataURL(file);
         }
     }
 
-    const openImagePicker = (kind: string, picker: HTMLInputElement) => {
+    const openImagePicker = (kind: Kind, picker: HTMLInputElement) => {
         if (!picker) return;
         picker.removeEventListener('change', () => { changeImagePicker(picker, kind, cropperImage, router) });
         picker.addEventListener('change', () => { changeImagePicker(picker, kind, cropperImage, router) });

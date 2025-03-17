@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useServerStore } from '@/stores/server';
 import { useUserStore } from '@/stores/user';
+import type { CrawlerResult } from '@/types';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -89,10 +90,10 @@ onMounted(async () => {
     </template>
     <template v-if="progress >= 100">
         <div class="flex justify-end w-full mt-2 mr-2">
-            <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
-                @click="router.push({ name: 'home' });">
+            <RouterLink class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
+                :to="{ name: 'home' }">
                 回到首页
-            </button>
+            </RouterLink>
         </div>
     </template>
 </template>

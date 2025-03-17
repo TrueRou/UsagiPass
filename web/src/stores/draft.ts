@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import { useUserStore } from "./user";
+import type { Card, PreferencePublic } from "@/types";
 
 export const useDraftStore = defineStore('draft', () => {
     const userStore = useUserStore();

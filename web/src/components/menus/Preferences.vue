@@ -1,9 +1,10 @@
-<script setup lang="ts">
+<script setup lang="tsx">
 import { useImageStore } from '@/stores/image';
 import { useServerStore } from '@/stores/server';
 import { useUserStore } from '@/stores/user';
+import { mapServerId, type Kind, type Server } from '@/types';
 import { ref, useTemplateRef } from 'vue';
-import { useRouter } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -14,11 +15,22 @@ const imagePicker = useTemplateRef('image-picker');
 const userProfile = ref(userStore.userProfile);
 
 const r = (resource_id: string) => import.meta.env.VITE_URL + "/images/" + resource_id;
-const openPicker = (kind: string) => userStore.openImagePicker(kind, imagePicker.value!);
+const openPicker = (kind: Kind) => userStore.openImagePicker(kind, imagePicker.value!);
 
-const openGallery = (kind: string) => {
+const openGallery = (kind: Kind) => {
     imageStore.wanderingPreferences = userProfile.value!.preferences;
     router.push({ name: 'gallery', params: { kind: kind } })
+};
+
+const bindBtn = (server: Server) => {
+    const isBinded = userStore.userProfile!.accounts[String(mapServerId[server])];
+    const colorSets = { orange: ["bg-orange-500", "hover:bg-orange-600"], blue: ["bg-blue-500", "hover:bg-blue-600"] };
+    const classNames = ["text-white", "font-bold", "py-2", "px-4", "rounded", ...colorSets[isBinded ? 'orange' : 'blue']];
+    return (
+        <RouterLink class={classNames} to={{ name: "bind", params: { server } }}>
+            {isBinded ? '改绑' : '绑定'}
+        </RouterLink>
+    );
 };
 </script>
 <template>
@@ -277,14 +289,7 @@ const openGallery = (kind: string) => {
                     @click="userStore.patchPreferServer(1)">
                     优先
                 </button>
-                <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
-                    v-if="userStore.userProfile!.accounts['1']" @click="router.push('/bind/divingfish')">
-                    改绑
-                </button>
-                <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600" v-else
-                    @click="router.push('/bind/divingfish')">
-                    绑定
-                </button>
+                <component :is="bindBtn('divingfish')"></component>
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
@@ -305,14 +310,7 @@ const openGallery = (kind: string) => {
                         @click="userStore.patchPreferServer(2)">
                         优先
                     </button>
-                    <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
-                        v-if="userStore.userProfile!.accounts['2']" @click="router.push('/bind/lxns')">
-                        改绑
-                    </button>
-                    <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600" v-else
-                        @click="router.push('/bind/lxns')">
-                        绑定
-                    </button>
+                    <component :is="bindBtn('lxns')"></component>
                 </div>
             </div>
         </div>

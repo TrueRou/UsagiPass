@@ -2,6 +2,7 @@ import { defineStore } from "pinia"
 import { ref } from "vue";
 import { useUserStore } from "./user";
 import router from "@/router";
+import type { ImageDetail, ImagePublic, Kind, PreferencePublic } from "@/types";
 
 export const useImageStore = defineStore('image', () => {
     const userStore = useUserStore();
@@ -23,7 +24,7 @@ export const useImageStore = defineStore('image', () => {
         }
     }
 
-    async function uploadImage(name: string, kind: string, file: Blob) {
+    async function uploadImage(name: string, kind: Kind, file: Blob) {
         try {
             const formData = new FormData();
             formData.append('file', file);

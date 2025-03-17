@@ -1,3 +1,4 @@
+import type { ServerMessage } from "@/types";
 import axios from "axios";
 import { defineStore } from "pinia"
 import { ref } from "vue";

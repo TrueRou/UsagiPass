@@ -3,9 +3,10 @@ import { useImageStore } from '@/stores/image';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import Prompt from '../widgets/Prompt.vue';
+import type { ImagePublic, Kind } from '@/types';
 
 const props = defineProps<{
-    kind: string;
+    kind: Kind;
 }>()
 
 

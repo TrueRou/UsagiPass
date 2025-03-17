@@ -1,3 +1,6 @@
+type Kind = "background" | "frame" | "character" | "passname"
+type Server = "divingfish" | "lxns"
+
 interface ImagePublic {
     id: string;
     name: string;
@@ -5,7 +8,7 @@ interface ImagePublic {
 }
 
 interface ImageDetail extends ImagePublic {
-    kind: string;
+    kind: Kind;
 }
 
 interface PreferencePublic {
@@ -66,3 +69,11 @@ interface CrawlerResult {
     err_msg: string;
     elapsed_time: number;
 }
+
+const mapServerId: Record<Server, number> = {
+    "divingfish": 1,
+    "lxns": 2,
+};
+
+export { mapServerId };
+export type { Kind, Server, ImagePublic, ImageDetail, PreferencePublic, UserAccountPublic, UserProfile, Card, CardProfile, ServerMessage, CrawlerResult };

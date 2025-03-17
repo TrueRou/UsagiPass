@@ -1,15 +1,16 @@
 <script setup lang="ts">
+import 'vue-cropper/dist/index.css'
 import { useUserStore } from '@/stores/user';
 import { onMounted, ref, useTemplateRef } from 'vue';
 import { VueCropper } from "vue-cropper";
 import { useServerStore } from '@/stores/server';
 import { useRouter } from 'vue-router';
 import { useImageStore } from '@/stores/image';
-import 'vue-cropper/dist/index.css'
+import type { Kind } from '@/types';
 import Prompt from '@/components/widgets/Prompt.vue';
 
 const props = defineProps<{
-    kind: string;
+    kind: Kind;
 }>()
 
 const router = useRouter();

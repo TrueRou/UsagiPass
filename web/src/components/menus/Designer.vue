@@ -5,6 +5,7 @@ import { computed, ref, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { useServerStore } from '@/stores/server';
 import { useUserStore } from '@/stores/user';
+import type { Kind, PreferencePublic } from '@/types';
 import DXBaseView from '@/views/DXBaseView.vue';
 import Prompt from '../widgets/Prompt.vue';
 
@@ -24,9 +25,9 @@ const showDialog = ref<boolean>(false);
 const newDraftPhone = ref<string>("");
 const preferences = ref<PreferencePublic>(await draftStore.fetchPreferences(props.uuid));
 
-const openPicker = (kind: string) => userStore.openImagePicker(kind, imagePicker.value!);
+const openPicker = (kind: Kind) => userStore.openImagePicker(kind, imagePicker.value!);
 
-const openGallery = (kind: string) => {
+const openGallery = (kind: Kind) => {
     imageStore.wanderingPreferences = preferences.value;
     router.push({ name: 'gallery', params: { kind: kind } })
 };

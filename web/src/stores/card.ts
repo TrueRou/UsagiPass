@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import { useUserStore } from "./user";
+import type { CardProfile } from "@/types";
 
 export const useCardStore = defineStore('card', () => {
     const userStore = useUserStore();
