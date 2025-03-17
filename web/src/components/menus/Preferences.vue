@@ -99,7 +99,7 @@ const bindBtn = (server: Server) => {
             <div><input v-model="userProfile!.preferences.friend_code"></div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>二维码尺寸</span>
                 <span class="text-gray-600" style="font-size: 12px;">如果机台无法识别, 请增大二维码尺寸</span>
@@ -117,7 +117,7 @@ const bindBtn = (server: Server) => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>背景图片</span>
                 <span class="text-gray-600" style="font-size: 12px;">选择卡面背景图片</span>
@@ -133,7 +133,7 @@ const bindBtn = (server: Server) => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>边框图片</span>
                 <span class="text-gray-600" style="font-size: 12px;">选择卡面边框图片</span>
@@ -149,7 +149,7 @@ const bindBtn = (server: Server) => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>人物图片</span>
                 <span class="text-gray-600" style="font-size: 12px;">选择卡面人物图片</span>
@@ -165,7 +165,7 @@ const bindBtn = (server: Server) => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>通行证图片</span>
                 <span class="text-gray-600" style="font-size: 12px;">选择卡面通行证图片</span>
@@ -181,7 +181,7 @@ const bindBtn = (server: Server) => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>镭射设置</span>
                 <span class="text-gray-600" style="font-size: 12px;">背景镭射层的显示样式</span>
@@ -293,7 +293,7 @@ const bindBtn = (server: Server) => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>
                     落雪账户: <b>{{ userStore.userProfile!.accounts['2'] ? '已绑定' : '未绑定' }}
@@ -333,7 +333,7 @@ const bindBtn = (server: Server) => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>上传边框</span>
                 <span class="text-gray-600" style="font-size: 12px;">上传自定义边框图片 (768 * 1052)</span>
@@ -346,7 +346,7 @@ const bindBtn = (server: Server) => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>上传人物</span>
                 <span class="text-gray-600" style="font-size: 12px;">上传自定义人物图片 (768 * 1052)</span>
@@ -359,7 +359,7 @@ const bindBtn = (server: Server) => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>上传PASS</span>
                 <span class="text-gray-600" style="font-size: 12px;">上传自定义PASS图片 (338 * 112)</span>

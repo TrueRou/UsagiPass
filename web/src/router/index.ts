@@ -70,6 +70,11 @@ const router = createRouter({
                     meta: { requireImages: true },
                     component: () => import('../components/menus/Designer.vue'),
                 },
+                {
+                    path: 'drafts',
+                    name: 'drafts',
+                    component: () => import('../components/menus/Drafts.vue')
+                },
             ]
         },
         {

@@ -33,6 +33,7 @@ export const useUserStore = defineStore('user', () => {
             await refreshUser();
             // refresh images after login, fetch user uploaded images
             if (imageStore.images) await imageStore.refreshImages();
+            router.back();
         } catch (error: any) {
             alert(error.response.data.detail);
         }

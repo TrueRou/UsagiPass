@@ -1,0 +1,293 @@
+<script setup lang="ts">
+import { useDraftStore } from '@/stores/draft';
+import type { Card, PreferencePublic } from '@/types';
+import { computed, ref } from 'vue';
+import { RouterLink } from 'vue-router';
+import DXBaseView from '@/views/DXBaseView.vue';
+
+const draftStore = useDraftStore();
+
+const drafts = ref<Card[]>([]);
+const loading = ref(true);
+const phoneNumber = ref("");
+const selectedDraft = ref<Card | null>(null);
+const previewPreferences = ref<PreferencePublic | null>(null);
+const showPreview = ref(false);
+
+// 获取用户创建的所有草稿
+const fetchDrafts = async () => {
+    loading.value = true;
+    try {
+        drafts.value = await draftStore.fetchDrafts(phoneNumber.value);
+    } catch (error) {
+        console.error("Error fetching drafts:", error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+// 删除草稿
+const deleteDraft = async (uuid: string) => {
+    if (confirm('确定要删除这个草稿吗？此操作不可撤销。')) {
+        try {
+            await draftStore.deleteDraft(uuid);
+            // 重新获取草稿列表以更新UI
+            await fetchDrafts();
+        } catch (error) {
+            console.error("Error deleting draft:", error);
+        }
+    }
+};
+
+// 确认查询电话
+const searchDrafts = () => {
+    var re = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/;
+    if (!re.test(phoneNumber.value)) {
+        alert("请输入正确的手机号码");
+        return;
+    }
+    fetchDrafts();
+};
+
+// 显示预览
+const previewDraft = async (draft: Card) => {
+    selectedDraft.value = draft;
+    loading.value = true;
+    try {
+        previewPreferences.value = await draftStore.fetchPreferences(draft.uuid);
+        showPreview.value = true;
+    } catch (error) {
+        console.error("Error fetching preferences for preview:", error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+// 关闭预览
+const closePreview = () => {
+    showPreview.value = false;
+    selectedDraft.value = null;
+};
+
+// 格式化日期显示
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+// 获取短ID用于显示
+const getShortId = (uuid: string) => {
+    return uuid.substring(0, 8);
+};
+
+// 订单状态显示逻辑
+const getOrderStatus = (draft: Card) => {
+    return draft.card_id ? '已确认' : '草稿';
+};
+
+const preferencesReadOnly = computed(() => {
+    if (!previewPreferences.value) return null;
+    return JSON.parse(JSON.stringify(previewPreferences.value));
+});
+</script>
+
+<template>
+    <!-- 预览弹窗 -->
+    <div v-if="showPreview && previewPreferences"
+        class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg w-full overflow-hidden" style="max-width: 30rem;">
+            <div class="p-4 bg-blue-400 text-white flex justify-between items-center">
+                <span class="font-bold text-nowrap">卡面预览 - 订单号: {{ getShortId(selectedDraft!.uuid) }}</span>
+            </div>
+            <div class="p-4 flex flex-col items-center">
+                <div class="flex flex-1 preview-radius w-full" style="max-width: 100vw; ">
+                    <DXBaseView :preferences="preferencesReadOnly" />
+                </div>
+                <div class="mt-4 flex justify-end w-full">
+                    <button @click="closePreview"
+                        class="bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-bold">
+                        关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
+        <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
+            <h1 class="font-bold text-white">我的订单</h1>
+        </div>
+        <!-- 直接在页面中添加手机号输入框 -->
+        <div class="w-full p-4">
+            <div class="flex flex-col items-center justify-center">
+                <div class="flex justify-between items-center w-full mb-2">
+                    <div class="flex flex-col p-2">
+                        <span>手机号码</span>
+                        <span class="text-gray-600" style="font-size: 12px;">号码仅用于跟踪和确认订单</span>
+                    </div>
+                    <div><input v-model="phoneNumber"></div>
+                </div>
+                <div class="flex w-full flex-col sm:flex-row gap-2">
+                    <button
+                        class="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 shadow-md flex items-center"
+                        @click="searchDrafts">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        查询订单
+                    </button>
+                    <RouterLink
+                        class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 shadow-md flex items-center"
+                        :to="{ name: 'designer', state: { phoneNumber: phoneNumber } }">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        创建订单
+                    </RouterLink>
+                </div>
+            </div>
+        </div>
+    </div>
+    <template v-if="drafts.length">
+        <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
+            <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
+                <h1 class="font-bold text-white">查询结果</h1>
+            </div>
+            <div class="w-full">
+                <div class="p-4">
+                    <div v-for="draft in drafts" :key="draft.uuid"
+                        class="border border-gray-300 rounded-lg p-4 mb-6 hover:shadow-lg transition-shadow">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <!-- 左侧：订单信息 -->
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold mb-2">订单编号: {{ getShortId(draft.uuid) }}</h3>
+                                <div class="space-y-2">
+                                    <p class="text-gray-600">
+                                        <span class="font-semibold">创建时间:</span> {{ formatDate(draft.created_at) }}
+                                    </p>
+                                    <p class="flex items-center">
+                                        <span class="font-semibold mr-2">订单状态:</span>
+                                        <span :class="{
+                                            'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-bold': !draft.card_id,
+                                            'bg-green-100 text-green-800 px-2 py-1 rounded-full font-bold': draft.card_id
+                                        }">
+                                            {{ getOrderStatus(draft) }}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="mt-4 flex flex-wrap gap-3">
+                                    <!-- 预览按钮 -->
+                                    <button @click="previewDraft(draft)"
+                                        class="bg-purple-500 text-white py-3 px-6 rounded-lg hover:bg-purple-600 font-bold flex items-center shadow-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                            <path fill-rule="evenodd"
+                                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        预览卡面
+                                    </button>
+
+                                    <!-- 编辑按钮 -->
+                                    <RouterLink v-if="!draft.card_id"
+                                        :to="{ name: 'designer', params: { uuid: draft.uuid } }"
+                                        class="bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 font-bold flex items-center shadow-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path
+                                                d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                        </svg>
+                                        编辑订单
+                                    </RouterLink>
+
+                                    <!-- 删除按钮 -->
+                                    <button v-if="!draft.card_id" @click="deleteDraft(draft.uuid)"
+                                        class="bg-red-500 text-white py-3 px-6 rounded-lg hover:bg-red-600 font-bold flex items-center shadow-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        删除订单
+                                    </button>
+
+                                    <span v-if="draft.card_id" class="text-sm italic text-gray-500 py-2">
+                                        订单已确认，无法修改
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>
+
+<style scoped>
+.preview-radius {
+    border-radius: 16px;
+    mask-image: radial-gradient(circle, white 100%, black 100%);
+    -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
+    overflow: hidden;
+}
+
+input {
+    outline-style: none;
+    border: 2px solid #000;
+    border-radius: 5px;
+    width: 200px;
+
+    @media (max-width: 600px) {
+        width: 160px;
+    }
+
+    @media (max-width: 380px) {
+        width: 140px;
+    }
+
+    height: 44.5px;
+    padding: 0;
+    padding: 10px 10px;
+    box-sizing: border-box;
+
+    &:focus {
+        border-color: #60a5fa;
+        outline: 0;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
+            #60a5fa;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
+            #60a5fa;
+    }
+}
+
+/* 移动设备适配 */
+@media (max-width: 640px) {
+    .flex-col-mobile {
+        flex-direction: column;
+    }
+
+    button,
+    a.bg-blue-500,
+    a.bg-green-500,
+    a.bg-red-500,
+    a.bg-purple-500 {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>

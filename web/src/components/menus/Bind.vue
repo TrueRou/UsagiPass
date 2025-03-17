@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user';
-import type { Kind, Server } from '@/types';
+import type { Server } from '@/types';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 

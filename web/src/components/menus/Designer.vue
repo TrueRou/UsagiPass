@@ -22,7 +22,7 @@ const serverStore = useServerStore();
 
 const imagePicker = useTemplateRef('image-picker');
 const showDialog = ref<boolean>(false);
-const newDraftPhone = ref<string>("");
+const newDraftPhone = ref<string>(history.state.phoneNumber || '');
 const preferences = ref<PreferencePublic>(await draftStore.fetchPreferences(props.uuid));
 
 const openPicker = (kind: Kind) => userStore.openImagePicker(kind, imagePicker.value!);
@@ -33,6 +33,10 @@ const openGallery = (kind: Kind) => {
 };
 
 const createDraft = async () => {
+    if (!newDraftPhone.value) {
+        showDialog.value = true;
+        return;
+    }
     var re = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
     if (!re.test(newDraftPhone.value)) {
         alert("请输入正确的手机号码");
@@ -40,8 +44,8 @@ const createDraft = async () => {
     }
     const card = await draftStore.createDraft(newDraftPhone.value);
     await draftStore.patchPreferences(card.uuid, preferences.value!);
-    router.push({ name: "designer", params: { uuid: card.uuid } });
     showDialog.value = false;
+    router.replace({ name: "designer", params: { uuid: card.uuid } });
     alert("您的卡面已创建\n在订单确认前, 您可以随时修改卡面设置");
 }
 
@@ -103,7 +107,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>边框图片</span>
                 <span class="text-gray-600" style="font-size: 12px;">选择卡面边框图片</span>
@@ -119,7 +123,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>人物图片</span>
                 <span class="text-gray-600" style="font-size: 12px;">选择卡面人物图片</span>
@@ -135,7 +139,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>通行证图片</span>
                 <span class="text-gray-600" style="font-size: 12px;">选择卡面通行证图片</span>
@@ -163,7 +167,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
             <div><input v-model="preferences!.display_name" placeholder="留空隐藏姓名框"></div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>好友号码</span>
                 <span class="text-gray-600" style="font-size: 12px;">卡面印刷的好友号码</span>
@@ -210,6 +214,28 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
         </div>
         <template v-if="userStore.isSignedIn">
             <div class="flex justify-between items-center w-full mt-2">
+                <div class="flex items-center">
+                    <img class="w-12 h-12 rounded-full ml-2" src="https://assets2.lxns.net/maimai/icon/300103.png">
+
+                    <div class="flex flex-col p-2">
+                        <span>
+                            {{ userStore.userProfile!.nickname }} ({{ userStore.userProfile!.username }})
+                        </span>
+                        <span class="text-gray-600" style="font-size: 12px;">
+                            该账号仅用于上传自定义图片
+                            DXRating: {{ userStore.userProfile!.player_rating }}
+                        </span>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <a class="ml-2 bg-red-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-red-600 text-sm cursor-pointer"
+                        @click="userStore.logout">
+                        <img class="pl-1.5 pt-1" src="../../assets/misc/logout.svg">
+                    </a>
+                </div>
+            </div>
+            <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+            <div class="flex justify-between items-center w-full">
                 <input class="hidden" ref="image-picker" type="file" accept="image/jpeg,image/png,image/webp" />
                 <div class="flex flex-col p-2">
                     <span>上传背景</span>
@@ -223,7 +249,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
                 </div>
             </div>
             <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-            <div class="flex justify-between items-center w-full mt-2">
+            <div class="flex justify-between items-center w-full">
                 <div class="flex flex-col p-2">
                     <span>上传边框</span>
                     <span class="text-gray-600" style="font-size: 12px;">上传自定义边框图片 (768 * 1052)</span>
@@ -236,7 +262,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
                 </div>
             </div>
             <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-            <div class="flex justify-between items-center w-full mt-2">
+            <div class="flex justify-between items-center w-full">
                 <div class="flex flex-col p-2">
                     <span>上传人物</span>
                     <span class="text-gray-600" style="font-size: 12px;">上传自定义人物图片 (768 * 1052)</span>
@@ -249,7 +275,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
                 </div>
             </div>
             <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-            <div class="flex justify-between items-center w-full mt-2">
+            <div class="flex justify-between items-center w-full">
                 <div class="flex flex-col p-2">
                     <span>上传PASS</span>
                     <span class="text-gray-600" style="font-size: 12px;">上传自定义PASS图片 (338 * 112)</span>
@@ -259,6 +285,20 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
                         @click="openPicker('passname')">
                         上传
                     </button>
+                </div>
+            </div>
+        </template>
+        <template v-else>
+            <div class="flex justify-between items-center w-full mt-2">
+                <div class="flex flex-col p-2">
+                    <span>登录以继续</span>
+                    <span class="text-gray-600" style="font-size: 12px;">支持使用水鱼或落雪账户进行登录</span>
+                </div>
+                <div>
+                    <RouterLink class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+                        :to="{ name: 'login' }">
+                        登录
+                    </RouterLink>
                 </div>
             </div>
         </template>
@@ -272,7 +312,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
         </template>
         <template v-else>
             <button class="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-600"
-                v-on:click="showDialog = true">
+                v-on:click="createDraft">
                 创建
             </button>
         </template>

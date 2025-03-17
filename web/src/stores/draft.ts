@@ -46,5 +46,15 @@ export const useDraftStore = defineStore('draft', () => {
         }
     }
 
-    return { fetchDrafts, createDraft, fetchPreferences, patchPreferences }
+    async function deleteDraft(uuid: string) {
+        try {
+            const response = await userStore.axiosInstance.delete(`/drafts/${uuid}`)
+            return response.status === 200
+        } catch (error: any) {
+            alert(error.response.data.detail)
+            return false
+        }
+    }
+
+    return { fetchDrafts, createDraft, fetchPreferences, patchPreferences, deleteDraft }
 })

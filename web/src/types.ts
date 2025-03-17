@@ -46,6 +46,7 @@ interface Card {
     card_id?: number;
     user_id?: number;
     phone_number?: string;
+    created_at: string;
 }
 
 interface CardProfile {
