@@ -1,26 +1,30 @@
 <script setup lang="ts">
 import { useDraftStore } from '@/stores/draft';
 import { useImageStore } from '@/stores/image';
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 import Prompt from '../widgets/Prompt.vue';
 import { useServerStore } from '@/stores/server';
 import DXBaseView from '@/views/DXBaseView.vue';
-import CardBack from '../CardBack.vue';
+import { useUserStore } from '@/stores/user';
 
 
 const props = defineProps<{
     uuid?: string;
 }>()
 
+const router = useRouter();
 const draftStore = useDraftStore();
 const imageStore = useImageStore();
+const userStore = useUserStore();
 const serverStore = useServerStore();
-const router = useRouter();
 
+const imagePicker = useTemplateRef('image-picker');
 const showDialog = ref<boolean>(false);
 const newDraftPhone = ref<string>("");
 const preferences = ref<PreferencePublic>(await draftStore.fetchPreferences(props.uuid));
+
+const openPicker = (kind: string) => userStore.openImagePicker(kind, imagePicker.value!);
 
 const createDraft = async () => {
     var re = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
@@ -38,10 +42,6 @@ const createDraft = async () => {
 const updateDraft = async () => {
     await draftStore.patchPreferences(props.uuid!, preferences.value!);
 }
-
-onMounted(async () => {
-    if (!imageStore.images) await imageStore.refreshImages();
-});
 
 const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences.value)));
 </script>
@@ -196,6 +196,65 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
             <div><input v-model="preferences!.maimai_version" :placeholder="serverStore.serverMessage?.maimai_version">
             </div>
         </div>
+    </div>
+    <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
+        <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
+            <h1 class="font-bold text-white">自定义图片</h1>
+        </div>
+        <template v-if="userStore.isSignedIn">
+            <div class="flex justify-between items-center w-full mt-2">
+                <input class="hidden" ref="image-picker" type="file" accept="image/jpeg,image/png,image/webp" />
+                <div class="flex flex-col p-2">
+                    <span>上传背景</span>
+                    <span class="text-gray-600" style="font-size: 12px;">上传自定义背景图片 (768 * 1052)</span>
+                </div>
+                <div>
+                    <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
+                        @click="openPicker('background')">
+                        上传
+                    </button>
+                </div>
+            </div>
+            <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+            <div class="flex justify-between items-center w-full mt-2">
+                <div class="flex flex-col p-2">
+                    <span>上传边框</span>
+                    <span class="text-gray-600" style="font-size: 12px;">上传自定义边框图片 (768 * 1052)</span>
+                </div>
+                <div>
+                    <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
+                        @click="openPicker('frame')">
+                        上传
+                    </button>
+                </div>
+            </div>
+            <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+            <div class="flex justify-between items-center w-full mt-2">
+                <div class="flex flex-col p-2">
+                    <span>上传人物</span>
+                    <span class="text-gray-600" style="font-size: 12px;">上传自定义人物图片 (768 * 1052)</span>
+                </div>
+                <div>
+                    <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
+                        @click="openPicker('character')">
+                        上传
+                    </button>
+                </div>
+            </div>
+            <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+            <div class="flex justify-between items-center w-full mt-2">
+                <div class="flex flex-col p-2">
+                    <span>上传PASS</span>
+                    <span class="text-gray-600" style="font-size: 12px;">上传自定义PASS图片 (338 * 112)</span>
+                </div>
+                <div>
+                    <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
+                        @click="openPicker('passname')">
+                        上传
+                    </button>
+                </div>
+            </div>
+        </template>
     </div>
     <div class="flex justify-end w-full mt-2 mr-5">
         <template v-if="props.uuid">

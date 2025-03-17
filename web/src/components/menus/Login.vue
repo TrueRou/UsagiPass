@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+
+const userStore = useUserStore();
 
 const username = ref('');
 const password = ref('');
 
-const userStore = useUserStore();
-const router = useRouter();
-
-const login = async (target: string) => {
-    const result = await userStore.login(target, username.value, password.value);
-    if (result) router.push({ name: 'home' });
-};
+const login = async (target: string) => await userStore.login(target, username.value, password.value);
 </script>
 <template>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">

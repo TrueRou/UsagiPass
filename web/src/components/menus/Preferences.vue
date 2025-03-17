@@ -2,53 +2,19 @@
 import { useImageStore } from '@/stores/image';
 import { useServerStore } from '@/stores/server';
 import { useUserStore } from '@/stores/user';
-import { storeToRefs } from 'pinia';
-import { onMounted, ref, useTemplateRef } from 'vue';
+import { ref, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const userStore = useUserStore();
 const imageStore = useImageStore();
 const serverStore = useServerStore();
-const router = useRouter();
-const imagePicker = useTemplateRef('image-picker');
 
-const { userProfile, cropperImage } = storeToRefs(userStore);
-const uploadKind = ref<string | null>(null);
+const imagePicker = useTemplateRef('image-picker');
+const userProfile = ref(userStore.userProfile);
 
 const r = (resource_id: string) => import.meta.env.VITE_URL + "/images/" + resource_id;
-
-const patchPreference = async () => {
-    if (await userStore.patchPreferences()) {
-        router.push({ name: 'home' }); // Redirect to home page
-    }
-}
-
-const patchPreferServer = async (prefer_server: number) => {
-    const response = await userStore.axiosInstance.patch('/users', {
-        prefer_server: prefer_server
-    });
-    if (response.status === 200) await userStore.refreshUser();
-}
-
-const openPicker = (kind: string) => {
-    uploadKind.value = kind;
-    imagePicker.value?.click();
-}
-
-onMounted(async () => {
-    if (!imageStore.images) await imageStore.refreshImages();
-    imagePicker.value?.addEventListener('change', async () => {
-        const file = imagePicker.value?.files?.[0];
-        if (file && uploadKind.value) {
-            const reader = new FileReader();
-            reader.onload = function (ev) {
-                cropperImage.value = ev.target?.result as string;
-                router.push({ name: 'cropper', params: { kind: uploadKind.value } });
-            }
-            reader.readAsDataURL(file);
-        }
-    });
-});
+const openPicker = (kind: string) => userStore.openImagePicker(kind, imagePicker.value!);
 </script>
 <template>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
@@ -94,7 +60,7 @@ onMounted(async () => {
             <div class="flex items-center">
                 <button
                     class="bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-2 px-2 rounded hover:from-pink-600 hover:to-blue-600 text-nowrap"
-                    @click="userStore.attemptUploadScores">
+                    @click="userStore.updateProber">
                     更新查分器
                 </button>
                 <a class="ml-2 bg-red-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-red-600 text-sm cursor-pointer"
@@ -303,7 +269,7 @@ onMounted(async () => {
             <div class="flex items-center">
                 <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mr-2"
                     v-if="userStore.userProfile!.prefer_server != 1 && userStore.userProfile!.accounts['1']"
-                    @click="patchPreferServer(1)">
+                    @click="userStore.patchPreferServer(1)">
                     优先
                 </button>
                 <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
@@ -331,7 +297,7 @@ onMounted(async () => {
                 <div class="flex items-center">
                     <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mr-2"
                         v-if="userStore.userProfile!.prefer_server != 2 && userStore.userProfile!.accounts['2']"
-                        @click="patchPreferServer(2)">
+                        @click="userStore.patchPreferServer(2)">
                         优先
                     </button>
                     <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
@@ -405,7 +371,7 @@ onMounted(async () => {
     </div>
     <div class="flex justify-end w-full mt-2 mr-5">
         <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
-            v-on:click="patchPreference">
+            v-on:click="userStore.patchPreferences()">
             保存
         </button>
     </div>

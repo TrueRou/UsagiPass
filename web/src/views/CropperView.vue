@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user';
-import { ref, useTemplateRef } from 'vue';
+import { onMounted, ref, useTemplateRef } from 'vue';
 import { VueCropper } from "vue-cropper";
 import { useServerStore } from '@/stores/server';
 import { useRouter } from 'vue-router';
-import 'vue-cropper/dist/index.css'
 import { useImageStore } from '@/stores/image';
+import 'vue-cropper/dist/index.css'
 import Prompt from '@/components/widgets/Prompt.vue';
 
 const props = defineProps<{
@@ -16,6 +16,7 @@ const router = useRouter();
 const userStore = useUserStore();
 const imageStore = useImageStore();
 const serverStore = useServerStore();
+
 const imageCropper = useTemplateRef('cropper');
 const fixedNumber = ref<Array<number>>([0, 0]);
 const showDialog = ref<boolean>(false);
@@ -23,26 +24,18 @@ const imageName = ref<string>('');
 
 const uploadImage = async () => {
     ((imageCropper.value) as any).getCropBlob(async (blob: Blob) => {
-        const formData = new FormData();
-        formData.append('file', blob);
-        await userStore.axiosInstance.post(`/images?name=${imageName.value}&kind=${props.kind}`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-        await imageStore.refreshImages();
-        showDialog.value = false;
-        router.back();
+        imageStore.uploadImage(props.kind, imageName.value, blob);
     });
 }
 
-if (!serverStore.serverKinds) await serverStore.refreshKind()
-if (!Object.keys(serverStore.serverKinds!).includes(props.kind)) {
-    alert(`访问的资源 ${props.kind} 不存在`)
-    router.push({ name: 'home' }); // Redirect to home page
-}
-
-fixedNumber.value = serverStore.serverKinds![props.kind]["hw"][0]
+onMounted(async () => {
+    if (!serverStore.serverKinds) await serverStore.refreshKind()
+    fixedNumber.value = serverStore.serverKinds![props.kind]["hw"][0]
+    if (!Object.keys(serverStore.serverKinds!).includes(props.kind)) {
+        alert(`访问的资源 ${props.kind} 不存在`)
+        router.back();
+    }
+})
 </script>
 <template>
     <Prompt text="请输入图片名称: " v-model="imageName" :show="showDialog" @confirm="uploadImage"

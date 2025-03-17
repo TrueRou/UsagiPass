@@ -30,14 +30,11 @@ const password = ref('');
 const userStore = useUserStore();
 const router = useRouter();
 
-const tryBind = async () => {
-    const result = await userStore.bind(props.server, username.value, password.value);
-    if (result) router.back()
-};
+const bind = async () => await userStore.bind(props.server, username.value, password.value);
 
 if (props.server !== 'divingfish' && props.server !== 'lxns') {
-    alert(`访问的资源 ${props.server} 不存在`)
-    router.push({ name: 'home' }); // Redirect to home page
+    alert(`访问的资源 ${props.server} 不存在`);
+    router.back();
 }
 </script>
 <template>
@@ -48,7 +45,7 @@ if (props.server !== 'divingfish' && props.server !== 'lxns') {
         <input type="text" v-model="username" :placeholder="serverLang[props.server].username" />
         <input class="mt-2" type="password" v-model="password" :placeholder="serverLang[props.server].password" />
         <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mt-2 w-[200px]"
-            @click="tryBind">绑定</button>
+            @click="bind">绑定</button>
         <button class="bg-gray-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-600 mt-2 w-[200px]"
             @click="router.back()">取消</button>
     </div>
