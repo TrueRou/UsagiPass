@@ -6,6 +6,7 @@ import router from "@/router";
 export const useImageStore = defineStore('image', () => {
     const userStore = useUserStore();
     const images = ref<Record<string, ImageDetail[]>>()
+    const wanderingPreferences = ref<PreferencePublic>()
 
     async function refreshImages() {
         try {
@@ -54,5 +55,5 @@ export const useImageStore = defineStore('image', () => {
         }
     }
 
-    return { images, refreshImages, uploadImage, deleteImage, patchImage }
+    return { images, wanderingPreferences, refreshImages, uploadImage, deleteImage, patchImage }
 })

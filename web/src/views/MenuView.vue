@@ -3,7 +3,11 @@
         <div class="flex flex-col items-center h-full w-full sm:w-[640px] pl-4 pr-4 pt-2 pb-2 z-0">
             <div
                 class="flex flex-col items-center h-full w-full rounded bg-white p-4 overflow-y-scroll overflow-x-hidden z-0">
-                <RouterView />
+                <RouterView v-slot="{ Component }">
+                    <KeepAlive :max="2">
+                        <Component :is="Component" />
+                    </KeepAlive>
+                </RouterView>
             </div>
         </div>
     </div>

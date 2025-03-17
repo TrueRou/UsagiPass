@@ -88,7 +88,7 @@ router.beforeEach(async (to, from, next) => {
     if (to.query.time) userStore.timeLimit = to.query.time as string
     if (!serverStore.serverMessage) await serverStore.refreshMotd()
     if (localStorage.getItem('token') && !userStore.userProfile) await userStore.refreshUser()
-    if (to.meta.requireImages && !imageStore.images) imageStore.refreshImages().catch(() => { console.log('Failed to refresh images') })
+    if (to.meta.requireImages && !imageStore.images) await imageStore.refreshImages()
 
     if (!userStore.isSignedIn && to.meta.requireAuth) next({ name: 'login' })
     else if (userStore.isSignedIn && to.name === 'login') next({ name: 'home' })

@@ -15,6 +15,11 @@ const userProfile = ref(userStore.userProfile);
 
 const r = (resource_id: string) => import.meta.env.VITE_URL + "/images/" + resource_id;
 const openPicker = (kind: string) => userStore.openImagePicker(kind, imagePicker.value!);
+
+const openGallery = (kind: string) => {
+    imageStore.wanderingPreferences = userProfile.value!.preferences;
+    router.push({ name: 'gallery', params: { kind: kind } })
+};
 </script>
 <template>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
@@ -107,7 +112,7 @@ const openPicker = (kind: string) => userStore.openImagePicker(kind, imagePicker
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/background')">
+                    @click="openGallery('background')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.background.id">
@@ -123,7 +128,7 @@ const openPicker = (kind: string) => userStore.openImagePicker(kind, imagePicker
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/frame')">
+                    @click="openGallery('frame')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.frame.id">
@@ -139,7 +144,7 @@ const openPicker = (kind: string) => userStore.openImagePicker(kind, imagePicker
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/character')">
+                    @click="openGallery('character')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.character.id">
@@ -155,7 +160,7 @@ const openPicker = (kind: string) => userStore.openImagePicker(kind, imagePicker
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/passname')">
+                    @click="openGallery('passname')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.passname.id">

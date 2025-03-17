@@ -3,10 +3,10 @@ import { useDraftStore } from '@/stores/draft';
 import { useImageStore } from '@/stores/image';
 import { computed, ref, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
-import Prompt from '../widgets/Prompt.vue';
 import { useServerStore } from '@/stores/server';
-import DXBaseView from '@/views/DXBaseView.vue';
 import { useUserStore } from '@/stores/user';
+import DXBaseView from '@/views/DXBaseView.vue';
+import Prompt from '../widgets/Prompt.vue';
 
 
 const props = defineProps<{
@@ -25,6 +25,11 @@ const newDraftPhone = ref<string>("");
 const preferences = ref<PreferencePublic>(await draftStore.fetchPreferences(props.uuid));
 
 const openPicker = (kind: string) => userStore.openImagePicker(kind, imagePicker.value!);
+
+const openGallery = (kind: string) => {
+    imageStore.wanderingPreferences = preferences.value;
+    router.push({ name: 'gallery', params: { kind: kind } })
+};
 
 const createDraft = async () => {
     var re = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
@@ -75,7 +80,8 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
         </div>
     </div>
     <Prompt text="请输入您的手机号码: <br>  手机号码只用于跟踪和确认订单" v-model="newDraftPhone" :show="showDialog" @confirm="createDraft"
-        @cancel="showDialog = false;"></Prompt>
+        @cancel="showDialog = false;">
+    </Prompt>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
             <h1 class="font-bold text-white">卡面设置</h1>
@@ -87,7 +93,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/background')">
+                    @click="openGallery('background')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="preferences!.background.id">
@@ -103,7 +109,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/frame')">
+                    @click="openGallery('frame')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="preferences!.frame.id">
@@ -119,7 +125,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/character')">
+                    @click="openGallery('character')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="preferences!.character.id">
@@ -135,7 +141,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/passname')">
+                    @click="openGallery('passname')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="preferences!.passname.id">
@@ -264,7 +270,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
             </button>
         </template>
         <template v-else>
-            <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
+            <button class="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-600"
                 v-on:click="showDialog = true">
                 创建
             </button>

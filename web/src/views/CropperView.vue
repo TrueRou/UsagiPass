@@ -24,7 +24,7 @@ const imageName = ref<string>('');
 
 const uploadImage = async () => {
     ((imageCropper.value) as any).getCropBlob(async (blob: Blob) => {
-        imageStore.uploadImage(props.kind, imageName.value, blob);
+        imageStore.uploadImage(imageName.value, props.kind, blob);
     });
 }
 
@@ -39,7 +39,8 @@ onMounted(async () => {
 </script>
 <template>
     <Prompt text="请输入图片名称: " v-model="imageName" :show="showDialog" @confirm="uploadImage"
-        @cancel="showDialog = false;"></Prompt>
+        @cancel="showDialog = false;">
+    </Prompt>
     <div class="cropper-frame">
         <VueCropper ref="cropper" :img="userStore.cropperImage" :outputSize="1" outputType="png" :autoCrop="true"
             :fixed="true" :fixedNumber="fixedNumber" :autoCropWidth="fixedNumber![0]" :autoCropHeight="fixedNumber![1]"

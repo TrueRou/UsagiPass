@@ -25,9 +25,10 @@ const renameModel = ref<ImagePublic | null>(null);
 const r = (resource_id: string) => import.meta.env.VITE_URL + `/images/${resource_id}/thumbnail`;
 
 const selectImage = (image: ImagePublic) => {
-    // emits('selected', image.id);
-
-    router.back();
+    if (imageStore.wanderingPreferences) {
+        (imageStore.wanderingPreferences as any)[props.kind].id = image.id;
+        router.back();
+    }
 }
 
 const setRenameModel = (image: ImagePublic) => {
@@ -47,8 +48,9 @@ if (!Object.keys(imageStore.images!).includes(props.kind)) {
 }
 </script>
 <template>
-    <Prompt text="请修改图片名称: " v-model="renameModel!['name']" :show="showDialog" @confirm="renameImage"
-        @cancel="showDialog = false;"></Prompt>
+    <Prompt v-if="renameModel" text="请修改图片名称: " v-model="renameModel!['name']" :show="showDialog" @confirm="renameImage"
+        @cancel="showDialog = false;">
+    </Prompt>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
             <h1 class="font-bold text-white">{{ '选取' + kindDict[props.kind] }}</h1>
