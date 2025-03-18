@@ -4,6 +4,7 @@ import { useServerStore } from '@/stores/server'
 import DXPassView from '@/views/DXPassView.vue'
 import DXCardView from '@/views/DXCardView.vue'
 import { useImageStore } from '@/stores/image'
+import CardGuardView from '@/views/CardGuardView.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,10 +16,15 @@ const router = createRouter({
             component: DXPassView
         },
         {
-            path: '/card/:uuid',
+            path: '/card',
             name: 'card',
-            props: true,
             component: DXCardView,
+        },
+        {
+            path: '/card/:uuid',
+            name: 'cardGuard',
+            props: true,
+            component: CardGuardView,
         },
         {
             path: '/cropper/:kind',

@@ -1,4 +1,4 @@
-type Kind = "background" | "frame" | "character" | "passname"
+type Kind = "background" | "frame" | "character" | "passname" | "mask"
 type Server = "divingfish" | "lxns"
 
 interface ImagePublic {

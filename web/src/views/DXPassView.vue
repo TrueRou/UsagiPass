@@ -6,7 +6,7 @@ import DXBaseView from './DXBaseView.vue';
 
 
 const userStore = useUserStore();
-const preferences = ref<PreferencePublic>(JSON.parse(JSON.stringify(userStore.userProfile!.preferences))); // Deep copy
+const preferences = ref<PreferencePublic>(JSON.parse(JSON.stringify(userStore.userProfile!.preferences)));
 
 const applyPreferences = () => {
     preferences.value.display_name ||= userStore.userProfile!.nickname;

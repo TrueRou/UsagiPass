@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useServerStore } from '@/stores/server';
+import type { ImageDetail, ImagePublic, PreferencePublic } from '@/types';
 
 const props = defineProps<{
     preferences: PreferencePublic;

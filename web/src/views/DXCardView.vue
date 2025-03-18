@@ -4,13 +4,9 @@ import { useCardStore } from '@/stores/card';
 import DXBaseView from './DXBaseView.vue';
 import type { CardProfile, PreferencePublic } from '@/types';
 
-const props = defineProps<{
-    uuid: string;
-}>()
-
 const cardStore = useCardStore();
-const cardProfile = ref<CardProfile>(await cardStore.fetchCard(props.uuid));
-const cardPreference = ref<PreferencePublic>(JSON.parse(JSON.stringify(cardProfile.value!.preferences))); // Deep copy
+const cardProfile = ref<CardProfile>(await cardStore.fetchCard(history.state.uuid));
+const cardPreference = ref<PreferencePublic>(JSON.parse(JSON.stringify(cardProfile.value!.preferences)));
 
 const applyPreferences = () => {
     cardPreference.value.dx_rating ||= String(cardProfile.value.player_rating);
