@@ -4,8 +4,10 @@ import type { Card, PreferencePublic } from '@/types';
 import { computed, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DXBaseView from '@/views/DXBaseView.vue';
+import { useNotificationStore } from '@/stores/notification';
 
 const draftStore = useDraftStore();
+const notificationStore = useNotificationStore();
 
 const drafts = ref<Card[]>([]);
 const loading = ref(true);
@@ -33,6 +35,7 @@ const deleteDraft = async (uuid: string) => {
             await draftStore.deleteDraft(uuid);
             // 重新获取草稿列表以更新UI
             await fetchDrafts();
+            notificationStore.success("删除成功", "草稿已成功删除");
         } catch (error) {
             console.error("Error deleting draft:", error);
         }
@@ -43,7 +46,7 @@ const deleteDraft = async (uuid: string) => {
 const searchDrafts = () => {
     var re = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/;
     if (!re.test(phoneNumber.value)) {
-        alert("请输入正确的手机号码");
+        notificationStore.warning("格式错误", "请输入正确的手机号码");
         return;
     }
     fetchDrafts();

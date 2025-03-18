@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useImageStore } from '@/stores/image';
+import { useNotificationStore } from '@/stores/notification';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import Prompt from '../widgets/Prompt.vue';
@@ -9,6 +10,7 @@ const props = defineProps<{
     kind: Kind;
 }>()
 
+const notificationStore = useNotificationStore();
 
 const kindDict: Record<string, string> = {
     'background': '背景',
@@ -44,7 +46,7 @@ const renameImage = async () => {
 }
 
 if (!Object.keys(imageStore.images!).includes(props.kind)) {
-    alert(`访问的资源 ${props.kind} 不存在`)
+    notificationStore.error("资源不存在", `访问的资源 ${props.kind} 不存在`);
     router.back();
 }
 </script>

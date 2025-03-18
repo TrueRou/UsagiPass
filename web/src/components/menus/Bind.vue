@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user';
+import { useNotificationStore } from '@/stores/notification';
 import type { Server } from '@/types';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -29,12 +30,13 @@ const username = ref('');
 const password = ref('');
 
 const userStore = useUserStore();
+const notificationStore = useNotificationStore();
 const router = useRouter();
 
 const bind = async () => await userStore.bind(props.server, username.value, password.value);
 
 if (props.server !== 'divingfish' && props.server !== 'lxns') {
-    alert(`访问的资源 ${props.server} 不存在`);
+    notificationStore.error("资源不存在", `访问的资源 ${props.server} 不存在`);
     router.back();
 }
 </script>

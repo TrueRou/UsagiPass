@@ -9,7 +9,7 @@ const cardProfile = ref<CardProfile>(await cardStore.fetchCard(history.state.uui
 const cardPreference = ref<PreferencePublic>(JSON.parse(JSON.stringify(cardProfile.value!.preferences)));
 
 const applyPreferences = () => {
-    cardPreference.value.dx_rating ||= String(cardProfile.value.player_rating);
+    if (cardProfile.value.player_rating != -1) cardPreference.value.dx_rating ||= String(cardProfile.value.player_rating);
 }
 
 applyPreferences();

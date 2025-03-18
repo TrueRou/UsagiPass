@@ -6,6 +6,7 @@ import { VueCropper } from "vue-cropper";
 import { useServerStore } from '@/stores/server';
 import { useRouter } from 'vue-router';
 import { useImageStore } from '@/stores/image';
+import { useNotificationStore } from '@/stores/notification';
 import type { Kind } from '@/types';
 import Prompt from '@/components/widgets/Prompt.vue';
 
@@ -17,6 +18,7 @@ const router = useRouter();
 const userStore = useUserStore();
 const imageStore = useImageStore();
 const serverStore = useServerStore();
+const notificationStore = useNotificationStore();
 
 const imageCropper = useTemplateRef('cropper');
 const fixedNumber = ref<Array<number>>([0, 0]);
@@ -33,7 +35,7 @@ onMounted(async () => {
     if (!serverStore.serverKinds) await serverStore.refreshKind()
     fixedNumber.value = serverStore.serverKinds![props.kind]["hw"][0]
     if (!Object.keys(serverStore.serverKinds!).includes(props.kind)) {
-        alert(`访问的资源 ${props.kind} 不存在`)
+        notificationStore.error("资源不存在", `访问的资源 ${props.kind} 不存在`);
         router.back();
     }
 })

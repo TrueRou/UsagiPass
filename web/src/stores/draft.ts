@@ -1,16 +1,18 @@
 import { defineStore } from "pinia"
 import { useUserStore } from "./user";
+import { useNotificationStore } from "./notification";
 import type { Card, PreferencePublic } from "@/types";
 
 export const useDraftStore = defineStore('draft', () => {
     const userStore = useUserStore();
+    const notificationStore = useNotificationStore();
 
     async function fetchDrafts(phone: string): Promise<Card[]> {
         try {
             const response = await userStore.axiosInstance.get(`/drafts?phone=${phone}`)
             return response.data
         } catch (error) {
-            alert("无法获取草稿列表，请联系开发者\n调试ID: " + phone)
+            notificationStore.error("获取订单失败", `无法获取草稿列表，请联系开发者\n手机号码: ${phone}`);
             throw error
         }
     }
@@ -20,7 +22,7 @@ export const useDraftStore = defineStore('draft', () => {
             const response = await userStore.axiosInstance.post(`/drafts?phone=${phone}`)
             return response.data
         } catch (error: any) {
-            alert(error.response.data.detail)
+            notificationStore.error("创建失败", error.response.data.detail);
             throw error
         }
     }
@@ -31,7 +33,7 @@ export const useDraftStore = defineStore('draft', () => {
             const response = await userStore.axiosInstance.get(path)
             return response.data
         } catch (error) {
-            alert("无法获取草稿配置，请联系开发者\n调试ID: " + uuid)
+            notificationStore.error("获取配置失败", `无法获取草稿配置，请联系开发者\n卡片UUID: ${uuid || '未知'}`);
             throw error
         }
     }
@@ -41,7 +43,7 @@ export const useDraftStore = defineStore('draft', () => {
             const response = await userStore.axiosInstance.patch(`/drafts/${uuid}/preference`, preferences)
             return response.status === 200
         } catch (error: any) {
-            alert(error.response.data.detail)
+            notificationStore.error("保存失败", error.response.data.detail);
             return false
         }
     }
@@ -51,7 +53,7 @@ export const useDraftStore = defineStore('draft', () => {
             const response = await userStore.axiosInstance.delete(`/drafts/${uuid}`)
             return response.status === 200
         } catch (error: any) {
-            alert(error.response.data.detail)
+            notificationStore.error("删除失败", error.response.data.detail);
             return false
         }
     }

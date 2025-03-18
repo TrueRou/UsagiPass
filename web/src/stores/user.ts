@@ -4,10 +4,12 @@ import { defineStore } from "pinia"
 import { computed, ref, type Ref } from "vue"
 import { type Router } from "vue-router"
 import { useImageStore } from "./image"
+import { useNotificationStore } from "./notification"
 import type { Kind, UserProfile } from "@/types"
 
 export const useUserStore = defineStore('user', () => {
     const imageStore = useImageStore();
+    const notificationStore = useNotificationStore();
 
     const token = ref(localStorage.getItem('token'));
     const maimaiCode = ref("");
@@ -31,11 +33,12 @@ export const useUserStore = defineStore('user', () => {
             localStorage.setItem('token', data.data.access_token);
             token.value = data.data.access_token;
             await refreshUser();
-            // refresh images after login, fetch user uploaded images
+            // 如果之前获取过图片列表，刷新列表
             if (imageStore.images) await imageStore.refreshImages();
+            notificationStore.success("登录成功", `欢迎回来，${userProfile.value?.nickname}`);
             router.back();
         } catch (error: any) {
-            alert(error.response.data.detail);
+            notificationStore.error("登录失败", error.response?.data?.detail || "未知错误");
         }
     }
 
@@ -50,9 +53,10 @@ export const useUserStore = defineStore('user', () => {
         try {
             await axiosInstance.value.post(`/accounts/bind/${target}`, new URLSearchParams({ username, password }));
             await refreshUser();
+            notificationStore.success("绑定成功", `${target === 'divingfish' ? '水鱼' : '落雪'}账户绑定成功`);
             router.back();
         } catch (error: any) {
-            alert(error.response.data.detail);
+            notificationStore.error("绑定失败", error.response?.data?.detail || "未知错误");
         }
     }
 
@@ -71,9 +75,10 @@ export const useUserStore = defineStore('user', () => {
         try {
             await axiosInstance.value.patch('/users/preference', userProfile.value!.preferences);
             await refreshUser();
+            notificationStore.success("保存成功", "个人偏好设置已保存");
             router.back();
         } catch (error: any) {
-            alert(error.response.data.detail);
+            notificationStore.error("保存失败", error.response?.data?.detail || "未知错误");
         }
     }
 
@@ -81,29 +86,30 @@ export const useUserStore = defineStore('user', () => {
         try {
             await axiosInstance.value.patch('/users', { prefer_server: prefer_server });
             await refreshUser();
+            notificationStore.success("设置成功", `已将${prefer_server === 1 ? '水鱼' : '落雪'}设为优先数据源`);
         } catch (error: any) {
-            alert(error.response.data.detail);
+            notificationStore.error("设置失败", error.response?.data?.detail || "未知错误");
         }
     }
 
     const updateProber = async () => {
         if (navigator.userAgent.toLowerCase().indexOf('micromessenger') == -1) {
-            alert("无法获取玩家信息, 请在微信环境中更新查分器");
-            return false;
+            notificationStore.error("更新失败", "无法获取玩家信息，请在微信环境中更新查分器");
+            return;
         }
         try {
             const testWahlap = await axios.get("http://tgk-wcaime.wahlap.com/test");
-            // 502 is wahlap's original status code for proxy with old rules
+            // 502是历史遗留规则中的一个错误码，代表代理配置过时
             if (testWahlap.status == 502) {
-                alert("当前代理配置已过时, 请更新订阅后重试");
-                return false;
+                notificationStore.warning("代理配置过时", "当前代理配置已过时，请更新订阅后重试");
+                return;
             }
-        } catch (error: any) { } // bypass cors
+        } catch (error: any) { }
         try {
             const resp = await axiosInstance.value.post("/accounts/update/oauth");
             window.location.href = resp.data.url;
         } catch (error: any) {
-            alert(error.response.data.detail);
+            notificationStore.error("更新失败", error.response?.data?.detail || "未知错误");
         }
     }
 
@@ -119,28 +125,29 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 
-    const openImagePicker = (kind: Kind, picker: HTMLInputElement) => {
-        if (!picker) return;
-        picker.removeEventListener('change', () => { changeImagePicker(picker, kind, cropperImage, router) });
-        picker.addEventListener('change', () => { changeImagePicker(picker, kind, cropperImage, router) });
-        picker.click();
+    const openImagePicker = (kind: Kind, imagePicker: HTMLInputElement) => {
+        if (imagePicker) {
+            imagePicker.onchange = () => changeImagePicker(imagePicker, kind, cropperImage, router);
+            imagePicker.click();
+        }
     }
 
     return {
         axiosInstance,
+        token,
+        isSignedIn,
+        userProfile,
+        cropperImage,
         maimaiCode,
         timeLimit,
         simplifiedCode,
-        userProfile,
-        isSignedIn,
-        cropperImage,
+        login,
+        logout,
+        bind,
         refreshUser,
         patchPreferences,
         patchPreferServer,
         updateProber,
-        openImagePicker,
-        login,
-        logout,
-        bind,
+        openImagePicker
     }
 })

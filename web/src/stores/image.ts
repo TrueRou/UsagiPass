@@ -1,11 +1,13 @@
 import { defineStore } from "pinia"
 import { ref } from "vue";
 import { useUserStore } from "./user";
+import { useNotificationStore } from "@/stores/notification";
 import router from "@/router";
 import type { ImageDetail, ImagePublic, Kind, PreferencePublic } from "@/types";
 
 export const useImageStore = defineStore('image', () => {
     const userStore = useUserStore();
+    const notificationStore = useNotificationStore();
     const images = ref<Record<string, ImageDetail[]>>()
     const wanderingPreferences = ref<PreferencePublic>()
 
@@ -20,7 +22,7 @@ export const useImageStore = defineStore('image', () => {
                 return acc;
             }, {});
         } catch (error: any) {
-            alert(error.response.data.detail);
+            notificationStore.error("获取失败", error.response.data.detail);
         }
     }
 
@@ -32,7 +34,7 @@ export const useImageStore = defineStore('image', () => {
             await refreshImages();
             router.back();
         } catch (error: any) {
-            alert(error.response.data.detail);
+            notificationStore.error("上传失败", error.response.data.detail);
         }
     }
 
@@ -43,7 +45,7 @@ export const useImageStore = defineStore('image', () => {
                 await refreshImages();
             }
         } catch (error: any) {
-            alert(error.response.data.detail);
+            notificationStore.error("删除失败", error.response.data.detail);
         }
     }
 
@@ -52,7 +54,7 @@ export const useImageStore = defineStore('image', () => {
             await userStore.axiosInstance.patch("/images/" + image.id + "?name=" + image.name);
             await refreshImages();
         } catch (error: any) {
-            alert(error.response.data.detail);
+            notificationStore.error("更新失败", error.response.data.detail);
         }
     }
 
