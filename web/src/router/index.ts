@@ -44,10 +44,16 @@ const router = createRouter({
                     component: () => import('../components/menus/Login.vue')
                 },
                 {
-                    path: 'preferences',
-                    name: 'preferences',
+                    path: 'preferences/pass',
+                    name: 'preferencesPass',
                     meta: { requireAuth: true, requireImages: true },
-                    component: () => import('../components/menus/Preferences.vue'),
+                    component: () => import('../components/menus/PreferencesPass.vue'),
+                },
+                {
+                    path: 'preferences/card',
+                    name: 'preferencesCard',
+                    meta: { requireAuth: true },
+                    component: () => import('../components/menus/PreferencesCard.vue'),
                 },
                 {
                     path: 'update',

@@ -19,12 +19,13 @@ from usagipass.app.models import (
     CardUser,
     PreferencePublic,
     PreferenceUpdate,
+    Privilege,
     Score,
     ScorePublic,
     User,
 )
 from usagipass.app.usecases import maimai
-from usagipass.app.usecases.authorize import verify_admin
+from usagipass.app.usecases.authorize import verify_admin, verify_user_optional
 from usagipass.app.usecases.accounts import apply_preference
 
 
@@ -105,18 +106,26 @@ async def delete_card(card: Card = Depends(require_card), session: Session = Dep
 @router.patch("/{uuid}/preference")
 async def update_preference(
     preference: CardPreferencePublic,
+    card: Card = Depends(require_card_strict),
     db_preference: CardPreference = Depends(require_preference),
     session: Session = Depends(require_session),
-    user: User = Depends(verify_admin),
+    user: User = Depends(verify_user_optional),
 ):
-    update_preference = CardPreferenceUpdate(
-        **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
-        character_id=preference.character.id if preference.character else None,
-        background_id=preference.background.id if preference.background else None,
-        frame_id=preference.frame.id if preference.frame else None,
-        passname_id=preference.passname.id if preference.passname else None,
-    )
-    # there's no problem with the image ids, we can update the preference
+    if user and user.privilege == Privilege.ADMIN:
+        update_preference = CardPreferenceUpdate(
+            **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
+            character_id=preference.character.id if preference.character else None,
+            background_id=preference.background.id if preference.background else None,
+            frame_id=preference.frame.id if preference.frame else None,
+            passname_id=preference.passname.id if preference.passname else None,
+        )
+
+    if (user and db_preference.protect_card and card.username == user.username) or not db_preference.protect_card:
+        # user can update the preference if it's not protected, or if the user is the card owner
+        update_preference = CardPreferenceUpdate(
+            **preference.model_dump(include=["skip_activation", "protect_card"]),
+        )
+
     partial_update_model(session, db_preference, update_preference)
     return {"message": "Preference has been updated"}
 

@@ -4,32 +4,24 @@ import { useUserStore } from '@/stores/user';
 import type { CardBests } from '@/types';
 import ScoreBestsSection from '@/components/scores/ScoreBests.vue';
 import ScoreStatisticsSection from '@/components/scores/ScoreStatistics.vue';
+import { useCardStore } from '@/stores/card';
 
 const userStore = useUserStore();
+const cardStore = useCardStore();
 
-
-const cardUuid = ref(history.state.uuid || '');
 const bests = ref<CardBests | null>(null);
 const loading = ref(true);
 const tabActive = ref('bests'); // 可选择bests或statistics
 
-onMounted(async () => {
-    if (cardUuid.value) {
-        await fetchCardBests();
-    }
-});
+loading.value = true;
 
-async function fetchCardBests() {
-    loading.value = true;
-
-    try {
-        const response = await userStore.axiosInstance.get(`/cards/${cardUuid.value}/bests`);
-        bests.value = response.data;
-    } catch (error) {
-        console.log("Card has no bests data, skipped");
-    } finally {
-        loading.value = false;
-    }
+try {
+    const response = await userStore.axiosInstance.get(`/cards/${cardStore.cardUUID}/bests`);
+    bests.value = response.data;
+} catch (error) {
+    console.log("Card has no bests data, skipped");
+} finally {
+    loading.value = false;
 }
 </script>
 

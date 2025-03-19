@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { useRouter, type RouteLocationAsPathGeneric, type RouteLocationAsRelativeGeneric } from 'vue-router';
 import DXRating from '@/components/DXRating.vue';
 import QRCode from '@/components/QRCode.vue';
 import CharaInfo from '@/components/CharaInfo.vue';
@@ -13,11 +13,10 @@ const props = defineProps<{
     preferences: PreferencePublic;
     timeLimit?: string;
     maimaiCode?: string;
-    settingsRoute?: string;
+    settingsRoute?: string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric;
     cardBack?: boolean;
 }>()
 
-const router = useRouter();
 const serverStore = useServerStore();
 
 const r = (image: ImagePublic) => import.meta.env.VITE_URL + "/images/" + image!.id;
@@ -58,7 +57,7 @@ watch(() => props.preferences, applyPreferences, { immediate: true });
                     <p class="footer-text font-sega">{{ preferences.maimai_version }}</p>
                 </div>
                 <template v-if="settingsRoute">
-                    <RouterLink :to="{ name: settingsRoute }">
+                    <RouterLink :to="settingsRoute">
                         <div class="p-1 rounded-full bg-white">
                             <img src="../assets/misc/settings.svg" style="width: 2vh;"></img>
                         </div>

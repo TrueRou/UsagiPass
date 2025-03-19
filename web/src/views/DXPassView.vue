@@ -19,5 +19,5 @@ applyPreferences();
 </script>
 <template>
     <DXBaseView :preferences="preferences" :timeLimit="userStore.timeLimit" :maimaiCode="userStore.maimaiCode"
-        settingsRoute="preferences" />
+        :settingsRoute="{ name: 'preferencesPass' }" />
 </template>

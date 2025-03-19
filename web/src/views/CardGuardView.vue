@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useCardStore } from '@/stores/card';
 import { useRouter } from 'vue-router';
 
 const props = defineProps<{
@@ -6,7 +7,10 @@ const props = defineProps<{
 }>()
 
 const router = useRouter();
-router.replace({ name: 'cards', state: { uuid: props.uuid } });
+const cardStore = useCardStore();
+
+if (props.uuid !== cardStore.cardUUID) await cardStore.refreshCard(props.uuid)
+router.replace({ name: 'cards', state: { "cardUUID": props.uuid } });
 </script>
 <template>
 

@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useCardStore } from '@/stores/card';
 import DXBaseView from './DXBaseView.vue';
-import type { CardProfile, PreferencePublic } from '@/types';
+import type { PreferencePublic } from '@/types';
 import CardBests from '@/components/CardBests.vue';
 
 const cardStore = useCardStore();
@@ -10,28 +10,32 @@ const activeView = ref(0); // 0: DXBaseView, 1: ScoreListView
 const touchStartX = ref(0);
 const touchEndX = ref(0);
 const minSwipeDistance = 50;
-const cardProfile = ref<CardProfile>(await cardStore.fetchCard(history.state.uuid));
-const cardPreference = ref<PreferencePublic>(JSON.parse(JSON.stringify(cardProfile.value!.preferences)));
 
-const showActivationDialog = ref(!cardProfile.value.user_id && !cardProfile.value.preferences.skip_activation);
+if (!cardStore.cardProfile) await cardStore.refreshCard();
+const cardPreference = ref<PreferencePublic>(JSON.parse(JSON.stringify(cardStore.cardProfile!.preferences)));
+const showActivationDialog = ref(cardStore.cardProfile!.user_id && cardStore.cardProfile!.preferences.skip_activation);
 const activationCode = ref('');
 
 const activateCard = async () => {
     if (activationCode.value) {
-        await cardStore.activateCard(history.state.uuid, activationCode.value);
-        cardProfile.value = await cardStore.fetchCard(history.state.uuid);
+        await cardStore.activateCard(activationCode.value);
+        await cardStore.refreshCard()
         showActivationDialog.value = false;
     }
 };
 
 const skipActivation = async () => {
-    cardProfile.value.preferences.skip_activation = true;
-    await cardStore.updateCardPreferences(history.state.uuid, cardProfile.value.preferences);
-    showActivationDialog.value = false;
+    if (cardStore.cardProfile) {
+        cardStore.cardProfile.preferences.skip_activation = true;
+        await cardStore.patchPreferences();
+        showActivationDialog.value = false;
+    }
 };
 
 const applyPreferences = () => {
-    if (cardProfile.value.player_rating != -1) cardPreference.value.dx_rating ||= String(cardProfile.value.player_rating);
+    if (cardStore.cardProfile!.player_rating != -1) {
+        cardPreference.value.dx_rating ||= String(cardStore.cardProfile!.player_rating);
+    }
 }
 
 applyPreferences();
@@ -60,7 +64,7 @@ const switchToView = (index: number) => {
     activeView.value = index;
 };
 
-onMounted(() => {
+onMounted(async () => {
     document.addEventListener('touchstart', handleTouchStart);
     document.addEventListener('touchend', handleTouchEnd);
 });
@@ -77,11 +81,11 @@ onUnmounted(() => {
         <div class="flex w-[200%] h-full transition-transform duration-300 ease-in-out"
             :style="{ transform: `translateX(-${activeView * 50}%)` }">
             <div class="flex-none w-1/2 h-full overflow-y-auto relative">
-                <DXBaseView :preferences="cardPreference" timeLimit="12:00:00" settingsRoute="preferences"
-                    class="h-full w-full absolute top-0 left-0" />
+                <DXBaseView :preferences="cardPreference" timeLimit="12:00:00"
+                    class="h-full w-full absolute top-0 left-0" :settingsRoute="{ name: 'preferencesCard' }" />
             </div>
             <div class="flex-none w-1/2 h-full overflow-y-auto relative">
-                <CardBests :key="cardProfile.user_id" class="h-full w-full absolute top-0 left-0" />
+                <CardBests :key="cardStore.cardProfile!.user_id" class="h-full w-full absolute top-0 left-0" />
             </div>
         </div>
 
