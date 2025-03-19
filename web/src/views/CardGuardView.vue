@@ -6,5 +6,8 @@ const props = defineProps<{
 }>()
 
 const router = useRouter();
-router.replace({ name: 'card', state: { uuid: props.uuid } });
+router.replace({ name: 'cards', state: { uuid: props.uuid } });
 </script>
+<template>
+
+</template>

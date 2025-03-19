@@ -16,13 +16,13 @@ const router = createRouter({
             component: DXPassView
         },
         {
-            path: '/card',
-            name: 'card',
+            path: '/cards',
+            name: 'cards',
             component: DXCardView,
         },
         {
-            path: '/card/:uuid',
-            name: 'cardGuard',
+            path: '/cards/:uuid',
+            name: 'cardsGuard',
             props: true,
             component: CardGuardView,
         },
