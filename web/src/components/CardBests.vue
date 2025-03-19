@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useUserStore } from '@/stores/user';
-import { useNotificationStore } from '@/stores/notification';
 import type { CardBests } from '@/types';
 import ScoreBestsSection from '@/components/scores/ScoreBests.vue';
 import ScoreStatisticsSection from '@/components/scores/ScoreStatistics.vue';
 
 const userStore = useUserStore();
-const notificationStore = useNotificationStore();
+
 
 const cardUuid = ref(history.state.uuid || '');
 const bests = ref<CardBests | null>(null);
@@ -22,14 +21,12 @@ onMounted(async () => {
 
 async function fetchCardBests() {
     loading.value = true;
+
     try {
         const response = await userStore.axiosInstance.get(`/cards/${cardUuid.value}/bests`);
         bests.value = response.data;
-    } catch (error: any) {
-        notificationStore.error(
-            "获取成绩失败",
-            error.response?.data?.detail || "无法获取玩家成绩数据"
-        );
+    } catch (error) {
+        console.log("Card has no bests data, skipped");
     } finally {
         loading.value = false;
     }

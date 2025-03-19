@@ -107,6 +107,16 @@ class PreferencePublic(PreferenceBase):
     passname: ImagePublic | None = None
 
 
+class CardPreferenceUpdate(PreferenceUpdate):
+    skip_activation: bool | None = None
+    protect_card: bool | None = None
+
+
+class CardPreferencePublic(PreferencePublic):
+    skip_activation: bool | None = None
+    protect_card: bool | None = None
+
+
 class UserPreference(PreferenceBase, table=True):
     __tablename__ = "user_preferences"
 
@@ -165,6 +175,8 @@ class CardPreference(PreferenceBase, table=True):
     background_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
     frame_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
     passname_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
+    skip_activation: bool = Field(default=False)
+    protect_card: bool = Field(default=False)
 
 
 class Card(SQLModel, table=True):
@@ -172,15 +184,17 @@ class Card(SQLModel, table=True):
 
     uuid: str = Field(primary_key=True)
     card_id: int | None = Field(default=None, unique=True, index=True)
-    user_id: int | None = Field(default=None, foreign_key="card_users.id", ondelete="CASCADE")
+    user_id: int | None = Field(default=None, foreign_key="card_users.id", ondelete="SET NULL")
+    username: str | None = Field(default=None, foreign_key="users.username", ondelete="SET NULL")
     phone_number: str | None = Field(default=None, index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class CardProfile(SQLModel):
     card_id: int | None
+    user_id: int | None
     player_rating: int
-    preferences: PreferencePublic
+    preferences: CardPreferencePublic
 
 
 class Score(SQLModel, table=True):

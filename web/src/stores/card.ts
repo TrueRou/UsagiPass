@@ -17,5 +17,23 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
-    return { fetchCard }
+    async function activateCard(uuid: string, activationCode: string) {
+        try {
+            await userStore.axiosInstance.post(`/cards/${uuid}/accounts?qrcode=${activationCode}`);
+        } catch (error: any) {
+            notificationStore.error("激活失败", error.response.data.detail || "未知错误");
+            throw error;
+        }
+    }
+
+    async function updateCardPreferences(uuid: string, preferences: any) {
+        try {
+            await userStore.axiosInstance.patch(`/cards/${uuid}/preference`, preferences);
+        } catch (error: any) {
+            notificationStore.error("保存失败", error.response.data.detail || "未知错误");
+            throw error;
+        }
+    }
+
+    return { fetchCard, activateCard, updateCardPreferences }
 })

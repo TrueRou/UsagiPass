@@ -9,7 +9,20 @@ from usagipass.app import settings
 from usagipass.app import database
 from usagipass.app.logging import log, Ansi
 from usagipass.app.database import partial_update_model, require_session, maimai_client
-from usagipass.app.models import Card, CardBests, CardPreference, CardProfile, CardUser, PreferencePublic, PreferenceUpdate, Score, ScorePublic, User
+from usagipass.app.models import (
+    Card,
+    CardBests,
+    CardPreference,
+    CardPreferencePublic,
+    CardPreferenceUpdate,
+    CardProfile,
+    CardUser,
+    PreferencePublic,
+    PreferenceUpdate,
+    Score,
+    ScorePublic,
+    User,
+)
 from usagipass.app.usecases import maimai
 from usagipass.app.usecases.authorize import verify_admin
 from usagipass.app.usecases.accounts import apply_preference
@@ -91,12 +104,12 @@ async def delete_card(card: Card = Depends(require_card), session: Session = Dep
 
 @router.patch("/{uuid}/preference")
 async def update_preference(
-    preference: PreferencePublic,
+    preference: CardPreferencePublic,
     db_preference: CardPreference = Depends(require_preference),
     session: Session = Depends(require_session),
     user: User = Depends(verify_admin),
 ):
-    update_preference = PreferenceUpdate(
+    update_preference = CardPreferenceUpdate(
         **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
         character_id=preference.character.id if preference.character else None,
         background_id=preference.background.id if preference.background else None,
@@ -136,10 +149,11 @@ async def get_profile(
     db_account: CardUser | None = Depends(require_card_user_optional),
     session: Session = Depends(require_session),
 ):
-    preferences = PreferencePublic.model_validate(db_preference)
+    preferences = CardPreferencePublic.model_validate(db_preference)
     apply_preference(preferences, db_preference, session)
     card_profile = CardProfile(
         card_id=card.card_id,
+        user_id=db_account.id if db_account else None,
         player_rating=db_account.mai_rating if db_account else -1,
         preferences=preferences,
     )

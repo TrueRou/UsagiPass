@@ -72,6 +72,11 @@ interface PreferencePublic {
     mask_type?: number;
 }
 
+interface CardPreferencePublic extends PreferencePublic {
+    skip_activation: boolean;
+    protect_card: boolean;
+}
+
 interface UserAccountPublic {
     account_name: string;
     nickname: string;
@@ -97,8 +102,9 @@ interface Card {
 
 interface CardProfile {
     card_id: number;
+    user_id?: number;
     player_rating: number;
-    preferences: PreferencePublic;
+    preferences: CardPreferencePublic;
 }
 
 interface ServerMessage {
@@ -148,4 +154,4 @@ const mapServerId: Record<Server, number> = {
 };
 
 export { mapServerId };
-export type { Kind, Server, ImagePublic, ImageDetail, PreferencePublic, UserAccountPublic, UserProfile, Card, CardProfile, ServerMessage, CrawlerResult, ScorePublic, CardBests };
+export type { Kind, Server, ImagePublic, ImageDetail, PreferencePublic, UserAccountPublic, UserProfile, Card, CardProfile, ServerMessage, CrawlerResult, ScorePublic, CardBests, CardPreferencePublic };
