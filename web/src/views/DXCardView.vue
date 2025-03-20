@@ -82,7 +82,8 @@ onUnmounted(() => {
             :style="{ transform: `translateX(-${activeView * 50}%)` }">
             <div class="flex-none w-1/2 h-full overflow-y-auto relative">
                 <DXBaseView :preferences="cardPreference" timeLimit="12:00:00"
-                    class="h-full w-full absolute top-0 left-0" :settingsRoute="{ name: 'preferencesCard' }" />
+                    class="h-full w-full absolute top-0 left-0"
+                    :settingsRoute="{ name: 'preferencesCard', state: { 'cardUUID': cardStore.cardUUID } }" />
             </div>
             <div class="flex-none w-1/2 h-full overflow-y-auto relative">
                 <CardBests :key="cardStore.cardProfile!.user_id" class="h-full w-full absolute top-0 left-0" />

@@ -1,43 +1,79 @@
 <script setup lang="tsx">
-import { useUserStore } from '@/stores/user';
-import { useRouter } from 'vue-router';
+import { useCardStore } from '@/stores/card';
+import { ref } from 'vue';
+import Prompt from '@/components/widgets/Prompt.vue';
 
-const router = useRouter();
-const userStore = useUserStore();
+const cardStore = useCardStore();
 
+if (!cardStore.cardProfile) await cardStore.refreshCard();
+const isActivated = ref(Boolean(cardStore.cardProfile && cardStore.cardProfile.user_id));
+const activationCode = ref('');
+const showActivationPrompt = ref(false);
+
+const openActivationPrompt = () => {
+    showActivationPrompt.value = true;
+};
+
+const confirmActivation = async () => {
+    await activateCard();
+    showActivationPrompt.value = false;
+};
+
+const cancelActivation = () => {
+    activationCode.value = '';
+    showActivationPrompt.value = false;
+};
+
+const activateCard = async () => {
+    if (!activationCode.value) return;
+
+    try {
+        await cardStore.activateCard(activationCode.value);
+        await cardStore.refreshCard();
+        isActivated.value = Boolean(cardStore.cardProfile && cardStore.cardProfile.user_id);
+    } finally {
+        activationCode.value = '';
+    }
+};
 </script>
 <template>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
-            <h1 class="font-bold text-white">开发者</h1>
+            <h1 class="font-bold text-white">卡片激活</h1>
         </div>
-        <div class="flex justify-between items-center w-full mt-2">
-            <div class="flex items-center">
-                <a href="https://github.com/TrueRou"><img class="w-12 h-12 rounded-full ml-2"
-                        src="../../assets/misc/avatar.webp"></a>
 
-                <div class="flex flex-col p-2">
-                    <span><a href="https://github.com/TrueRou">兔肉</a></span>
-                    <span class="text-gray-600" style="font-size: 12px;">本项目已在Github开源</span>
-                </div>
-            </div>
-            <div class="flex items-center">
-                <a class="bg-blue-500 text-white font-bold py-2 px-2 h-[40px] w-[40px] rounded hover:bg-blue-600 cursor-pointer"
-                    href="https://github.com/TrueRou/UsagiPass">
-                    <img src="../../assets/misc/github-mark-white.svg">
-                </a>
-                <a class="ml-2 bg-blue-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-blue-600 text-sm cursor-pointer"
-                    href="https://afdian.com/a/turou">
-                    <img src="../../assets/misc/afdian.svg">
-                </a>
-            </div>
+        <!-- 卡片ID信息 -->
+        <div class="flex justify-between items-center w-full mt-3 px-4">
+            <span class="font-medium">卡片 ID:</span>
+            <span class="font-bold">{{ cardStore.cardProfile?.card_id }}</span>
         </div>
+
+        <!-- 卡片激活状态 -->
+        <div class="flex justify-between items-center w-full mt-3 px-4">
+            <span class="font-medium">激活状态:</span>
+            <span class="font-bold" :class="isActivated ? 'text-green-600' : 'text-red-600'">
+                {{ isActivated ? '已激活' : '未激活' }}
+            </span>
+        </div>
+
+        <!-- 卡片激活按钮 -->
+        <div v-if="!isActivated" class="flex justify-center w-full mt-3 px-4">
+            <button @click="openActivationPrompt"
+                class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 w-full">
+                激活卡片
+            </button>
+        </div>
+
+        <!-- 激活对话框 -->
+        <Prompt v-model="activationCode" :show="showActivationPrompt" text="请输入卡片激活码" placeholder="扫描二维码或输入激活码"
+            @confirm="confirmActivation" @cancel="cancelActivation" />
     </div>
+
     <div class="flex justify-end w-full mt-2 mr-5">
-        <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
-            v-on:click="userStore.patchPreferences()">
-            保存
-        </button>
+        <RouterLink to="/" @click.prevent="$router.go(-1)"
+            class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 inline-block">
+            返回
+        </RouterLink>
     </div>
 </template>
 <style scoped>
@@ -69,7 +105,6 @@ input {
             #60a5fa;
     }
 }
-
 
 select {
     background: #fafdfe;
