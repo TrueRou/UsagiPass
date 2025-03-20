@@ -86,7 +86,7 @@ const formatDate = (dateString: string) => {
 
 // 获取短ID用于显示
 const getShortId = (uuid: string) => {
-    return uuid.substring(0, 8);
+    return uuid.substring(0, 6);
 };
 
 // 订单状态显示逻辑

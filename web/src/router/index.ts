@@ -5,6 +5,8 @@ import DXPassView from '@/views/DXPassView.vue'
 import DXCardView from '@/views/DXCardView.vue'
 import { useImageStore } from '@/stores/image'
 import CardGuardView from '@/views/CardGuardView.vue'
+import { useNotificationStore } from '@/stores/notification'
+import { Privilege } from '@/types'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -90,6 +92,12 @@ const router = createRouter({
             ]
         },
         {
+            path: '/admin',
+            name: 'admin',
+            component: () => import('../views/AdminView.vue'),
+            meta: { requiresAuth: true, requiresAdmin: true }
+        },
+        {
             path: '/:pathMatch(.*)*',
             redirect: '/'
         },
@@ -98,18 +106,41 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
-    const imageStore = useImageStore();
+    const imageStore = useImageStore()
     const serverStore = useServerStore()
+    const notificationStore = useNotificationStore()
 
+    // Handle query parameters
     if (to.query.maid) userStore.maimaiCode = to.query.maid as string
     if (to.query.time) userStore.timeLimit = to.query.time as string
+
+    // Load necessary data
     if (!serverStore.serverMessage) await serverStore.refreshMotd()
     if (localStorage.getItem('token') && !userStore.userProfile) await userStore.refreshUser()
     if (to.meta.requireImages && !imageStore.images) await imageStore.refreshImages()
 
-    if (!userStore.isSignedIn && to.meta.requireAuth) next({ name: 'login' })
-    else if (userStore.isSignedIn && to.name === 'login') next({ name: 'home' })
-    else next()
+    // Check authentication first
+    if (!userStore.isSignedIn) {
+        // Handle routes requiring authentication
+        if (to.meta.requireAuth || to.meta.requiresAdmin) {
+            notificationStore.error("访问受限", "请先登录")
+            return next({ name: 'login' })
+        }
+    } else {
+        // User is signed in
+        if (to.name === 'login' && from.name !== 'login') {
+            notificationStore.error("正在跳转", "您已登录, 即将回到上一页面")
+            return next(from)
+        }
+
+        // Check admin access
+        if (to.meta.requiresAdmin && userStore.userProfile?.privilege !== Privilege.ADMIN) {
+            notificationStore.error("访问受限", "您没有管理员权限")
+            return next({ name: 'home' })
+        }
+    }
+
+    next()
 })
 
 export default router

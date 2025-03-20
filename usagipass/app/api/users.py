@@ -38,6 +38,7 @@ async def get_profile(user: User = Depends(verify_user), session: Session = Depe
     user_profile = UserProfile(
         username=user.username,
         prefer_server=user.prefer_server,
+        privilege=user.privilege,
         nickname=prefer_account.nickname,
         player_rating=prefer_account.player_rating,
         preferences=preferences,

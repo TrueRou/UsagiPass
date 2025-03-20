@@ -58,5 +58,15 @@ export const useDraftStore = defineStore('draft', () => {
         }
     }
 
-    return { fetchDrafts, createDraft, fetchPreferences, patchPreferences, deleteDraft }
+    async function updateCardStatus(uuid: string, mode: 'CONFIRMED' | 'UNSET') {
+        try {
+            const response = await userStore.axiosInstance.patch(`/cards/${uuid}?mode=${mode}`)
+            return response.status === 200
+        } catch (error: any) {
+            notificationStore.error("状态更新失败", error.response.data.detail);
+            return false
+        }
+    }
+
+    return { fetchDrafts, createDraft, fetchPreferences, patchPreferences, deleteDraft, updateCardStatus }
 })

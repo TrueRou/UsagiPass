@@ -136,6 +136,7 @@ class UserAccountPublic(SQLModel):
 class UserProfile(SQLModel):
     username: str
     prefer_server: AccountServer
+    privilege: Privilege
     nickname: str
     player_rating: int
     preferences: PreferencePublic

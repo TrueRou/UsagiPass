@@ -1,6 +1,12 @@
 type Kind = "background" | "frame" | "character" | "passname" | "mask"
 type Server = "divingfish" | "lxns"
 
+enum Privilege {
+    BANNED = 1,
+    NORMAL = 2,
+    ADMIN = 3
+}
+
 enum LevelIndex {
     BASIC = 0,
     ADVANCED = 1,
@@ -86,6 +92,7 @@ interface UserAccountPublic {
 interface UserProfile {
     username: string;
     prefer_server: number;
+    privilege: Privilege;
     nickname: string;
     player_rating: number;
     preferences: PreferencePublic;
@@ -96,6 +103,7 @@ interface Card {
     uuid: string;
     card_id?: number;
     user_id?: number;
+    username?: string;
     phone_number?: string;
     created_at: string;
 }
@@ -153,5 +161,5 @@ const mapServerId: Record<Server, number> = {
     "lxns": 2,
 };
 
-export { mapServerId };
+export { mapServerId, Privilege };
 export type { Kind, Server, ImagePublic, ImageDetail, PreferencePublic, UserAccountPublic, UserProfile, Card, CardProfile, ServerMessage, CrawlerResult, ScorePublic, CardBests, CardPreferencePublic };
