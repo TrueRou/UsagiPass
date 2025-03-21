@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
 import { useUserStore } from "./user";
 import { useNotificationStore } from "./notification";
-import type { Card, PreferencePublic } from "@/types";
+import type { Card, Preference } from "@/types";
 
 export const useDraftStore = defineStore('draft', () => {
     const userStore = useUserStore();
@@ -27,7 +27,7 @@ export const useDraftStore = defineStore('draft', () => {
         }
     }
 
-    async function fetchPreferences(uuid?: string): Promise<PreferencePublic> {
+    async function fetchPreferences(uuid?: string): Promise<Preference> {
         try {
             const path = uuid ? `/drafts/${uuid}/preference` : '/defaults'
             const response = await userStore.axiosInstance.get(path)
@@ -38,35 +38,24 @@ export const useDraftStore = defineStore('draft', () => {
         }
     }
 
-    async function patchPreferences(uuid: string, preferences: PreferencePublic) {
+    async function patchPreferences(uuid: string, preferences: Preference) {
         try {
             const response = await userStore.axiosInstance.patch(`/drafts/${uuid}/preference`, preferences)
             return response.status === 200
         } catch (error: any) {
             notificationStore.error("保存失败", error.response.data.detail);
-            return false
+            throw error
         }
     }
 
     async function deleteDraft(uuid: string) {
         try {
-            const response = await userStore.axiosInstance.delete(`/drafts/${uuid}`)
-            return response.status === 200
+            await userStore.axiosInstance.delete(`/drafts/${uuid}`)
         } catch (error: any) {
             notificationStore.error("删除失败", error.response.data.detail);
-            return false
+            throw error
         }
     }
 
-    async function updateCardStatus(uuid: string, mode: 'CONFIRMED' | 'UNSET') {
-        try {
-            const response = await userStore.axiosInstance.patch(`/cards/${uuid}?mode=${mode}`)
-            return response.status === 200
-        } catch (error: any) {
-            notificationStore.error("状态更新失败", error.response.data.detail);
-            return false
-        }
-    }
-
-    return { fetchDrafts, createDraft, fetchPreferences, patchPreferences, deleteDraft, updateCardStatus }
+    return { fetchDrafts, createDraft, fetchPreferences, patchPreferences, deleteDraft }
 })

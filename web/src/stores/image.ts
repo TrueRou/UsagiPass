@@ -3,18 +3,18 @@ import { ref } from "vue";
 import { useUserStore } from "./user";
 import { useNotificationStore } from "@/stores/notification";
 import router from "@/router";
-import type { ImageDetail, ImagePublic, Kind, PreferencePublic } from "@/types";
+import type { Image, Kind, Preference } from "@/types";
 
 export const useImageStore = defineStore('image', () => {
     const userStore = useUserStore();
     const notificationStore = useNotificationStore();
-    const images = ref<Record<string, ImageDetail[]>>()
-    const wanderingPreferences = ref<PreferencePublic>()
+    const images = ref<Record<string, Image[]>>()
+    const wanderingPreferences = ref<Preference>()
 
     async function refreshImages() {
         try {
             const response = await userStore.axiosInstance.get('/bits')
-            images.value = response.data.reduce((acc: Record<string, ImageDetail[]>, item: ImageDetail) => {
+            images.value = response.data.reduce((acc: Record<string, Image[]>, item: Image) => {
                 if (!acc[item.kind]) {
                     acc[item.kind] = [];
                 }
@@ -38,7 +38,7 @@ export const useImageStore = defineStore('image', () => {
         }
     }
 
-    async function deleteImage(image: ImagePublic) {
+    async function deleteImage(image: Image) {
         try {
             if (confirm(`确定删除 ${image.name} 吗？`)) {
                 await userStore.axiosInstance.delete("/images/" + image.id)
@@ -49,7 +49,7 @@ export const useImageStore = defineStore('image', () => {
         }
     }
 
-    async function patchImage(image: ImagePublic) {
+    async function patchImage(image: Image) {
         try {
             await userStore.axiosInstance.patch("/images/" + image.id + "?name=" + image.name);
             await refreshImages();

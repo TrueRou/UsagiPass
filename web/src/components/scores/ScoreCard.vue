@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { ScorePublic } from '@/types';
+import type { Score } from '@/types';
 
 const props = defineProps<{
-    score: ScorePublic;
+    score: Score;
 }>();
 
 // 获取成绩卡片背景颜色
@@ -72,7 +72,7 @@ const songTypeLabel = computed(() => {
                     <span class="font-bold">
                         {{ parseInt(String(props.score.achievements)) }}
                         <span class="text-xs">.{{ (String(props.score.achievements).split(".")[1] || "0").padEnd(4, "0")
-                        }}%</span>
+                            }}%</span>
                     </span>
                     <span class="text-xs text-gray-500 ml-1">DX: {{ props.score.dx_rating }}</span>
                 </div>

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, or_, select
 
-from usagipass.app.models import PreferencePublic, ServerMessage, Image, ImageDetail, User, image_kinds
+from usagipass.app.models import ImagePublic, PreferencePublic, ServerMessage, Image, User, image_kinds
 from usagipass.app.database import require_session
 from usagipass.app.usecases import authorize
 from usagipass.app.settings import maimai_version, server_motd, author_motd
@@ -21,7 +21,7 @@ async def get_kinds():
     return image_kinds
 
 
-@router.get("/bits", response_model=list[ImageDetail])
+@router.get("/bits", response_model=list[ImagePublic])
 async def get_images(user: User | None = Depends(authorize.verify_user_optional), session: Session = Depends(require_session)):
     if user is None:
         clause = select(Image).where(Image.uploaded_by == None).order_by(Image.uploaded_at.desc())
@@ -43,8 +43,8 @@ async def get_defaults(session: Session = Depends(require_session)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Default image not found in database, please contact the administrator"
         )
     return PreferencePublic(
-        character=ImageDetail.model_validate(character),
-        background=ImageDetail.model_validate(background),
-        frame=ImageDetail.model_validate(frame),
-        passname=ImageDetail.model_validate(passname),
+        character=ImagePublic.model_validate(character),
+        background=ImagePublic.model_validate(background),
+        frame=ImagePublic.model_validate(frame),
+        passname=ImagePublic.model_validate(passname),
     )

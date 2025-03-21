@@ -28,7 +28,7 @@ const activateCard = async () => {
     if (!activationCode.value) return;
 
     try {
-        await cardStore.activateCard(activationCode.value);
+        await cardStore.createAccount(activationCode.value);
         await cardStore.refreshCard();
         isActivated.value = Boolean(cardStore.cardProfile && cardStore.cardProfile.user_id);
     } finally {

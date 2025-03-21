@@ -53,21 +53,18 @@ enum SongType {
     UTAGE = "utage"
 }
 
-interface ImagePublic {
+interface Image {
     id: string;
     name: string;
+    kind: Kind;
     uploaded_by?: string;
 }
 
-interface ImageDetail extends ImagePublic {
-    kind: Kind;
-}
-
-interface PreferencePublic {
-    character: ImagePublic;
-    background: ImagePublic;
-    frame: ImagePublic;
-    passname: ImagePublic;
+interface Preference {
+    character: Image;
+    background: Image;
+    frame: Image;
+    passname: Image;
     maimai_version?: string;
     simplified_code?: string;
     character_name?: string;
@@ -78,12 +75,12 @@ interface PreferencePublic {
     mask_type?: number;
 }
 
-interface CardPreferencePublic extends PreferencePublic {
+interface CardPreference extends Preference {
     skip_activation: boolean;
     protect_card: boolean;
 }
 
-interface UserAccountPublic {
+interface UserAccount {
     account_name: string;
     nickname: string;
     player_rating: number;
@@ -95,24 +92,8 @@ interface UserProfile {
     privilege: Privilege;
     nickname: string;
     player_rating: number;
-    preferences: PreferencePublic;
-    accounts: Record<string, UserAccountPublic>;
-}
-
-interface Card {
-    uuid: string;
-    card_id?: number;
-    user_id?: number;
-    username?: string;
-    phone_number?: string;
-    created_at: string;
-}
-
-interface CardProfile {
-    card_id: number;
-    user_id?: number;
-    player_rating: number;
-    preferences: CardPreferencePublic;
+    preferences: Preference;
+    accounts: Record<string, UserAccount>;
 }
 
 interface ServerMessage {
@@ -131,7 +112,7 @@ interface CrawlerResult {
     elapsed_time: number;
 }
 
-interface ScorePublic {
+interface Score {
     song_id: number;
     song_name: string;
     level: string;
@@ -148,12 +129,30 @@ interface ScorePublic {
     updated_at: string;
 }
 
-interface CardBests {
-    b35_scores: ScorePublic[];
-    b15_scores: ScorePublic[];
+interface Card {
+    uuid: string;
+    card_id?: number;
+    user_id?: number;
+    username?: string;
+    phone_number?: string;
+    created_at: string;
+}
+
+interface Bests {
+    b35_scores: Score[];
+    b15_scores: Score[];
     b35_rating: number;
     b15_rating: number;
     all_rating: number;
+}
+
+interface CardUser {
+    id: number;
+    created_at: string;
+    last_activity_at: string;
+    last_updated_at: string;
+    player_rating: number;
+    player_bests: Bests;
 }
 
 const mapServerId: Record<Server, number> = {
@@ -162,4 +161,4 @@ const mapServerId: Record<Server, number> = {
 };
 
 export { mapServerId, Privilege };
-export type { Kind, Server, ImagePublic, ImageDetail, PreferencePublic, UserAccountPublic, UserProfile, Card, CardProfile, ServerMessage, CrawlerResult, ScorePublic, CardBests, CardPreferencePublic };
+export type { Kind, Server, Image, Preference, UserAccount, UserProfile, Card, ServerMessage, CrawlerResult, Score, Bests, CardUser, CardPreference };

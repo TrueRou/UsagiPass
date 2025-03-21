@@ -7,10 +7,10 @@ import PlayerInfo from '@/components/PlayerInfo.vue';
 import CardBack from '@/components/CardBack.vue';
 import { useServerStore } from '@/stores/server';
 import { watch } from 'vue';
-import type { ImagePublic, PreferencePublic } from '@/types';
+import type { Image, Preference } from '@/types';
 
 const props = defineProps<{
-    preferences: PreferencePublic;
+    preferences: Preference;
     timeLimit?: string;
     maimaiCode?: string;
     settingsRoute?: string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric;
@@ -19,7 +19,7 @@ const props = defineProps<{
 
 const serverStore = useServerStore();
 
-const r = (image: ImagePublic) => import.meta.env.VITE_URL + "/images/" + image!.id;
+const r = (image: Image) => import.meta.env.VITE_URL + "/images/" + image!.id;
 
 const applyPreferences = () => {
     props.preferences.character_name ||= props.preferences.character.name;

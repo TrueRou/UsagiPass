@@ -1,12 +1,11 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from usagipass.app import database
 from usagipass.app.api.cards import require_card, require_preference
 from usagipass.app.database import partial_update_model, require_session
 from usagipass.app.models import Card, CardPreference, PreferencePublic, PreferenceUpdate
-from usagipass.app.usecases.accounts import apply_preference
 
 
 router = APIRouter(prefix="/drafts", tags=["drafts"])
@@ -43,17 +42,6 @@ async def delete_draft(draft: Card = Depends(require_draft), session: Session = 
     session.delete(draft)
     session.commit()
     return {"message": "Draft has been deleted"}
-
-
-@router.get("/{uuid}/preference", response_model=PreferencePublic)
-async def get_preference(
-    draft: Card = Depends(require_draft),
-    db_preference: CardPreference = Depends(require_preference),
-    session: Session = Depends(require_session),
-):
-    preferences = PreferencePublic.model_validate(db_preference)
-    apply_preference(preferences, db_preference, session)
-    return preferences
 
 
 @router.patch("/{uuid}/preference")

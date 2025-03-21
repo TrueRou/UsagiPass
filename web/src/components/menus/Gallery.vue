@@ -4,7 +4,7 @@ import { useNotificationStore } from '@/stores/notification';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import Prompt from '../widgets/Prompt.vue';
-import type { ImagePublic, Kind } from '@/types';
+import type { Image, Kind } from '@/types';
 
 const props = defineProps<{
     kind: Kind;
@@ -23,18 +23,18 @@ const router = useRouter();
 const imageStore = useImageStore();
 
 const showDialog = ref<boolean>(false);
-const renameModel = ref<ImagePublic | null>(null);
+const renameModel = ref<Image | null>(null);
 
 const r = (resource_id: string) => import.meta.env.VITE_URL + `/images/${resource_id}/thumbnail`;
 
-const selectImage = (image: ImagePublic) => {
+const selectImage = (image: Image) => {
     if (imageStore.wanderingPreferences) {
         (imageStore.wanderingPreferences as any)[props.kind].id = image.id;
         router.back();
     }
 }
 
-const setRenameModel = (image: ImagePublic) => {
+const setRenameModel = (image: Image) => {
     renameModel.value = Object.assign({}, image);
     showDialog.value = true;
 }

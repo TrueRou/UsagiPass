@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useCardStore } from '@/stores/card';
 import DXBaseView from './DXBaseView.vue';
-import type { PreferencePublic } from '@/types';
+import type { Preference } from '@/types';
 import CardBests from '@/components/CardBests.vue';
 
 const cardStore = useCardStore();
@@ -11,30 +11,28 @@ const touchStartX = ref(0);
 const touchEndX = ref(0);
 const minSwipeDistance = 50;
 
-if (!cardStore.cardProfile) await cardStore.refreshCard();
-const cardPreference = ref<PreferencePublic>(JSON.parse(JSON.stringify(cardStore.cardProfile!.preferences)));
-const showActivationDialog = ref(cardStore.cardProfile!.user_id && cardStore.cardProfile!.preferences.skip_activation);
+if (!cardStore.cardPreference) await cardStore.refreshCard();
+const cardPreference = ref<Preference>(JSON.parse(JSON.stringify(cardStore.cardPreference)));
+const showActivationDialog = ref(cardStore.cardAccount && cardStore.cardPreference?.skip_activation);
 const activationCode = ref('');
 
 const activateCard = async () => {
     if (activationCode.value) {
-        await cardStore.activateCard(activationCode.value);
+        await cardStore.createAccount(activationCode.value);
         await cardStore.refreshCard()
         showActivationDialog.value = false;
     }
 };
 
 const skipActivation = async () => {
-    if (cardStore.cardProfile) {
-        cardStore.cardProfile.preferences.skip_activation = true;
-        await cardStore.patchPreferences();
-        showActivationDialog.value = false;
-    }
+    cardStore.cardPreference!.skip_activation = true;
+    await cardStore.patchPreferences();
+    showActivationDialog.value = false;
 };
 
 const applyPreferences = () => {
-    if (cardStore.cardProfile!.player_rating != -1) {
-        cardPreference.value.dx_rating ||= String(cardStore.cardProfile!.player_rating);
+    if (cardStore.cardAccount?.player_rating != -1) {
+        cardPreference.value.dx_rating ||= String(cardStore.cardAccount?.player_rating);
     }
 }
 
@@ -86,7 +84,7 @@ onUnmounted(() => {
                     :settingsRoute="{ name: 'preferencesCard', state: { 'cardUUID': cardStore.cardUUID } }" />
             </div>
             <div class="flex-none w-1/2 h-full overflow-y-auto relative">
-                <CardBests :key="cardStore.cardProfile!.user_id" class="h-full w-full absolute top-0 left-0" />
+                <CardBests class="h-full w-full absolute top-0 left-0" />
             </div>
         </div>
 

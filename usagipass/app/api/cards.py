@@ -11,14 +11,12 @@ from usagipass.app.logging import log, Ansi
 from usagipass.app.database import partial_update_model, require_session, maimai_client
 from usagipass.app.models import (
     Card,
-    CardBests,
+    BestsPublic,
     CardPreference,
     CardPreferencePublic,
     CardPreferenceUpdate,
-    CardProfile,
     CardUser,
-    PreferencePublic,
-    PreferenceUpdate,
+    CardUserPublic,
     Privilege,
     Score,
     ScorePublic,
@@ -94,13 +92,15 @@ async def update_card(
     return {"message": "Card has been updated"}
 
 
-@router.delete("/{uuid}")
-async def delete_card(card: Card = Depends(require_card), session: Session = Depends(require_session), user: User = Depends(verify_admin)):
-    if card.user_id is not None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card has already been activated")
-    session.delete(card)
-    session.commit()
-    return {"message": "Card has been deleted"}
+@router.get("/{uuid}/preference", response_model=CardPreferencePublic)
+async def get_preference(
+    card: Card = Depends(require_card),
+    db_preference: CardPreference = Depends(require_preference),
+    session: Session = Depends(require_session),
+):
+    preferences = CardPreferencePublic.model_validate(db_preference)
+    apply_preference(preferences, db_preference, session)
+    return preferences
 
 
 @router.patch("/{uuid}/preference")
@@ -130,47 +130,8 @@ async def update_preference(
     return {"message": "Preference has been updated"}
 
 
-@router.post("/{uuid}/accounts")
-async def create_card_account(qrcode: str, card: Card = Depends(require_card_strict), session: Session = Depends(require_session)):
-    if card.user_id is not None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card has already been activated")
-    try:
-        credentials = await maimai_client.qrcode(qrcode, settings.arcade_proxy)
-        card_user = CardUser(mai_userid=credentials.credentials, mai_rating=0)
-        session.add(card_user)
-        session.flush()
-        card.user_id = card_user.id
-        session.commit()
-    except AimeServerError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid QR code or expired")
-    except Exception as e:
-        log(f"Failed to activate card of {card.card_id}: {repr(e)}", Ansi.LRED)
-        session.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to activate card")
-    await maimai.update_scores(card_user)
-    return {"message": "Card has been activated"}
-
-
-@router.get("/{uuid}/profile", response_model=CardProfile)
-async def get_profile(
-    card: Card = Depends(require_card_strict),
-    db_preference: CardPreference = Depends(require_preference),
-    db_account: CardUser | None = Depends(require_card_user_optional),
-    session: Session = Depends(require_session),
-):
-    preferences = CardPreferencePublic.model_validate(db_preference)
-    apply_preference(preferences, db_preference, session)
-    card_profile = CardProfile(
-        card_id=card.card_id,
-        user_id=db_account.id if db_account else None,
-        player_rating=db_account.mai_rating if db_account else -1,
-        preferences=preferences,
-    )
-    return card_profile
-
-
-@router.get("/{uuid}/bests", response_model=CardBests)
-async def get_bests(
+@router.get("/{uuid}/accounts", response_model=CardUserPublic)
+async def get_account(
     card: Card = Depends(require_card_strict),
     db_account: CardUser = Depends(require_card_user),
     session: Session = Depends(require_session),
@@ -188,20 +149,49 @@ async def get_bests(
 
     songs = await maimai_client.songs()
     scores = MaimaiScores(all=[await Score.as_mpy(score) for score in session.exec(select(Score).where(Score.user_id == db_account.id))], songs=songs)
-    return CardBests(
-        b35_scores=_ser_scores(scores.scores_b35, songs),
-        b15_scores=_ser_scores(scores.scores_b15, songs),
-        b35_rating=scores.rating_b35,
-        b15_rating=scores.rating_b15,
-        all_rating=scores.rating,
+
+    return CardUserPublic(
+        **db_account.model_dump(exclude={"mai_userid", "mai_rating"}),
+        player_rating=db_account.mai_rating,
+        player_bests=BestsPublic(
+            b35_scores=_ser_scores(scores.scores_b35, songs),
+            b15_scores=_ser_scores(scores.scores_b15, songs),
+            b35_rating=scores.rating_b35,
+            b15_rating=scores.rating_b15,
+            all_rating=scores.rating,
+        ),
     )
 
 
-@router.patch("/{uuid}/bests", response_model=CardBests)
-async def update_bests(
+@router.post("/{uuid}/accounts")
+async def create_account(
+    qrcode: str,
     card: Card = Depends(require_card_strict),
-    db_account: CardUser = Depends(require_card_user),
     session: Session = Depends(require_session),
 ):
+    if card.user_id is not None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card has already been activated")
+    try:
+        credentials = await maimai_client.qrcode(qrcode, settings.arcade_proxy)
+        card_user = CardUser(mai_userid=credentials.credentials, mai_rating=0)
+        session.add(card_user)
+        session.flush()
+        card.user_id = card_user.id
+        session.commit()
+    except AimeServerError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid QR code or expired")
+    except Exception as e:
+        log(f"Failed to activate card of {card.card_id}: {repr(e)}", Ansi.LRED)
+        session.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to activate card")
+    await maimai.update_scores(card_user)
+    return {"message": "Card account has been activated"}
+
+
+@router.patch("/{uuid}/accounts")
+async def update_accounts(
+    card: Card = Depends(require_card_strict),
+    db_account: CardUser = Depends(require_card_user),
+):
     await maimai.update_scores(db_account)
-    return await get_bests(db_account, session)
+    return {"message": "Card account has been updated"}

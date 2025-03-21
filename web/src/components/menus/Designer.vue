@@ -6,9 +6,10 @@ import { computed, ref, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { useServerStore } from '@/stores/server';
 import { useUserStore } from '@/stores/user';
-import type { Kind, PreferencePublic } from '@/types';
+import type { Kind, Preference } from '@/types';
 import DXBaseView from '@/views/DXBaseView.vue';
 import Prompt from '../widgets/Prompt.vue';
+import { matchPhoneNumber } from '@/utils';
 
 
 const props = defineProps<{
@@ -25,7 +26,7 @@ const notificationStore = useNotificationStore();
 const imagePicker = useTemplateRef('image-picker');
 const showDialog = ref<boolean>(false);
 const newDraftPhone = ref<string>(history.state.phoneNumber || '');
-const preferences = ref<PreferencePublic>(await draftStore.fetchPreferences(props.uuid));
+const preferences = ref<Preference>(await draftStore.fetchPreferences(props.uuid));
 
 const openPicker = (kind: Kind) => userStore.openImagePicker(kind, imagePicker.value!);
 
@@ -39,23 +40,18 @@ const createDraft = async () => {
         showDialog.value = true;
         return;
     }
-    var re = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/
-    if (!re.test(newDraftPhone.value)) {
-        notificationStore.warning("格式错误", "请输入正确的手机号码");
-        return;
+    if (matchPhoneNumber(newDraftPhone.value)) {
+        const card = await draftStore.createDraft(newDraftPhone.value);
+        await draftStore.patchPreferences(card.uuid, preferences.value!);
+        showDialog.value = false;
+        router.replace({ name: "designer", params: { uuid: card.uuid } });
+        notificationStore.success("创建成功", "您的卡面已创建\n在订单确认前，您可以随时修改卡面设置");
     }
-    const card = await draftStore.createDraft(newDraftPhone.value);
-    await draftStore.patchPreferences(card.uuid, preferences.value!);
-    showDialog.value = false;
-    router.replace({ name: "designer", params: { uuid: card.uuid } });
-    notificationStore.success("创建成功", "您的卡面已创建\n在订单确认前，您可以随时修改卡面设置");
 }
 
 const updateDraft = async () => {
-    const result = await draftStore.patchPreferences(props.uuid!, preferences.value!);
-    if (result) {
-        notificationStore.success("保存成功", "您的卡面设置已更新");
-    }
+    await draftStore.patchPreferences(props.uuid!, preferences.value!);
+    notificationStore.success("保存成功", "您的卡面设置已更新");
 }
 
 const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences.value)));

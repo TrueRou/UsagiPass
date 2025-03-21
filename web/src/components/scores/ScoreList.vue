@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { ScorePublic } from '@/types';
+import type { Score } from '@/types';
 import ScoreCard from './ScoreCard.vue';
 
 const props = defineProps<{
-    scores: ScorePublic[];
+    scores: Score[];
 }>();
 
-const selectedScore = ref<ScorePublic | null>(null);
+const selectedScore = ref<Score | null>(null);
 const showScoreDetail = ref(false);
 
 // 打开成绩详情
-function openScoreDetail(score: ScorePublic) {
+function openScoreDetail(score: Score) {
     selectedScore.value = score;
     showScoreDetail.value = true;
 }

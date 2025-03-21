@@ -41,16 +41,10 @@ class Image(SQLModel, table=True):
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
 
 
-class ImageDetail(SQLModel):
-    id: str
-    name: str
-    kind: str
-    uploaded_by: str | None
-
-
 class ImagePublic(SQLModel):
     id: str
     name: str
+    kind: str
     uploaded_by: str | None
 
 
@@ -191,13 +185,6 @@ class Card(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
-class CardProfile(SQLModel):
-    card_id: int | None
-    user_id: int | None
-    player_rating: int
-    preferences: CardPreferencePublic
-
-
 class Score(SQLModel, table=True):
     __tablename__ = "scores"
 
@@ -264,9 +251,18 @@ class ScorePublic(SQLModel):
     updated_at: datetime
 
 
-class CardBests(SQLModel):
+class BestsPublic(SQLModel):
     b35_scores: list[ScorePublic]
     b15_scores: list[ScorePublic]
     b35_rating: int
     b15_rating: int
     all_rating: int
+
+
+class CardUserPublic(SQLModel):
+    id: int
+    created_at: datetime
+    last_activity_at: datetime
+    last_updated_at: datetime
+    player_rating: int
+    player_bests: BestsPublic

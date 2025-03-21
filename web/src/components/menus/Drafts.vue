@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useDraftStore } from '@/stores/draft';
-import type { Card, PreferencePublic } from '@/types';
+import type { Card, Preference } from '@/types';
 import { computed, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DXBaseView from '@/views/DXBaseView.vue';
 import { useNotificationStore } from '@/stores/notification';
+import { matchPhoneNumber, getShortUuid, formatDate, getOrderStatus } from '@/utils';
 
 const draftStore = useDraftStore();
 const notificationStore = useNotificationStore();
@@ -13,46 +14,25 @@ const drafts = ref<Card[]>([]);
 const loading = ref(true);
 const phoneNumber = ref("");
 const selectedDraft = ref<Card | null>(null);
-const previewPreferences = ref<PreferencePublic | null>(null);
+const previewPreferences = ref<Preference | null>(null);
 const showPreview = ref(false);
 
-// 获取用户创建的所有草稿
 const fetchDrafts = async () => {
     loading.value = true;
-    try {
-        drafts.value = await draftStore.fetchDrafts(phoneNumber.value);
-    } catch (error) {
-        console.error("Error fetching drafts:", error);
-    } finally {
-        loading.value = false;
-    }
+    drafts.value = await draftStore.fetchDrafts(phoneNumber.value);
+    loading.value = false;
 };
 
-// 删除草稿
 const deleteDraft = async (uuid: string) => {
-    if (confirm('确定要删除这个草稿吗？此操作不可撤销。')) {
-        try {
-            await draftStore.deleteDraft(uuid);
-            // 重新获取草稿列表以更新UI
-            await fetchDrafts();
-            notificationStore.success("删除成功", "草稿已成功删除");
-        } catch (error) {
-            console.error("Error deleting draft:", error);
-        }
-    }
+    await draftStore.deleteDraft(uuid);
+    await fetchDrafts();
+    notificationStore.success("删除成功", "草稿已成功删除");
 };
 
-// 确认查询电话
 const searchDrafts = () => {
-    var re = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/;
-    if (!re.test(phoneNumber.value)) {
-        notificationStore.warning("格式错误", "请输入正确的手机号码");
-        return;
-    }
-    fetchDrafts();
+    if (matchPhoneNumber(phoneNumber.value)) fetchDrafts();
 };
 
-// 显示预览
 const previewDraft = async (draft: Card) => {
     selectedDraft.value = draft;
     loading.value = true;
@@ -66,32 +46,9 @@ const previewDraft = async (draft: Card) => {
     }
 };
 
-// 关闭预览
 const closePreview = () => {
     showPreview.value = false;
     selectedDraft.value = null;
-};
-
-// 格式化日期显示
-const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-};
-
-// 获取短ID用于显示
-const getShortId = (uuid: string) => {
-    return uuid.substring(0, 6);
-};
-
-// 订单状态显示逻辑
-const getOrderStatus = (draft: Card) => {
-    return draft.card_id ? '已确认' : '草稿';
 };
 
 const preferencesReadOnly = computed(() => {
@@ -106,7 +63,7 @@ const preferencesReadOnly = computed(() => {
         class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-lg w-full overflow-hidden" style="max-width: 30rem;">
             <div class="p-4 bg-blue-400 text-white flex justify-between items-center">
-                <span class="font-bold text-nowrap">卡面预览 - 订单号: {{ getShortId(selectedDraft!.uuid) }}</span>
+                <span class="font-bold text-nowrap">卡面预览 - 订单号: {{ getShortUuid(selectedDraft!.uuid) }}</span>
             </div>
             <div class="p-4 flex flex-col items-center">
                 <div class="flex flex-1 preview-radius w-full" style="max-width: 100vw; ">
@@ -175,7 +132,7 @@ const preferencesReadOnly = computed(() => {
                         <div class="flex flex-col md:flex-row gap-4">
                             <!-- 左侧：订单信息 -->
                             <div class="flex-1">
-                                <h3 class="text-lg font-bold mb-2">订单编号: {{ getShortId(draft.uuid) }}</h3>
+                                <h3 class="text-lg font-bold mb-2">订单编号: {{ getShortUuid(draft.uuid) }}</h3>
                                 <div class="space-y-2">
                                     <p class="text-gray-600">
                                         <span class="font-semibold">创建时间:</span> {{ formatDate(draft.created_at) }}
@@ -227,10 +184,6 @@ const preferencesReadOnly = computed(() => {
                                         </svg>
                                         删除订单
                                     </button>
-
-                                    <span v-if="draft.card_id" class="text-sm italic text-gray-500 py-2">
-                                        订单已确认，无法修改
-                                    </span>
                                 </div>
                             </div>
                         </div>

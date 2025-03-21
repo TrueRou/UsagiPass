@@ -2,10 +2,11 @@
 import { useDraftStore } from '@/stores/draft';
 import { useUserStore } from '@/stores/user';
 import { useNotificationStore } from '@/stores/notification';
-import type { Card, PreferencePublic } from '@/types';
+import type { Card, Preference } from '@/types';
 import { computed, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DXBaseView from '@/views/DXBaseView.vue';
+import { getShortUuid, formatDate, getOrderStatus } from '@/utils';
 
 const draftStore = useDraftStore();
 const userStore = useUserStore();
@@ -15,45 +16,87 @@ const cards = ref<Card[]>([]);
 const loading = ref(false);
 const phoneNumber = ref("");
 const selectedCard = ref<Card | null>(null);
-const previewPreferences = ref<PreferencePublic | null>(null);
+const previewPreferences = ref<Preference | null>(null);
 const showPreview = ref(false);
 const showStatusConfirm = ref(false);
-const sortByNewest = ref(true);
-const showOnlyDrafts = ref(false);
+const dateFilter = ref<'all' | '3days' | 'week' | 'month'>('all');
+const typeFilter = ref<'all' | 'draft'>('all');
 
-// 获取所有卡片或按电话号码筛选
 const fetchCards = async () => {
-    loading.value = true;
     try {
-        if (phoneNumber.value) {
-            cards.value = await draftStore.fetchDrafts(phoneNumber.value);
-        } else {
-            // 获取所有卡片
-            const response = await userStore.axiosInstance.get('/cards');
-            cards.value = response.data;
-        }
-    } catch (error) {
-        console.error("Error fetching cards:", error);
-        notificationStore.error("获取卡片失败", "请检查您的网络连接或权限");
-    } finally {
+        loading.value = true;
+        cards.value = (await userStore.axiosInstance.get('/cards')).data
         loading.value = false;
+    } catch (error: any) {
+        notificationStore.error("获取卡片失败", error.response.data.detail || "未知错误");
+        throw error
     }
 };
 
-// 过滤和排序卡片
+const updateCardStatus = async (uuid: string, mode: 'CONFIRMED' | 'UNSET') => {
+    try {
+        await userStore.axiosInstance.patch(`/cards/${uuid}?mode=${mode}`);
+        notificationStore.success("状态更新成功", `卡片状态已更新为${mode === 'CONFIRMED' ? '已确认' : '草稿'}`);
+        await fetchCards();
+        showStatusConfirm.value = false;
+    } catch (error: any) {
+        notificationStore.error("状态更新失败", error.response.data.detail || "未知错误");
+        throw error
+    }
+};
+
+const deleteDraft = async (uuid: string) => {
+    await draftStore.deleteDraft(uuid)
+    notificationStore.success("删除成功", "草稿已删除");
+    await fetchCards();
+};
+
 const filteredCards = computed(() => {
     let result = [...cards.value];
 
-    // 仅显示草稿
-    if (showOnlyDrafts.value) {
+    // 按手机号码筛选
+    if (phoneNumber.value) {
+        result = result.filter(card => {
+            const phoneNum = card.phone_number || '未知号码';
+            return phoneNum.includes(phoneNumber.value);
+        });
+    }
+
+    // 仅显示草稿 - 使用typeFilter而不是showOnlyDrafts
+    if (typeFilter.value === 'draft') {
         result = result.filter(card => !card.card_id);
     }
 
-    // 排序
+    // 按时间段筛选
+    if (dateFilter.value !== 'all') {
+        const now = new Date();
+        let startDate: Date;
+
+        switch (dateFilter.value) {
+            case '3days':
+                startDate = new Date(now);
+                startDate.setDate(now.getDate() - 3);
+                break;
+            case 'week':
+                startDate = new Date(now);
+                startDate.setDate(now.getDate() - 7);
+                break;
+            case 'month':
+                startDate = new Date(now);
+                startDate.setMonth(now.getMonth() - 1);
+                break;
+            default:
+                startDate = new Date(0);
+        }
+
+        result = result.filter(card => new Date(card.created_at) >= startDate);
+    }
+
+    // 默认排序（最新的在前面）
     result.sort((a, b) => {
         const dateA = new Date(a.created_at).getTime();
         const dateB = new Date(b.created_at).getTime();
-        return sortByNewest.value ? dateB - dateA : dateA - dateB;
+        return dateB - dateA;
     });
 
     return result;
@@ -77,54 +120,6 @@ const groupedCards = computed(() => {
     }));
 });
 
-// 删除草稿
-const deleteCard = async (uuid: string) => {
-    if (confirm('确定要删除这个卡片吗？此操作不可撤销。')) {
-        try {
-            // 根据是否为草稿选择不同的删除路径
-            const isConfirmed = cards.value.find(c => c.uuid === uuid)?.card_id;
-            if (isConfirmed) {
-                await userStore.axiosInstance.delete(`/cards/${uuid}`);
-            } else {
-                await draftStore.deleteDraft(uuid);
-            }
-            // 重新获取卡片列表以更新UI
-            await fetchCards();
-            notificationStore.success("删除成功", "卡片已成功删除");
-        } catch (error) {
-            console.error("Error deleting card:", error);
-            notificationStore.error("删除失败", "请检查您的网络连接或权限");
-        }
-    }
-};
-
-// 更新卡片状态
-const updateCardStatus = async (uuid: string, mode: 'CONFIRMED' | 'UNSET') => {
-    try {
-        await userStore.axiosInstance.patch(`/cards/${uuid}?mode=${mode}`);
-        // 重新获取卡片列表以更新UI
-        await fetchCards();
-        notificationStore.success("状态更新成功", `卡片状态已更新为${mode === 'CONFIRMED' ? '已确认' : '草稿'}`);
-        showStatusConfirm.value = false;
-    } catch (error) {
-        console.error("Error updating card status:", error);
-        notificationStore.error("状态更新失败", "请检查您的网络连接或权限");
-    }
-};
-
-// 确认查询
-const searchCards = () => {
-    if (phoneNumber.value) {
-        var re = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/;
-        if (!re.test(phoneNumber.value)) {
-            notificationStore.warning("格式错误", "请输入正确的手机号码");
-            return;
-        }
-    }
-    fetchCards();
-};
-
-// 显示预览
 const previewCard = async (card: Card) => {
     selectedCard.value = card;
     loading.value = true;
@@ -146,37 +141,14 @@ const previewCard = async (card: Card) => {
     }
 };
 
-// 关闭预览
 const closePreview = () => {
     showPreview.value = false;
     selectedCard.value = null;
 };
 
-// 更新确认状态
 const showStatusDialog = (card: Card) => {
     selectedCard.value = card;
     showStatusConfirm.value = true;
-};
-
-// 格式化日期显示
-const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-    });
-};
-
-// 获取短ID用于显示
-const getShortId = (uuid: string) => {
-    return uuid.substring(0, 6);
-};
-
-// 订单状态显示逻辑
-const getOrderStatus = (card: Card) => {
-    if (card.user_id && card.card_id) return '已激活';
-    return card.card_id ? '已确认' : '草稿';
 };
 
 const preferencesReadOnly = computed(() => {
@@ -184,7 +156,6 @@ const preferencesReadOnly = computed(() => {
     return JSON.parse(JSON.stringify(previewPreferences.value));
 });
 
-// 初始加载
 fetchCards();
 </script>
 
@@ -194,7 +165,7 @@ fetchCards();
         class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-lg w-full overflow-hidden" style="max-width: 30rem;">
             <div class="p-4 bg-blue-400 text-white flex justify-between items-center">
-                <span class="font-bold text-nowrap">卡面预览 - 订单号: {{ getShortId(selectedCard!.uuid) }}</span>
+                <span class="font-bold text-nowrap">卡面预览 - 订单号: {{ getShortUuid(selectedCard!.uuid) }}</span>
                 <button @click="closePreview" class="text-white hover:text-gray-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -216,7 +187,7 @@ fetchCards();
         class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-lg w-full overflow-hidden" style="max-width: 30rem;">
             <div class="p-4 bg-blue-400 text-white">
-                <span class="font-bold">更新订单状态 - {{ getShortId(selectedCard.uuid) }}</span>
+                <span class="font-bold">更新订单状态 - {{ getShortUuid(selectedCard.uuid) }}</span>
             </div>
             <div class="p-6">
                 <p class="mb-4">当前状态:
@@ -251,38 +222,52 @@ fetchCards();
         <div class="flex flex-col bg-white p-4 pt-0">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                 <div class="flex flex-1 items-center">
-                    <input v-model="phoneNumber" type="text" placeholder="按手机号查询..."
+                    <input v-model="phoneNumber" type="text" placeholder="按手机号过滤..."
                         class="flex-1 p-2 border border-gray-300 rounded mr-2 w-full md:w-auto">
-                    <button @click="searchCards"
-                        class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 whitespace-nowrap">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="inline h-5 w-5 mr-1" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        查询
-                    </button>
                 </div>
 
-                <div class="flex items-center space-x-4">
-                    <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" v-model="showOnlyDrafts" class="form-checkbox h-5 w-5 text-blue-600">
-                        <span class="ml-2 text-gray-700">仅显示草稿</span>
-                    </label>
+                <div class="flex items-center gap-4 flex-wrap">
+                    <!-- 改为按钮选择样式 -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-gray-700">类型:</span>
+                        <div class="flex border border-gray-300 rounded-md overflow-hidden">
+                            <button @click="typeFilter = 'all'; fetchCards()"
+                                :class="{ 'bg-blue-500 text-white': typeFilter === 'all', 'bg-gray-100 hover:bg-gray-200': typeFilter !== 'all' }"
+                                class="px-3 py-1.5 text-sm font-medium">
+                                全部
+                            </button>
+                            <button @click="typeFilter = 'draft'; fetchCards()"
+                                :class="{ 'bg-blue-500 text-white': typeFilter === 'draft', 'bg-gray-100 hover:bg-gray-200': typeFilter !== 'draft' }"
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
+                                仅草稿
+                            </button>
+                        </div>
+                    </div>
 
-                    <div class="flex items-center">
-                        <span class="mr-2 text-gray-700">排序:</span>
-                        <button @click="sortByNewest = true"
-                            :class="sortByNewest ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-gray-100 text-gray-800 border-gray-300'"
-                            class="px-3 py-1 rounded-l border">
-                            最新
-                        </button>
-                        <button @click="sortByNewest = false"
-                            :class="!sortByNewest ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-gray-100 text-gray-800 border-gray-300'"
-                            class="px-3 py-1 rounded-r border border-l-0">
-                            最早
-                        </button>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-gray-700">时间:</span>
+                        <div class="flex border border-gray-300 rounded-md overflow-hidden">
+                            <button @click="dateFilter = 'all'; fetchCards()"
+                                :class="{ 'bg-blue-500 text-white': dateFilter === 'all', 'bg-gray-100 hover:bg-gray-200': dateFilter !== 'all' }"
+                                class="px-3 py-1.5 text-sm font-medium">
+                                全部
+                            </button>
+                            <button @click="dateFilter = '3days'; fetchCards()"
+                                :class="{ 'bg-blue-500 text-white': dateFilter === '3days', 'bg-gray-100 hover:bg-gray-200': dateFilter !== '3days' }"
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
+                                三日内
+                            </button>
+                            <button @click="dateFilter = 'week'; fetchCards()"
+                                :class="{ 'bg-blue-500 text-white': dateFilter === 'week', 'bg-gray-100 hover:bg-gray-200': dateFilter !== 'week' }"
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
+                                一周内
+                            </button>
+                            <button @click="dateFilter = 'month'; fetchCards()"
+                                :class="{ 'bg-blue-500 text-white': dateFilter === 'month', 'bg-gray-100 hover:bg-gray-200': dateFilter !== 'month' }"
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
+                                一月内
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -321,7 +306,7 @@ fetchCards();
                     class="bg-white shadow mb-1 overflow-hidden group-card">
                     <div class="border-b border-gray-200 bg-gray-50 px-4 py-3 flex justify-between items-center">
                         <div>
-                            <span class="font-bold">订单号: {{ getShortId(card.uuid) }}</span>
+                            <span class="font-bold">订单号: {{ getShortUuid(card.uuid) }}</span>
                             <span :class="{
                                 'ml-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-bold': !card.card_id && !card.user_id,
                                 'ml-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold': card.card_id && !card.user_id,
@@ -348,7 +333,7 @@ fetchCards();
                                 class="bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                                     fill="currentColor">
-                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                    <path d="M10 12a2 2 0 100-4 2 2 0 000-4z" />
                                     <path fill-rule="evenodd"
                                         d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
                                         clip-rule="evenodd" />
@@ -380,7 +365,7 @@ fetchCards();
                             </button>
 
                             <!-- 删除按钮 -->
-                            <button @click="deleteCard(card.uuid)"
+                            <button v-if="!card.card_id" @click="deleteDraft(card.uuid)"
                                 class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                                     fill="currentColor">
@@ -389,6 +374,16 @@ fetchCards();
                                         clip-rule="evenodd" />
                                 </svg>
                                 删除
+                            </button>
+                            <!-- 写卡按钮 -->
+                            <button v-if="card.card_id"
+                                class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 30 30"
+                                    fill="currentColor" stroke="currentColor" stroke-width="0.6">
+                                    <path
+                                        d="m 20 4.79296 v 18.10352 l -9 -9 v 3 c 0 0 8 9 9 9 h 0.210938 C 20.845635 25.55074 21.44166 25.14619 22 24.69531 v -18.59766 c -0.618707 -0.49963 -1.288408 -0.93504 -2 -1.30469 z M 8.7890625 4.89648 C 8.1543654 5.24222 7.5583404 5.64677 7 6.09765 v 18.59766 c 0.6187068 0.49963 1.2884078 0.93504 2 1.30469 v -18.10352 l 9 9 v -3 c 0 0 -8 -9 -9 -9 z" />
+                                </svg>
+                                写卡
                             </button>
                         </div>
                     </div>
@@ -450,5 +445,10 @@ input[type="checkbox"]:focus {
 /* 单独一张卡片时的样式 */
 .group-container:has(.group-card:only-child) .group-card {
     border-radius: 0.25rem;
+}
+
+input[type="date"] {
+    min-width: 150px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 </style>

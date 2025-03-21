@@ -8,7 +8,7 @@ from PIL.Image import Image as PILImage, Resampling
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
 from usagipass.app.database import require_session, add_model
-from usagipass.app.models import sega_prefixs, image_kinds, Image, ImageDetail, User
+from usagipass.app.models import ImagePublic, sega_prefixs, image_kinds, Image, User
 from usagipass.app.usecases.authorize import verify_user
 
 
@@ -38,7 +38,7 @@ def _remove_sega_prefix(name: str) -> str:
     return name
 
 
-@router.post("", response_model=ImageDetail, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ImagePublic, status_code=status.HTTP_201_CREATED)
 async def upload_image(
     name: str,
     kind: str,
@@ -98,7 +98,7 @@ async def patch_image(
     return {"message": "Image has been renamed"}
 
 
-@router.get("/{image_id}/related", response_model=list[ImageDetail])
+@router.get("/{image_id}/related", response_model=list[ImagePublic])
 async def get_images_related(session: Session = Depends(require_session), image: Image = Depends(require_image)):
     # we don't verify the image here, due to related images are usually from SEGA
     if not image.sega_name:
