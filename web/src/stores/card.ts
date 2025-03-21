@@ -20,7 +20,7 @@ export const useCardStore = defineStore('card', () => {
         try {
             cardUUID.value = uuid || cardUUID.value
             cardPreference.value = (await userStore.axiosInstance.get(`/cards/${cardUUID.value}/preference`)).data
-            userStore.axiosInstance.get(`/cards/${cardUUID.value}/accounts`).then((data: any) => cardAccount.value = data).catch(() => cardAccount.value = null)
+            userStore.axiosInstance.get(`/cards/${cardUUID.value}/accounts`).then(resp => cardAccount.value = resp.data).catch(() => cardAccount.value = null)
         } catch (error) {
             notificationStore.error("获取卡片失败", `无法获取卡片信息，请联系开发者\n卡片UUID: ${uuid}`)
             throw error

@@ -2,11 +2,12 @@
 import { useCardStore } from '@/stores/card';
 import { ref } from 'vue';
 import Prompt from '@/components/widgets/Prompt.vue';
+import { formatDate } from '@/utils';
 
 const cardStore = useCardStore();
 
-if (!cardStore.cardProfile) await cardStore.refreshCard();
-const isActivated = ref(Boolean(cardStore.cardProfile && cardStore.cardProfile.user_id));
+if (!cardStore.cardPreference) await cardStore.refreshCard();
+const isActivated = ref(Boolean(cardStore.cardAccount));
 const activationCode = ref('');
 const showActivationPrompt = ref(false);
 
@@ -30,7 +31,7 @@ const activateCard = async () => {
     try {
         await cardStore.createAccount(activationCode.value);
         await cardStore.refreshCard();
-        isActivated.value = Boolean(cardStore.cardProfile && cardStore.cardProfile.user_id);
+        isActivated.value = Boolean(cardStore.cardAccount);
     } finally {
         activationCode.value = '';
     }
@@ -40,12 +41,6 @@ const activateCard = async () => {
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
             <h1 class="font-bold text-white">卡片激活</h1>
-        </div>
-
-        <!-- 卡片ID信息 -->
-        <div class="flex justify-between items-center w-full mt-3 px-4">
-            <span class="font-medium">卡片 ID:</span>
-            <span class="font-bold">{{ cardStore.cardProfile?.card_id }}</span>
         </div>
 
         <!-- 卡片激活状态 -->
@@ -62,6 +57,41 @@ const activateCard = async () => {
                 class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 w-full">
                 激活卡片
             </button>
+        </div>
+
+        <!-- 已激活卡片的详细信息 -->
+        <div v-if="isActivated && cardStore.cardAccount" class="w-full mt-3 mb-3 px-4">
+            <div class="bg-gray-100 rounded p-3 border border-gray-300">
+                <h2 class="font-bold text-lg mb-2 text-blue-600">卡片信息</h2>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="flex flex-col">
+                        <span class="text-gray-600 text-sm">激活时间</span>
+                        <span class="font-medium">{{ formatDate(cardStore.cardAccount.created_at) }}</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-gray-600 text-sm">最后活动</span>
+                        <span class="font-medium">
+                            {{ new Date(cardStore.cardAccount.last_activity_at).toLocaleString() }}
+                        </span>
+                    </div>
+                </div>
+
+                <div v-if="cardStore.cardAccount.player_bests" class="mt-3">
+                    <h2 class="font-bold text-lg mb-2 text-blue-600">成绩信息</h2>
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <div class="flex flex-col">
+                            <span class="text-gray-600 text-sm">总 Rating</span>
+                            <span class="font-medium">{{ cardStore.cardAccount.player_bests.all_rating }}</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-gray-600 text-sm">最后更新</span>
+                            <span class="font-medium">{{ new
+                                Date(cardStore.cardAccount.last_updated_at).toLocaleString() }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- 激活对话框 -->

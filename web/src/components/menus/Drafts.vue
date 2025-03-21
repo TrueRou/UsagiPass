@@ -11,16 +11,13 @@ const draftStore = useDraftStore();
 const notificationStore = useNotificationStore();
 
 const drafts = ref<Card[]>([]);
-const loading = ref(true);
 const phoneNumber = ref("");
 const selectedDraft = ref<Card | null>(null);
 const previewPreferences = ref<Preference | null>(null);
 const showPreview = ref(false);
 
 const fetchDrafts = async () => {
-    loading.value = true;
     drafts.value = await draftStore.fetchDrafts(phoneNumber.value);
-    loading.value = false;
 };
 
 const deleteDraft = async (uuid: string) => {
@@ -35,15 +32,8 @@ const searchDrafts = () => {
 
 const previewDraft = async (draft: Card) => {
     selectedDraft.value = draft;
-    loading.value = true;
-    try {
-        previewPreferences.value = await draftStore.fetchPreferences(draft.uuid);
-        showPreview.value = true;
-    } catch (error) {
-        console.error("Error fetching preferences for preview:", error);
-    } finally {
-        loading.value = false;
-    }
+    previewPreferences.value = await draftStore.fetchPreferences(draft.uuid);
+    showPreview.value = true;
 };
 
 const closePreview = () => {

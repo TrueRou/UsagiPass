@@ -83,8 +83,8 @@ onUnmounted(() => {
                     class="h-full w-full absolute top-0 left-0"
                     :settingsRoute="{ name: 'preferencesCard', state: { 'cardUUID': cardStore.cardUUID } }" />
             </div>
-            <div class="flex-none w-1/2 h-full overflow-y-auto relative">
-                <CardBests class="h-full w-full absolute top-0 left-0" />
+            <div class="flex-none w-1/2 h-full relative">
+                <CardBests :bests="cardStore.cardAccount?.player_bests" />
             </div>
         </div>
 

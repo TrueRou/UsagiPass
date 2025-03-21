@@ -13,7 +13,6 @@ const userStore = useUserStore();
 const notificationStore = useNotificationStore();
 
 const cards = ref<Card[]>([]);
-const loading = ref(false);
 const phoneNumber = ref("");
 const selectedCard = ref<Card | null>(null);
 const previewPreferences = ref<Preference | null>(null);
@@ -24,9 +23,7 @@ const typeFilter = ref<'all' | 'draft'>('all');
 
 const fetchCards = async () => {
     try {
-        loading.value = true;
         cards.value = (await userStore.axiosInstance.get('/cards')).data
-        loading.value = false;
     } catch (error: any) {
         notificationStore.error("获取卡片失败", error.response.data.detail || "未知错误");
         throw error
@@ -122,23 +119,8 @@ const groupedCards = computed(() => {
 
 const previewCard = async (card: Card) => {
     selectedCard.value = card;
-    loading.value = true;
-    try {
-        if (card.card_id) {
-            // 已确认的卡片使用不同的API
-            const response = await userStore.axiosInstance.get(`/cards/${card.uuid}/profile`);
-            previewPreferences.value = response.data.preferences;
-        } else {
-            // 草稿使用草稿的API
-            previewPreferences.value = await draftStore.fetchPreferences(card.uuid);
-        }
-        showPreview.value = true;
-    } catch (error) {
-        console.error("Error fetching preferences for preview:", error);
-        notificationStore.error("获取预览失败", "无法获取卡片配置");
-    } finally {
-        loading.value = false;
-    }
+    previewPreferences.value = await draftStore.fetchPreferences(card.uuid);
+    showPreview.value = true;
 };
 
 const closePreview = () => {
@@ -285,13 +267,7 @@ fetchCards();
         </div>
 
         <!-- 卡片列表 -->
-        <div v-if="loading" class="text-center py-10">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent">
-            </div>
-            <p class="mt-2 text-gray-600">加载中...</p>
-        </div>
-
-        <div v-else-if="groupedCards.length === 0" class="text-center py-10">
+        <div v-if="groupedCards.length === 0" class="text-center py-10">
             <p class="text-gray-600">没有找到符合条件的卡片</p>
         </div>
 

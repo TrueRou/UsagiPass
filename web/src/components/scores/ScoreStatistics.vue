@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { CardBests } from '@/types';
+import type { Bests } from '@/types';
 
 const props = defineProps<{
-    bests: CardBests;
+    bests: Bests;
 }>();
 
 const allScores = computed(() => {
@@ -105,16 +105,16 @@ const achievementStats = computed(() => {
     });
 
     return {
-        average: count > 0 ? Math.round((sum / count) * 100) / 100 : 0,
-        max: Math.round(max * 100) / 100
+        average: count > 0 ? (sum / count) : 0,
+        max: max
     };
 });
 </script>
 
 <template>
-    <div>
+    <div class="pl-1 pr-1 mt-4">
         <!-- 总体统计 -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-md p-4 mb-4">
+        <div class="bg-white dark:bg-gray-800 rounded-md mb-4">
             <div class="mb-2">
                 <h3 class="text-lg font-bold">总体统计</h3>
             </div>
@@ -126,17 +126,17 @@ const achievementStats = computed(() => {
                 </div>
                 <div class="border rounded p-3">
                     <div class="text-sm text-gray-500 dark:text-gray-400">最高达成率</div>
-                    <div class="text-xl font-bold">{{ achievementStats.max }}%</div>
+                    <div class="text-xl font-bold">{{ achievementStats.max.toFixed(4) }}%</div>
                 </div>
                 <div class="border rounded p-3">
                     <div class="text-sm text-gray-500 dark:text-gray-400">平均达成率</div>
-                    <div class="text-xl font-bold">{{ achievementStats.average }}%</div>
+                    <div class="text-xl font-bold">{{ achievementStats.average.toFixed(4) }}%</div>
                 </div>
             </div>
         </div>
 
         <!-- 成绩等级分布 -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-md p-4 mb-4">
+        <div class="bg-white dark:bg-gray-800 shadow rounded-md mb-4">
             <div class="mb-2">
                 <h3 class="text-lg font-bold">成绩等级分布</h3>
             </div>
@@ -165,7 +165,7 @@ const achievementStats = computed(() => {
         </div>
 
         <!-- 曲目类型分布 -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-md p-4 mb-4">
+        <div class="bg-white dark:bg-gray-800 shadow rounded-md mb-4">
             <div class="mb-2">
                 <h3 class="text-lg font-bold">曲目类型分布</h3>
             </div>
@@ -182,7 +182,7 @@ const achievementStats = computed(() => {
         </div>
 
         <!-- 难度系数分布 -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-md p-4 mb-4">
+        <div class="bg-white dark:bg-gray-800 shadow rounded-md mb-4">
             <div class="mb-2">
                 <h3 class="text-lg font-bold">难度系数分布</h3>
             </div>

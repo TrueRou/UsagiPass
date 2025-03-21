@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
 import { useUserStore } from "./user";
 import { useNotificationStore } from "./notification";
-import type { Card, Preference } from "@/types";
+import type { Card, CardPreference, Preference } from "@/types";
 
 export const useDraftStore = defineStore('draft', () => {
     const userStore = useUserStore();
@@ -27,21 +27,20 @@ export const useDraftStore = defineStore('draft', () => {
         }
     }
 
-    async function fetchPreferences(uuid?: string): Promise<Preference> {
+    async function fetchPreferences(uuid?: string): Promise<CardPreference> {
         try {
-            const path = uuid ? `/drafts/${uuid}/preference` : '/defaults'
+            const path = uuid ? `/cards/${uuid}/preference` : '/defaults'
             const response = await userStore.axiosInstance.get(path)
             return response.data
-        } catch (error) {
-            notificationStore.error("获取配置失败", `无法获取草稿配置，请联系开发者\n卡片UUID: ${uuid || '未知'}`);
+        } catch (error: any) {
+            notificationStore.error("获取配置失败", error.response.data.detail || "未知错误");
             throw error
         }
     }
 
     async function patchPreferences(uuid: string, preferences: Preference) {
         try {
-            const response = await userStore.axiosInstance.patch(`/drafts/${uuid}/preference`, preferences)
-            return response.status === 200
+            await userStore.axiosInstance.patch(`/drafts/${uuid}/preference`, preferences)
         } catch (error: any) {
             notificationStore.error("保存失败", error.response.data.detail);
             throw error
