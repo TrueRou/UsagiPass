@@ -7,6 +7,7 @@ import { computed, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DXBaseView from '@/views/DXBaseView.vue';
 import { getShortUuid, formatDate, getOrderStatus } from '@/utils';
+import Prompt from '@/components/widgets/Prompt.vue';
 
 const draftStore = useDraftStore();
 const userStore = useUserStore();
@@ -20,6 +21,9 @@ const showPreview = ref(false);
 const showStatusConfirm = ref(false);
 const dateFilter = ref<'all' | '3days' | 'week' | 'month'>('all');
 const typeFilter = ref<'all' | 'draft'>('all');
+// 添加确认删除相关的状态
+const showDeleteConfirm = ref(false);
+const draftToDelete = ref("");
 
 const fetchCards = async () => {
     try {
@@ -46,6 +50,27 @@ const deleteDraft = async (uuid: string) => {
     await draftStore.deleteDraft(uuid)
     notificationStore.success("删除成功", "草稿已删除");
     await fetchCards();
+};
+
+// 修改为显示确认对话框
+const confirmDelete = (uuid: string) => {
+    draftToDelete.value = uuid;
+    showDeleteConfirm.value = true;
+};
+
+// 确认删除的处理函数
+const handleConfirmDelete = () => {
+    if (draftToDelete.value) {
+        deleteDraft(draftToDelete.value);
+        showDeleteConfirm.value = false;
+        draftToDelete.value = "";
+    }
+};
+
+// 取消删除的处理函数
+const handleCancelDelete = () => {
+    showDeleteConfirm.value = false;
+    draftToDelete.value = "";
 };
 
 const filteredCards = computed(() => {
@@ -142,6 +167,10 @@ fetchCards();
 </script>
 
 <template>
+    <!-- 添加删除确认对话框 -->
+    <Prompt v-model="draftToDelete" :show="showDeleteConfirm" text="确定要删除这个草稿吗？此操作无法撤销。" @confirm="handleConfirmDelete"
+        @cancel="handleCancelDelete" />
+
     <!-- 预览弹窗 -->
     <div v-if="showPreview && previewPreferences"
         class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -340,8 +369,8 @@ fetchCards();
                                 更新
                             </button>
 
-                            <!-- 删除按钮 -->
-                            <button v-if="!card.card_id" @click="deleteDraft(card.uuid)"
+                            <!-- 删除按钮 - 修改点击事件 -->
+                            <button v-if="!card.card_id" @click="confirmDelete(card.uuid)"
                                 class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                                     fill="currentColor">

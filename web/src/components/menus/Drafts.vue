@@ -1,20 +1,28 @@
 <script setup lang="ts">
 import { useDraftStore } from '@/stores/draft';
 import type { Card, Preference } from '@/types';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DXBaseView from '@/views/DXBaseView.vue';
 import { useNotificationStore } from '@/stores/notification';
 import { matchPhoneNumber, getShortUuid, formatDate, getOrderStatus } from '@/utils';
+import Prompt from '@/components/widgets/Prompt.vue';
+
+const props = defineProps<{
+    phoneNumber?: string;
+}>();
 
 const draftStore = useDraftStore();
 const notificationStore = useNotificationStore();
 
 const drafts = ref<Card[]>([]);
-const phoneNumber = ref("");
+const phoneNumber = ref(props.phoneNumber || "");
 const selectedDraft = ref<Card | null>(null);
 const previewPreferences = ref<Preference | null>(null);
 const showPreview = ref(false);
+// 添加确认删除相关的状态
+const showDeleteConfirm = ref(false);
+const draftToDelete = ref("");
 
 const fetchDrafts = async () => {
     drafts.value = await draftStore.fetchDrafts(phoneNumber.value);
@@ -24,6 +32,27 @@ const deleteDraft = async (uuid: string) => {
     await draftStore.deleteDraft(uuid);
     await fetchDrafts();
     notificationStore.success("删除成功", "草稿已成功删除");
+};
+
+// 修改为显示确认对话框
+const confirmDelete = (uuid: string) => {
+    draftToDelete.value = uuid;
+    showDeleteConfirm.value = true;
+};
+
+// 确认删除的处理函数
+const handleConfirmDelete = () => {
+    if (draftToDelete.value) {
+        deleteDraft(draftToDelete.value);
+        showDeleteConfirm.value = false;
+        draftToDelete.value = "";
+    }
+};
+
+// 取消删除的处理函数
+const handleCancelDelete = () => {
+    showDeleteConfirm.value = false;
+    draftToDelete.value = "";
 };
 
 const searchDrafts = () => {
@@ -45,9 +74,17 @@ const preferencesReadOnly = computed(() => {
     if (!previewPreferences.value) return null;
     return JSON.parse(JSON.stringify(previewPreferences.value));
 });
+
+onMounted(() => {
+    if (phoneNumber.value) fetchDrafts();
+});
 </script>
 
 <template>
+    <!-- 添加删除确认对话框 -->
+    <Prompt v-model="draftToDelete" :show="showDeleteConfirm" text="确定要删除这个草稿吗？此操作无法撤销。" @confirm="handleConfirmDelete"
+        @cancel="handleCancelDelete" />
+
     <!-- 预览弹窗 -->
     <div v-if="showPreview && previewPreferences"
         class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -69,23 +106,20 @@ const preferencesReadOnly = computed(() => {
         </div>
     </div>
 
-    <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
-        <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
-            <h1 class="font-bold text-white">我的订单</h1>
-        </div>
-        <!-- 直接在页面中添加手机号输入框 -->
-        <div class="w-full p-4">
+    <!-- 我的订单部分 - 移除外框 -->
+    <div class="w-full mb-6">
+        <div class="w-full p-4 bg-gray-50 rounded-lg">
             <div class="flex flex-col items-center justify-center">
-                <div class="flex justify-between items-center w-full mb-2">
+                <div class="flex justify-between items-center w-full mb-4">
                     <div class="flex flex-col p-2">
-                        <span>手机号码</span>
+                        <span class="font-medium">手机号码</span>
                         <span class="text-gray-600" style="font-size: 12px;">号码仅用于跟踪和确认订单</span>
                     </div>
-                    <div><input v-model="phoneNumber"></div>
+                    <div><input v-model="phoneNumber" class="shadow-sm"></div>
                 </div>
-                <div class="flex w-full flex-col sm:flex-row gap-2">
+                <div class="flex w-full flex-col sm:flex-row gap-3">
                     <button
-                        class="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 shadow-md flex items-center"
+                        class="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 shadow-md flex items-center transition-colors"
                         @click="searchDrafts">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                             fill="currentColor">
@@ -96,7 +130,7 @@ const preferencesReadOnly = computed(() => {
                         查询订单
                     </button>
                     <RouterLink
-                        class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 shadow-md flex items-center"
+                        class="bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 shadow-md flex items-center transition-colors"
                         :to="{ name: 'designer', state: { phoneNumber: phoneNumber } }">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                             fill="currentColor">
@@ -110,37 +144,36 @@ const preferencesReadOnly = computed(() => {
             </div>
         </div>
     </div>
+
+    <!-- 查询结果部分 - 移除外框 -->
     <template v-if="drafts.length">
-        <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
-            <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
-                <h1 class="font-bold text-white">查询结果</h1>
-            </div>
+        <div class="w-full">
             <div class="w-full">
-                <div class="p-4">
+                <div class="grid gap-6">
                     <div v-for="draft in drafts" :key="draft.uuid"
-                        class="border border-gray-300 rounded-lg p-4 mb-6 hover:shadow-lg transition-shadow">
+                        class="border border-gray-200 rounded-lg p-5 hover:shadow-lg transition-shadow bg-white">
                         <div class="flex flex-col md:flex-row gap-4">
                             <!-- 左侧：订单信息 -->
                             <div class="flex-1">
-                                <h3 class="text-lg font-bold mb-2">订单编号: {{ getShortUuid(draft.uuid) }}</h3>
-                                <div class="space-y-2">
+                                <h3 class="text-lg font-bold mb-3">订单编号: {{ getShortUuid(draft.uuid) }}</h3>
+                                <div class="space-y-3">
                                     <p class="text-gray-600">
                                         <span class="font-semibold">创建时间:</span> {{ formatDate(draft.created_at) }}
                                     </p>
                                     <p class="flex items-center">
                                         <span class="font-semibold mr-2">订单状态:</span>
                                         <span :class="{
-                                            'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-bold': !draft.card_id,
-                                            'bg-green-100 text-green-800 px-2 py-1 rounded-full font-bold': draft.card_id
+                                            'bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-bold': !draft.card_id,
+                                            'bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold': draft.card_id
                                         }">
                                             {{ getOrderStatus(draft) }}
                                         </span>
                                     </p>
                                 </div>
-                                <div class="mt-4 flex flex-wrap gap-3">
+                                <div class="mt-5 flex flex-wrap gap-3">
                                     <!-- 预览按钮 -->
                                     <button @click="previewDraft(draft)"
-                                        class="bg-purple-500 text-white py-3 px-6 rounded-lg hover:bg-purple-600 font-bold flex items-center shadow-md">
+                                        class="bg-purple-500 text-white py-3 px-6 rounded-lg hover:bg-purple-600 font-bold flex items-center shadow-md transition-colors">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                                             fill="currentColor">
                                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
@@ -154,7 +187,7 @@ const preferencesReadOnly = computed(() => {
                                     <!-- 编辑按钮 -->
                                     <RouterLink v-if="!draft.card_id"
                                         :to="{ name: 'designer', params: { uuid: draft.uuid } }"
-                                        class="bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 font-bold flex items-center shadow-md">
+                                        class="bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 font-bold flex items-center shadow-md transition-colors">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                                             fill="currentColor">
                                             <path
@@ -164,8 +197,8 @@ const preferencesReadOnly = computed(() => {
                                     </RouterLink>
 
                                     <!-- 删除按钮 -->
-                                    <button v-if="!draft.card_id" @click="deleteDraft(draft.uuid)"
-                                        class="bg-red-500 text-white py-3 px-6 rounded-lg hover:bg-red-600 font-bold flex items-center shadow-md">
+                                    <button v-if="!draft.card_id" @click="confirmDelete(draft.uuid)"
+                                        class="bg-red-500 text-white py-3 px-6 rounded-lg hover:bg-red-600 font-bold flex items-center shadow-md transition-colors">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                                             fill="currentColor">
                                             <path fill-rule="evenodd"

@@ -46,12 +46,14 @@ const createDraft = async () => {
         showDialog.value = false;
         router.replace({ name: "designer", params: { uuid: card.uuid } });
         notificationStore.success("创建成功", "您的卡面已创建\n在订单确认前，您可以随时修改卡面设置");
+        router.push({ name: 'drafts', params: { phoneNumber: newDraftPhone.value } });
     }
 }
 
 const updateDraft = async () => {
     await draftStore.patchPreferences(props.uuid!, preferences.value!);
     notificationStore.success("保存成功", "您的卡面设置已更新");
+    router.push({ name: 'drafts', params: { phoneNumber: newDraftPhone.value } });
 }
 
 const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences.value)));
