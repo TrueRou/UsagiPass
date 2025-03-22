@@ -3,6 +3,7 @@ import { useCardStore } from '@/stores/card';
 import { ref } from 'vue';
 import Prompt from '@/components/widgets/Prompt.vue';
 import { formatDate } from '@/utils';
+import TermsLink from '../common/TermsLink.vue';
 
 const cardStore = useCardStore();
 
@@ -96,7 +97,9 @@ const activateCard = async () => {
 
         <!-- 激活对话框 -->
         <Prompt v-model="activationCode" :show="showActivationPrompt" text="请输入卡片激活码" placeholder="扫描二维码或输入激活码"
-            @confirm="confirmActivation" @cancel="cancelActivation" />
+            @confirm="confirmActivation" @cancel="cancelActivation">
+            <TermsLink />
+        </Prompt>
     </div>
 
     <div class="flex justify-end w-full mt-2 mr-5">

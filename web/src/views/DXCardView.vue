@@ -4,6 +4,7 @@ import { useCardStore } from '@/stores/card';
 import DXBaseView from './DXBaseView.vue';
 import type { Preference } from '@/types';
 import CardBests from '@/components/CardBests.vue';
+import TermsLink from '@/components/common/TermsLink.vue';
 
 const cardStore = useCardStore();
 const activeView = ref(0); // 0: DXBaseView, 1: ScoreListView
@@ -117,6 +118,7 @@ onUnmounted(() => {
 
                 <p class="text-xs text-gray-500 mt-4">* 跳过激活后，查分功能将无法使用</p>
                 <p class="text-xs text-gray-500">* 您可以随时进行激活，一旦激活后不可换绑</p>
+                <TermsLink />
             </div>
         </div>
     </div>

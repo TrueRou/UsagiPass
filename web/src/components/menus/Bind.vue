@@ -4,6 +4,7 @@ import { useNotificationStore } from '@/stores/notification';
 import type { Server } from '@/types';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import TermsLink from '../common/TermsLink.vue';
 
 const props = defineProps<{
     server: Server;
@@ -51,7 +52,7 @@ if (props.server !== 'divingfish' && props.server !== 'lxns') {
             @click="bind">绑定</button>
         <button class="bg-gray-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-600 mt-2 w-[200px]"
             @click="router.back()">取消</button>
-    </div>
+        <TermsLink / </div>
 </template>
 <style scoped>
 input {
