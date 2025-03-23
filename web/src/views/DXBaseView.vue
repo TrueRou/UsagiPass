@@ -30,7 +30,7 @@ watch(() => props.preferences, applyPreferences, { immediate: true });
 </script>
 <template>
     <div class="flex items-center justify-center h-full w-full">
-        <div v-if="cardBack">
+        <div class="flex relative flex-col items-center justify-center h-full" v-if="cardBack">
             <img class="h-full object-cover -z-[20]" src="../assets/misc/UI_CardBase_Back.png">
         </div>
         <div class="flex relative flex-col items-center justify-center h-full" v-else>

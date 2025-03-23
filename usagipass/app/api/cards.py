@@ -1,9 +1,14 @@
 import uuid
-from typing import Literal
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from typing import Literal, List
+from fastapi import APIRouter, Depends, HTTPException, Path, status, Body
+from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 from maimai_py import MaimaiScores, MaimaiSongs, Score as MpyScore
 from maimai_py.exceptions import AimeServerError
+import tempfile
+import os
+import zipfile
+import shutil
 
 from usagipass.app import settings
 from usagipass.app import database
@@ -25,6 +30,7 @@ from usagipass.app.models import (
 from usagipass.app.usecases import maimai
 from usagipass.app.usecases.authorize import verify_admin, verify_user_optional
 from usagipass.app.usecases.accounts import apply_preference
+from usagipass.app.usecases import browser
 
 
 router = APIRouter(prefix="/cards", tags=["cards"])
@@ -195,3 +201,32 @@ async def update_accounts(
 ):
     await maimai.update_scores(db_account)
     return {"message": "Card account has been updated"}
+
+
+@router.get("/{uuid}/screenshot")
+async def get_card_screenshot(
+    card: Card = Depends(require_card_strict),
+    user: User = Depends(verify_admin),
+):
+    success, result = await browser.capture_card_screenshot(str(card.uuid))
+    if not success:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"无法生成卡面截图")
+    return FileResponse(result, media_type="image/png")
+
+
+@router.post("/batch/screenshot")
+async def get_batch_screenshot(
+    uuids: List[str] = Body(...),
+    session: Session = Depends(require_session),
+    user: User = Depends(verify_admin),
+):
+    cards = session.exec(select(Card).where(Card.uuid.in_(uuids))).all()
+    if len(cards) != len(uuids):
+        lost_uuids = set(uuids) - {card.uuid for card in cards}
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Cards are not found: {', '.join(lost_uuids)}")
+
+    max_id = max(card.card_id for card in cards)
+    min_id = min(card.card_id for card in cards)
+
+    _, zip_file = await browser.capture_multiple_screenshot(list(cards))
+    return FileResponse(zip_file, media_type="application/zip", filename=f"cards{min_id}-{max_id}.zip")

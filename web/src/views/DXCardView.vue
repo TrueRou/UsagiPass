@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useCardStore } from '@/stores/card';
 import DXBaseView from './DXBaseView.vue';
 import type { Preference } from '@/types';
@@ -37,8 +37,6 @@ const applyPreferences = () => {
     }
 }
 
-applyPreferences();
-
 const handleTouchStart = (e: TouchEvent) => {
     touchStartX.value = e.changedTouches[0].screenX;
 };
@@ -63,6 +61,11 @@ const switchToView = (index: number) => {
     activeView.value = index;
 };
 
+const isPublish = computed(() => history.state.publish === "true");
+const isBack = computed(() => history.state.back === "true");
+
+applyPreferences();
+
 onMounted(async () => {
     document.addEventListener('touchstart', handleTouchStart);
     document.addEventListener('touchend', handleTouchEnd);
@@ -81,8 +84,8 @@ onUnmounted(() => {
             :style="{ transform: `translateX(-${activeView * 50}%)` }">
             <div class="flex-none w-1/2 h-full overflow-y-auto relative">
                 <DXBaseView :preferences="cardPreference" timeLimit="12:00:00"
-                    class="h-full w-full absolute top-0 left-0"
-                    :settingsRoute="{ name: 'preferencesCard', state: { 'cardUUID': cardStore.cardUUID } }" />
+                    class="h-full w-full absolute top-0 left-0" :cardBack="isBack"
+                    :settingsRoute="isPublish ? undefined : { name: 'preferencesCard', state: { 'cardUUID': cardStore.cardUUID } }" />
             </div>
             <div class="flex-none w-1/2 h-full relative">
                 <CardBests :bests="cardStore.cardAccount?.player_bests" />
@@ -90,7 +93,7 @@ onUnmounted(() => {
         </div>
 
         <!-- 指示器和导航 -->
-        <div class="fixed bottom-10 left-1/2 transform -translate-x-1/2 flex gap-2.5 z-10">
+        <div v-if="!isPublish" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 flex gap-2.5 z-10">
             <div class="w-2.5 h-2.5 rounded-full cursor-pointer"
                 :class="{ 'bg-white': activeView === 0, 'bg-white/50': activeView !== 0 }" @click="switchToView(0)">
             </div>

@@ -12,7 +12,7 @@ export const useServerStore = defineStore('server', () => {
 
     const axiosInstance = ref(axios.create({
         baseURL: import.meta.env.VITE_URL,
-        timeout: 3000,
+        timeout: 10000,
     }));
 
     async function refreshMotd() {
