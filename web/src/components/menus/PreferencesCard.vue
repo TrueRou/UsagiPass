@@ -1,9 +1,11 @@
 <script setup lang="tsx">
-import { useCardStore } from '@/stores/card';
 import { ref } from 'vue';
-import Prompt from '@/components/widgets/Prompt.vue';
 import { formatDate } from '@/utils';
-import TermsLink from '../common/TermsLink.vue';
+import { useCardStore } from '@/stores/card';
+import Prompt from '@/components/widgets/Prompt.vue';
+import TermsLink from '@/components/widgets/TermsLink.vue';
+
+
 
 const cardStore = useCardStore();
 

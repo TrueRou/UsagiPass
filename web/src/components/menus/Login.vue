@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user';
 import { ref } from 'vue';
-import TermsLink from '../common/TermsLink.vue';
+import { useUserStore } from '@/stores/user';
+import TermsLink from '@/components/widgets/TermsLink.vue';
 
 const userStore = useUserStore();
 

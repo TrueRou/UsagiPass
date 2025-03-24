@@ -220,7 +220,7 @@ async def get_batch_screenshot(
     session: Session = Depends(require_session),
     user: User = Depends(verify_admin),
 ):
-    cards = session.exec(select(Card).where(Card.uuid.in_(uuids))).all()
+    cards = session.exec(select(Card).where(Card.uuid.in_(uuids), Card.card_id != None)).all()
     if len(cards) != len(uuids):
         lost_uuids = set(uuids) - {card.uuid for card in cards}
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Cards are not found: {', '.join(lost_uuids)}")

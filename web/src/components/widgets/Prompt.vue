@@ -42,8 +42,8 @@ const handleKeydown = (e: KeyboardEvent) => {
                     <h3 class="text-lg sm:text-xl font-medium text-gray-900 dark:text-white mb-3" v-html="props.text">
                     </h3>
 
-                    <input ref="inputRef" v-model="model" type="text" :placeholder="props.placeholder"
-                        @keydown="handleKeydown" class="prompt-input">
+                    <input v-if="model !== undefined" ref="inputRef" v-model="model" type="text"
+                        :placeholder="props.placeholder" @keydown="handleKeydown" class="prompt-input">
 
                     <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row-reverse gap-2 sm:gap-3">
                         <button @click="emits('confirm')" class="prompt-button confirm-button">

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
+import type { Preference } from '@/types';
 import { useCardStore } from '@/stores/card';
 import DXBaseView from './DXBaseView.vue';
-import type { Preference } from '@/types';
 import CardBests from '@/components/CardBests.vue';
-import TermsLink from '@/components/common/TermsLink.vue';
+import TermsLink from '@/components/widgets/TermsLink.vue';
 
 const cardStore = useCardStore();
 const activeView = ref(0); // 0: DXBaseView, 1: ScoreListView

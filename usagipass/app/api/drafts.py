@@ -25,7 +25,7 @@ def require_draft(card: Card = Depends(require_card)) -> Card:
 
 @router.get("", response_model=list[Card])
 async def get_drafts(phone: str = Depends(require_phone), session: Session = Depends(require_session)):
-    return session.exec(select(Card).where(Card.phone_number == phone)).all()
+    return session.exec(select(Card).where(Card.phone_number == phone).order_by(Card.created_at.desc())).all()
 
 
 @router.post("", response_model=Card)

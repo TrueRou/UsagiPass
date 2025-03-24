@@ -21,9 +21,10 @@ const showPreview = ref(false);
 const showStatusConfirm = ref(false);
 const dateFilter = ref<'all' | '3days' | 'week' | 'month'>('all');
 const typeFilter = ref<'all' | 'draft'>('all');
-// 添加确认删除相关的状态
 const showDeleteConfirm = ref(false);
 const draftToDelete = ref("");
+const selectedCards = ref<Set<string>>(new Set());
+const isDownloading = ref(false);
 
 const fetchCards = async () => {
     try {
@@ -52,13 +53,11 @@ const deleteDraft = async (uuid: string) => {
     await fetchCards();
 };
 
-// 修改为显示确认对话框
 const confirmDelete = (uuid: string) => {
     draftToDelete.value = uuid;
     showDeleteConfirm.value = true;
 };
 
-// 确认删除的处理函数
 const handleConfirmDelete = () => {
     if (draftToDelete.value) {
         deleteDraft(draftToDelete.value);
@@ -67,7 +66,6 @@ const handleConfirmDelete = () => {
     }
 };
 
-// 取消删除的处理函数
 const handleCancelDelete = () => {
     showDeleteConfirm.value = false;
     draftToDelete.value = "";
@@ -84,7 +82,7 @@ const filteredCards = computed(() => {
         });
     }
 
-    // 仅显示草稿 - 使用typeFilter而不是showOnlyDrafts
+    // 按是否为草稿筛选
     if (typeFilter.value === 'draft') {
         result = result.filter(card => !card.card_id);
     }
@@ -156,6 +154,97 @@ const closePreview = () => {
 const showStatusDialog = (card: Card) => {
     selectedCard.value = card;
     showStatusConfirm.value = true;
+};
+
+const toggleCardSelection = (uuid: string) => {
+    if (selectedCards.value.has(uuid)) {
+        selectedCards.value.delete(uuid);
+    } else {
+        selectedCards.value.add(uuid);
+    }
+};
+
+const toggleGroupSelection = (groupCards: Card[]) => {
+    const allSelected = groupCards.every(card => selectedCards.value.has(card.uuid));
+
+    if (allSelected) {
+        groupCards.forEach(card => {
+            selectedCards.value.delete(card.uuid);
+        });
+    } else {
+        groupCards.forEach(card => {
+            selectedCards.value.add(card.uuid);
+        });
+    }
+};
+
+const isGroupAllSelected = (groupCards: Card[]) => {
+    return groupCards.length > 0 && groupCards.every(card => selectedCards.value.has(card.uuid));
+};
+
+const isGroupPartialSelected = (groupCards: Card[]) => {
+    const selectedCount = groupCards.filter(card => selectedCards.value.has(card.uuid)).length;
+    return selectedCount > 0 && selectedCount < groupCards.length;
+};
+
+const downloadBatchScreenshots = async () => {
+    if (selectedCards.value.size === 0) {
+        notificationStore.warning("请先选择卡片", "您需要至少选择一张卡片");
+        return;
+    }
+
+    try {
+        isDownloading.value = true;
+
+        // 过滤出已确认的卡片（有card_id的卡片）
+        const selectedCardsList = cards.value.filter(card => selectedCards.value.has(card.uuid));
+        const confirmedCards = selectedCardsList.filter(card => card.card_id);
+        const draftCards = selectedCardsList.filter(card => !card.card_id);
+
+        // 如果有草稿卡片，显示警告
+        if (draftCards.length > 0) {
+            notificationStore.warning(
+                "草稿卡片已被过滤",
+                `${draftCards.length}张草稿卡片不会被下载，因为它们尚未确认。只有已确认的卡片将被下载。`
+            );
+
+            // 如果过滤后没有可下载的卡片，直接返回
+            if (confirmedCards.length === 0) {
+                notificationStore.warning("无法下载", "您选择的卡片中没有已确认的卡片，请先确认卡片。");
+                isDownloading.value = false;
+                return;
+            }
+        }
+
+        const uuidsToDownload = confirmedCards.map(card => card.uuid);
+
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        document.body.appendChild(a);
+
+        const response = await userStore.axiosInstance.post('/cards/batch/screenshot',
+            uuidsToDownload,
+            { responseType: 'blob', timeout: 60000 }
+        );
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        a.href = url;
+        a.download = `cards_${new Date().toISOString().slice(0, 10)}.zip`;
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        notificationStore.success("下载成功", `已成功下载${confirmedCards.length}张卡片的截图`);
+    } catch (error: any) {
+        notificationStore.error("下载失败", error.response?.data?.detail || "未知错误");
+    } finally {
+        isDownloading.value = false;
+    }
+};
+
+const clearSelection = () => {
+    selectedCards.value.clear();
 };
 
 const preferencesReadOnly = computed(() => {
@@ -283,15 +372,52 @@ fetchCards();
                 </div>
             </div>
 
-            <div class="flex justify-between items-center">
-                <span class="text-gray-600">总计: {{ filteredCards.length }} 条记录</span>
-                <button @click="fetchCards" class="text-blue-600 hover:text-blue-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                </button>
+            <div class="flex justify-between items-center h-8">
+                <div class="flex items-center">
+                    <span class="text-gray-600 mr-4" v-if="selectedCards.size == 0">总计: {{ filteredCards.length }}
+                        条记录</span>
+                    <!-- 添加选中计数 -->
+                    <span v-if="selectedCards.size > 0" class="text-blue-600 font-medium">
+                        已选择: {{ selectedCards.size }} 张卡片
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <!-- 批量下载按钮 -->
+                    <button v-if="selectedCards.size > 0" @click="downloadBatchScreenshots" :disabled="isDownloading"
+                        class="text-white bg-blue-600 hover:bg-blue-700 py-1.5 px-3 rounded text-sm font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg v-if="isDownloading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        下载卡面
+                    </button>
+                    <!-- 清除选择按钮 -->
+                    <button v-if="selectedCards.size > 0" @click="clearSelection"
+                        class="text-gray-600 hover:text-gray-800 py-1.5 px-2 rounded text-sm flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <!-- 刷新按钮 -->
+                    <button @click="fetchCards" class="text-blue-600 hover:text-blue-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -303,22 +429,49 @@ fetchCards();
         <div v-else>
             <div v-for="(group, index) in groupedCards" :key="group.phoneNumber" class="mb-8 group-container">
                 <!-- 手机号码分组标题 -->
-                <div class="group-header">
-                    手机号码: {{ group.phoneNumber }} ({{ group.cards.length }}张卡片)
+                <div class="group-header flex justify-between items-center">
+                    <span>手机号码: {{ group.phoneNumber }} ({{ group.cards.length }}张卡片)</span>
+
+                    <!-- 全选/取消全选分组按钮 -->
+                    <div class="flex items-center">
+                        <button @click="toggleGroupSelection(group.cards)"
+                            class="text-white hover:text-gray-200 flex items-center text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <rect v-if="isGroupAllSelected(group.cards)" width="16" height="16" x="2" y="2"
+                                    rx="2" />
+                                <path v-else-if="isGroupPartialSelected(group.cards)" fill-rule="evenodd"
+                                    d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm0 0h14v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"
+                                    clip-rule="evenodd" />
+                                <path v-else fill-rule="evenodd"
+                                    d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            {{ isGroupAllSelected(group.cards) ? '取消全选' : '全选分组' }}
+                        </button>
+                    </div>
                 </div>
 
                 <div v-for="card in group.cards" :key="card.uuid"
-                    class="bg-white shadow mb-1 overflow-hidden group-card">
+                    class="bg-white shadow mb-1 overflow-hidden group-card"
+                    :class="{ 'border-2 border-blue-500': selectedCards.has(card.uuid) }">
                     <div class="border-b border-gray-200 bg-gray-50 px-4 py-3 flex justify-between items-center">
-                        <div>
-                            <span class="font-bold">订单号: {{ getShortUuid(card.uuid) }}</span>
-                            <span :class="{
-                                'ml-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-bold': !card.card_id && !card.user_id,
-                                'ml-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold': card.card_id && !card.user_id,
-                                'ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-bold': card.user_id && card.card_id
-                            }">
-                                {{ getOrderStatus(card) }}
-                            </span>
+                        <div class="flex items-center">
+                            <!-- 添加勾选框 -->
+                            <div class="mr-2 flex items-center">
+                                <input type="checkbox" :checked="selectedCards.has(card.uuid)"
+                                    @change="toggleCardSelection(card.uuid)" class="h-4 w-4 cursor-pointer">
+                            </div>
+                            <div>
+                                <span class="font-bold">订单号: {{ getShortUuid(card.uuid) }}</span>
+                                <span :class="{
+                                    'ml-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-bold': !card.card_id && !card.user_id,
+                                    'ml-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold': card.card_id && !card.user_id,
+                                    'ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-bold': card.user_id && card.card_id
+                                }">
+                                    {{ getOrderStatus(card) }}
+                                </span>
+                            </div>
                         </div>
                         <span class="text-sm text-gray-600">{{ formatDate(card.created_at) }}</span>
                     </div>
@@ -455,5 +608,10 @@ input[type="checkbox"]:focus {
 input[type="date"] {
     min-width: 150px;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* 添加选中状态的样式 */
+input[type="checkbox"] {
+    accent-color: #2563eb;
 }
 </style>

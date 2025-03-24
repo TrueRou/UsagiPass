@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useDraftStore } from '@/stores/draft';
 import type { Card, Preference } from '@/types';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onActivated, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DXBaseView from '@/views/DXBaseView.vue';
 import { useNotificationStore } from '@/stores/notification';
@@ -20,7 +20,6 @@ const phoneNumber = ref(props.phoneNumber || "");
 const selectedDraft = ref<Card | null>(null);
 const previewPreferences = ref<Preference | null>(null);
 const showPreview = ref(false);
-// 添加确认删除相关的状态
 const showDeleteConfirm = ref(false);
 const draftToDelete = ref("");
 
@@ -75,14 +74,14 @@ const preferencesReadOnly = computed(() => {
     return JSON.parse(JSON.stringify(previewPreferences.value));
 });
 
-onMounted(() => {
+onActivated(() => {
     if (phoneNumber.value) fetchDrafts();
 });
 </script>
 
 <template>
     <!-- 添加删除确认对话框 -->
-    <Prompt v-model="draftToDelete" :show="showDeleteConfirm" text="确定要删除这个草稿吗？此操作无法撤销。" @confirm="handleConfirmDelete"
+    <Prompt :show="showDeleteConfirm" text="确定要删除这个草稿吗？此操作无法撤销。" @confirm="handleConfirmDelete"
         @cancel="handleCancelDelete" />
 
     <!-- 预览弹窗 -->
