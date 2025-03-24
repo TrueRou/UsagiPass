@@ -6,10 +6,11 @@ import { computed, ref, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { useServerStore } from '@/stores/server';
 import { useUserStore } from '@/stores/user';
-import type { Kind, Preference } from '@/types';
+import { Privilege, type CardPreference, type Kind } from '@/types';
 import DXBaseView from '@/views/DXBaseView.vue';
 import Prompt from '../widgets/Prompt.vue';
 import { matchPhoneNumber } from '@/utils';
+import { useCardStore } from '@/stores/card';
 
 
 const props = defineProps<{
@@ -18,6 +19,7 @@ const props = defineProps<{
 
 const router = useRouter();
 const draftStore = useDraftStore();
+const cardStore = useCardStore();
 const imageStore = useImageStore();
 const userStore = useUserStore();
 const serverStore = useServerStore();
@@ -25,8 +27,10 @@ const notificationStore = useNotificationStore();
 
 const imagePicker = useTemplateRef('image-picker');
 const showDialog = ref<boolean>(false);
+const showBatchDialog = ref<boolean>(false);
 const newDraftPhone = ref<string>(history.state.phoneNumber || '');
-const preferences = ref<Preference>(await draftStore.fetchPreferences(props.uuid));
+const batchCount = ref<number>(1);
+const preferences = ref<CardPreference>(await draftStore.fetchPreferences(props.uuid));
 
 const openPicker = (kind: Kind) => userStore.openImagePicker(kind, imagePicker.value!);
 
@@ -35,12 +39,19 @@ const openGallery = (kind: Kind) => {
     router.push({ name: 'gallery', params: { kind: kind } })
 };
 
+const openPhoneDialog = () => {
+    if (!isAdmin && !newDraftPhone.value) showDialog.value = true;
+    else createDraft();
+}
+
 const createDraft = async () => {
-    if (!newDraftPhone.value) {
-        showDialog.value = true;
+    if (isAdmin) {
+        await cardStore.createCard();
+        router.push({ name: 'admin' });
+        notificationStore.success("创建成功", "已成功创建一张卡片，卡片订单已自动确认");
         return;
     }
-    if (matchPhoneNumber(newDraftPhone.value)) {
+    else if (matchPhoneNumber(newDraftPhone.value)) {
         const card = await draftStore.createDraft(newDraftPhone.value);
         await draftStore.patchPreferences(card.uuid, preferences.value!);
         showDialog.value = false;
@@ -51,11 +62,44 @@ const createDraft = async () => {
 }
 
 const updateDraft = async () => {
-    await draftStore.patchPreferences(props.uuid!, preferences.value!);
-    notificationStore.success("保存成功", "您的卡面设置已更新");
-    router.push({ name: 'drafts', params: { phoneNumber: newDraftPhone.value } });
+    if (isAdmin) {
+        await cardStore.patchPreferences(props.uuid!, preferences.value!);
+        router.push({ name: 'admin' });
+    } else {
+        await draftStore.patchPreferences(props.uuid!, preferences.value!);
+        router.push({ name: 'drafts', params: { phoneNumber: newDraftPhone.value } });
+    }
+    notificationStore.success("保存成功", "卡面设置已更新");
 }
 
+const openBatchDialog = () => {
+    if (isAdmin) {
+        showBatchDialog.value = true;
+    }
+}
+
+const createBatchCards = async () => {
+    if (!isAdmin) return;
+
+    const count = parseInt(batchCount.value.toString());
+    if (isNaN(count) || count < 1 || count > 32) {
+        notificationStore.error("数量错误", "批量创建数量必须在1-32之间");
+        return;
+    }
+
+    try {
+        for (let i = 0; i < count; i++) {
+            await cardStore.createCard();
+        }
+        notificationStore.success("批量创建成功", `已成功创建${count}张卡片`);
+        showBatchDialog.value = false;
+        router.push({ name: 'admin' });
+    } catch (error) {
+        notificationStore.error("批量创建失败", "创建卡片时发生错误");
+    }
+}
+
+const isAdmin = computed(() => userStore.userProfile?.privilege === Privilege.ADMIN);
 const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences.value)));
 </script>
 <template>
@@ -90,6 +134,11 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
     <Prompt text="请输入您的手机号码: <br>  手机号码只用于跟踪和确认订单" v-model="newDraftPhone" :show="showDialog" @confirm="createDraft"
         @cancel="showDialog = false;">
     </Prompt>
+
+    <Prompt text="请输入批量创建数量: <br> 一次最多可创建1-32张卡片" v-model="batchCount" :show="showBatchDialog"
+        @confirm="createBatchCards" @cancel="showBatchDialog = false;" inputType="number">
+    </Prompt>
+
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
             <h1 class="font-bold text-white">卡面设置</h1>
@@ -315,8 +364,12 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
         </template>
         <template v-else>
             <button class="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-600"
-                v-on:click="createDraft">
+                v-on:click="openPhoneDialog">
                 创建
+            </button>
+            <button v-if="isAdmin" class="bg-red-500 text-white font-bold py-2 px-4 ml-2 rounded hover:bg-red-600"
+                v-on:click="openBatchDialog">
+                批量创建
             </button>
         </template>
     </div>

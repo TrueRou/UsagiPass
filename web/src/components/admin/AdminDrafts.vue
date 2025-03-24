@@ -36,6 +36,17 @@ const fetchCards = async () => {
 };
 
 const updateCardStatus = async (uuid: string, mode: 'CONFIRMED' | 'UNSET') => {
+    // 再次检查卡片是否已激活（防止对话框打开后卡片状态发生变化）
+    const card = cards.value.find(c => c.uuid === uuid);
+    if (card && card.user_id) {
+        notificationStore.warning(
+            "无法修改状态",
+            "已激活的卡片不允许修改状态。"
+        );
+        showStatusConfirm.value = false;
+        return;
+    }
+
     try {
         await userStore.axiosInstance.patch(`/cards/${uuid}?mode=${mode}`);
         notificationStore.success("状态更新成功", `卡片状态已更新为${mode === 'CONFIRMED' ? '已确认' : '草稿'}`);
@@ -152,6 +163,14 @@ const closePreview = () => {
 };
 
 const showStatusDialog = (card: Card) => {
+    // 检查卡片是否已激活
+    if (card.user_id) {
+        notificationStore.warning(
+            "无法修改状态",
+            "已激活的卡片不允许修改状态。该卡片已有用户使用。"
+        );
+        return;
+    }
     selectedCard.value = card;
     showStatusConfirm.value = true;
 };
@@ -257,7 +276,7 @@ fetchCards();
 
 <template>
     <!-- 添加删除确认对话框 -->
-    <Prompt v-model="draftToDelete" :show="showDeleteConfirm" text="确定要删除这个草稿吗？此操作无法撤销。" @confirm="handleConfirmDelete"
+    <Prompt :show="showDeleteConfirm" text="确定要删除这个草稿吗？此操作无法撤销。" @confirm="handleConfirmDelete"
         @cancel="handleCancelDelete" />
 
     <!-- 预览弹窗 -->
@@ -290,10 +309,14 @@ fetchCards();
                 <span class="font-bold">更新订单状态 - {{ getShortUuid(selectedCard.uuid) }}</span>
             </div>
             <div class="p-6">
+                <p v-if="selectedCard.user_id" class="text-red-600 font-medium mb-4">
+                    警告：该卡片已被激活，不应修改状态。
+                </p>
                 <p class="mb-4">当前状态:
                     <span :class="{
                         'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-bold': !selectedCard.card_id,
-                        'bg-green-100 text-green-800 px-2 py-1 rounded-full font-bold': selectedCard.card_id
+                        'bg-green-100 text-green-800 px-2 py-1 rounded-full font-bold': selectedCard.card_id && !selectedCard.user_id,
+                        'bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-bold': selectedCard.user_id
                     }">
                         {{ getOrderStatus(selectedCard) }}
                     </span>
@@ -305,11 +328,11 @@ fetchCards();
                         取消
                     </button>
                     <button @click="updateCardStatus(selectedCard.uuid, 'UNSET')"
-                        class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600">
+                        class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         设为草稿
                     </button>
                     <button @click="updateCardStatus(selectedCard.uuid, 'CONFIRMED')"
-                        class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+                        class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         设为已确认
                     </button>
                 </div>
@@ -511,8 +534,10 @@ fetchCards();
                             </RouterLink>
 
                             <!-- 状态按钮 -->
-                            <button @click="showStatusDialog(card)"
-                                class="bg-amber-500 text-white py-2 px-4 rounded hover:bg-amber-600 flex items-center">
+                            <button @click="showStatusDialog(card)" :class="{
+                                'bg-amber-500 hover:bg-amber-600': !card.user_id,
+                                'bg-gray-400 hover:bg-gray-500': card.user_id
+                            }" class="text-white py-2 px-4 rounded flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                                     fill="currentColor">
                                     <path fill-rule="evenodd"

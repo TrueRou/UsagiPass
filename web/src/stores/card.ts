@@ -36,14 +36,26 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
-    async function patchPreferences() {
+    async function patchPreferences(uuid?: string, preference?: CardPreference) {
         try {
-            await userStore.axiosInstance.patch(`/cards/${cardUUID.value}/preference`, cardPreference.value);
+            uuid = uuid ?? cardUUID.value!;
+            preference = preference ?? cardPreference.value!;
+            await userStore.axiosInstance.patch(`/cards/${uuid}/preference`, preference);
         } catch (error: any) {
             notificationStore.error("保存失败", error.response.data.detail || "未知错误");
             throw error;
         }
     }
 
-    return { refreshCard, createAccount, patchPreferences, cardUUID, cardPreference, cardAccount }
+    async function createCard() {
+        try {
+            const resp = await userStore.axiosInstance.post("/cards");
+            return resp.data;
+        } catch (error: any) {
+            notificationStore.error("创建失败", error.response.data.detail || "未知错误");
+            throw error;
+        }
+    }
+
+    return { refreshCard, createAccount, createCard, patchPreferences, cardUUID, cardPreference, cardAccount }
 })
