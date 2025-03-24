@@ -234,6 +234,12 @@ class Score(SQLModel, table=True):
         )
 
 
+class CardPublic(SQLModel):
+    uuid: str
+    card_id: int
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 class ScorePublic(SQLModel):
     song_id: int
     song_name: str

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import type { Preference } from '@/types';
 import { useCardStore } from '@/stores/card';
 import DXBaseView from './DXBaseView.vue';
@@ -31,12 +31,6 @@ const skipActivation = async () => {
     showActivationDialog.value = false;
 };
 
-const applyPreferences = () => {
-    if (cardStore.cardAccount?.player_rating != -1) {
-        cardPreference.value.dx_rating ||= String(cardStore.cardAccount?.player_rating);
-    }
-}
-
 const handleTouchStart = (e: TouchEvent) => {
     touchStartX.value = e.changedTouches[0].screenX;
 };
@@ -64,8 +58,6 @@ const switchToView = (index: number) => {
 const isPublish = computed(() => history.state.publish === "true");
 const isBack = computed(() => history.state.back === "true");
 
-applyPreferences();
-
 onMounted(async () => {
     document.addEventListener('touchstart', handleTouchStart);
     document.addEventListener('touchend', handleTouchEnd);
@@ -75,6 +67,17 @@ onUnmounted(() => {
     document.removeEventListener('touchstart', handleTouchStart);
     document.removeEventListener('touchend', handleTouchEnd);
 });
+
+const applyPreferences = () => {
+    if (cardStore.cardAccount?.player_rating != -1) {
+        cardPreference.value.dx_rating ||= String(cardStore.cardAccount?.player_rating);
+    }
+    if (cardStore.card?.card_id) {
+        cardPreference.value.simplified_code = "CID: " + cardStore.card?.card_id;
+    }
+}
+
+watch(() => [cardPreference, cardStore.card], applyPreferences, { immediate: true });
 </script>
 
 <template>

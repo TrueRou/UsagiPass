@@ -211,6 +211,16 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
             <h1 class="font-bold text-white">个人设置</h1>
         </div>
+        <template v-if="isAdmin">
+            <div class="flex justify-between items-center w-full">
+                <div class="flex flex-col p-2">
+                    <span>卡片元数据</span>
+                    <span class="text-gray-600" style="font-size: 12px;">覆盖卡面左下方的CID</span>
+                </div>
+                <div><input v-model="preferences!.simplified_code" placeholder="默认情况请留空"></div>
+            </div>
+            <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+        </template>
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>玩家昵称</span>
@@ -233,14 +243,6 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
                 <span class="text-gray-600" style="font-size: 12px;">卡面印刷的DX分数</span>
             </div>
             <div><input v-model="preferences!.dx_rating" placeholder="留空不印刷DX分数"></div>
-        </div>
-        <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full">
-            <div class="flex flex-col p-2">
-                <span>卡片号码</span>
-                <span class="text-gray-600" style="font-size: 12px;">卡面印刷的卡片号码</span>
-            </div>
-            <div><input v-model="preferences!.simplified_code" placeholder="留空不印刷卡片号码"></div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
         <div class="flex justify-between items-center w-full">

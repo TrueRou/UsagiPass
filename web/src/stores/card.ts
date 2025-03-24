@@ -2,13 +2,14 @@ import { ref } from "vue";
 import { defineStore } from "pinia"
 import { useUserStore } from "./user";
 import { useNotificationStore } from "./notification";
-import type { CardPreference, CardUser } from "@/types";
+import type { Card, CardPreference, CardUser } from "@/types";
 
 export const useCardStore = defineStore('card', () => {
     const userStore = useUserStore();
     const notificationStore = useNotificationStore();
 
     const cardUUID = ref<string | null>(history.state.cardUUID || null);
+    const card = ref<Card | null>(null);
     const cardPreference = ref<CardPreference | null>(null);
     const cardAccount = ref<CardUser | null>(null);
 
@@ -19,6 +20,7 @@ export const useCardStore = defineStore('card', () => {
         }
         try {
             cardUUID.value = uuid || cardUUID.value
+            card.value = (await userStore.axiosInstance.get(`/cards/${cardUUID.value}`)).data
             cardPreference.value = (await userStore.axiosInstance.get(`/cards/${cardUUID.value}/preference`)).data
             userStore.axiosInstance.get(`/cards/${cardUUID.value}/accounts`).then(resp => cardAccount.value = resp.data).catch(() => cardAccount.value = null)
         } catch (error) {
@@ -57,5 +59,5 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
-    return { refreshCard, createAccount, createCard, patchPreferences, cardUUID, cardPreference, cardAccount }
+    return { refreshCard, createAccount, createCard, patchPreferences, cardUUID, card, cardPreference, cardAccount }
 })

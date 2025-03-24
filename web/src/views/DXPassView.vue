@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useUserStore } from '@/stores/user';
 import type { Preference } from '@/types';
 import DXBaseView from './DXBaseView.vue';
@@ -15,7 +15,7 @@ const applyPreferences = () => {
     preferences.value.simplified_code ||= userStore.simplifiedCode;
 }
 
-applyPreferences();
+watch(() => preferences, applyPreferences, { immediate: true });
 </script>
 <template>
     <DXBaseView :preferences="preferences" :timeLimit="userStore.timeLimit" :maimaiCode="userStore.maimaiCode"

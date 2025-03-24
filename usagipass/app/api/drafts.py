@@ -52,7 +52,7 @@ async def update_preference(
     session: Session = Depends(require_session),
 ):
     update_preference = PreferenceUpdate(
-        **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
+        **preference.model_dump(exclude={"character", "background", "frame", "passname", "simplified_code"}),
         character_id=preference.character.id if preference.character else None,
         background_id=preference.background.id if preference.background else None,
         frame_id=preference.frame.id if preference.frame else None,

@@ -20,6 +20,7 @@ from usagipass.app.models import (
     CardPreference,
     CardPreferencePublic,
     CardPreferenceUpdate,
+    CardPublic,
     CardUser,
     CardUserPublic,
     Privilege,
@@ -82,6 +83,11 @@ async def get_cards(session: Session = Depends(require_session), user: User = De
     return session.exec(select(Card).order_by(Card.created_at.desc())).all()
 
 
+@router.get("/{uuid}", response_model=CardPublic)
+async def get_card(card: Card = Depends(require_card)):
+    return card
+
+
 @router.patch("/{uuid}")
 async def update_card(
     mode: Literal["UNSET", "CONFIRMED"],
@@ -126,7 +132,7 @@ async def update_preference(
             passname_id=preference.passname.id if preference.passname else None,
         )
 
-    if (user and db_preference.protect_card and card.username == user.username) or not db_preference.protect_card:
+    elif (user and db_preference.protect_card and card.username == user.username) or not db_preference.protect_card:
         # user can update the preference if it's not protected, or if the user is the card owner
         update_preference = CardPreferenceUpdate(
             **preference.model_dump(include=["skip_activation", "protect_card"]),
