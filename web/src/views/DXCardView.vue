@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
-import type { Preference } from '@/types';
+import { CardStatus, type Preference } from '@/types';
 import { useCardStore } from '@/stores/card';
 import DXBaseView from './DXBaseView.vue';
 import CardBests from '@/components/CardBests.vue';
@@ -12,9 +12,9 @@ const touchStartX = ref(0);
 const touchEndX = ref(0);
 const minSwipeDistance = 50;
 
-if (!cardStore.cardPreference) await cardStore.refreshCard();
-const cardPreference = ref<Preference>(JSON.parse(JSON.stringify(cardStore.cardPreference)));
-const showActivationDialog = ref(cardStore.cardAccount && cardStore.cardPreference?.skip_activation);
+if (!cardStore.cardProfile) await cardStore.refreshCard();
+const cardPreference = ref<Preference>(JSON.parse(JSON.stringify(cardStore.cardProfile?.preferences)));
+const showActivationDialog = ref(cardStore.cardProfile?.status! < CardStatus.ACTIVATED);
 const activationCode = ref('');
 
 const activateCard = async () => {
@@ -26,8 +26,8 @@ const activateCard = async () => {
 };
 
 const skipActivation = async () => {
-    cardStore.cardPreference!.skip_activation = true;
-    await cardStore.patchPreferences();
+    await cardStore.createAccount();
+    await cardStore.refreshCard()
     showActivationDialog.value = false;
 };
 
@@ -69,15 +69,15 @@ onUnmounted(() => {
 });
 
 const applyPreferences = () => {
-    if (cardStore.cardAccount?.player_rating != -1) {
-        cardPreference.value.dx_rating ||= String(cardStore.cardAccount?.player_rating);
+    if (cardStore.cardProfile?.accounts?.player_rating != -1) {
+        cardPreference.value.dx_rating ||= String(cardStore.cardProfile?.accounts?.player_rating);
     }
-    if (cardStore.card?.card_id) {
-        cardPreference.value.simplified_code = "CID: " + cardStore.card?.card_id;
+    if (cardStore.cardProfile?.id) {
+        cardPreference.value.simplified_code = "CID: " + cardStore.cardProfile?.id;
     }
 }
 
-watch(() => [cardPreference, cardStore.card], applyPreferences, { immediate: true });
+watch(() => [cardStore.cardProfile], applyPreferences, { immediate: true });
 </script>
 
 <template>
@@ -91,7 +91,7 @@ watch(() => [cardPreference, cardStore.card], applyPreferences, { immediate: tru
                     :settingsRoute="isPublish ? undefined : { name: 'preferencesCard', state: { 'cardUUID': cardStore.cardUUID } }" />
             </div>
             <div class="flex-none w-1/2 h-full relative">
-                <CardBests :bests="cardStore.cardAccount?.player_bests" />
+                <CardBests :bests="cardStore.cardProfile?.accounts?.player_bests" />
             </div>
         </div>
 

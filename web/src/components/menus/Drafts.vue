@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useDraftStore } from '@/stores/draft';
 import type { Card, Preference } from '@/types';
-import { computed, onActivated, onMounted, ref } from 'vue';
+import { computed, onActivated, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DXBaseView from '@/views/DXBaseView.vue';
 import { useNotificationStore } from '@/stores/notification';
-import { matchPhoneNumber, getShortUuid, formatDate, getOrderStatus } from '@/utils';
+import { matchPhoneNumber, getShortUuid, formatDate, formatDateDetailed } from '@/utils';
+import { CardStatusMap, CardStatus } from '@/types';
 import Prompt from '@/components/widgets/Prompt.vue';
 
 const props = defineProps<{
@@ -16,7 +17,7 @@ const draftStore = useDraftStore();
 const notificationStore = useNotificationStore();
 
 const drafts = ref<Card[]>([]);
-const phoneNumber = ref(props.phoneNumber || "");
+const phoneNumber = ref(props.phoneNumber || history.state.phoneNumber || "");
 const selectedDraft = ref<Card | null>(null);
 const previewPreferences = ref<Preference | null>(null);
 const showPreview = ref(false);
@@ -154,18 +155,16 @@ onActivated(() => {
                         <div class="flex flex-col md:flex-row gap-4">
                             <!-- 左侧：订单信息 -->
                             <div class="flex-1">
-                                <h3 class="text-lg font-bold mb-3">订单编号: {{ getShortUuid(draft.uuid) }}</h3>
+                                <h3 class="text-lg font-bold mb-3">订单UUID: {{ getShortUuid(draft.uuid) }}</h3>
                                 <div class="space-y-3">
                                     <p class="text-gray-600">
-                                        <span class="font-semibold">创建时间:</span> {{ formatDate(draft.created_at) }}
+                                        <span class="font-semibold">创建时间:</span> {{ formatDateDetailed(draft.created_at)
+                                        }}
                                     </p>
-                                    <p class="flex items-center">
+                                    <p class="flex items-center text-gray-600 ">
                                         <span class="font-semibold mr-2">订单状态:</span>
-                                        <span :class="{
-                                            'bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-bold': !draft.card_id,
-                                            'bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold': draft.card_id
-                                        }">
-                                            {{ getOrderStatus(draft) }}
+                                        <span :class="CardStatusMap[draft.status].color">
+                                            {{ CardStatusMap[draft.status].tag }}
                                         </span>
                                     </p>
                                 </div>
@@ -184,7 +183,7 @@ onActivated(() => {
                                     </button>
 
                                     <!-- 编辑按钮 -->
-                                    <RouterLink v-if="!draft.card_id"
+                                    <RouterLink v-if="draft.status === CardStatus.DRAFTED"
                                         :to="{ name: 'designer', params: { uuid: draft.uuid } }"
                                         class="bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 font-bold flex items-center shadow-md transition-colors">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
@@ -196,7 +195,8 @@ onActivated(() => {
                                     </RouterLink>
 
                                     <!-- 删除按钮 -->
-                                    <button v-if="!draft.card_id" @click="confirmDelete(draft.uuid)"
+                                    <button v-if="draft.status === CardStatus.DRAFTED"
+                                        @click="confirmDelete(draft.uuid)"
                                         class="bg-red-500 text-white py-3 px-6 rounded-lg hover:bg-red-600 font-bold flex items-center shadow-md transition-colors">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                                             fill="currentColor">

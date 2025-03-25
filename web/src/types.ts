@@ -1,10 +1,22 @@
 type Kind = "background" | "frame" | "character" | "passname" | "mask"
-type Server = "divingfish" | "lxns"
 
 enum Privilege {
     BANNED = 1,
     NORMAL = 2,
     ADMIN = 3
+}
+
+enum AccountServer {
+    DIVINGFISH = 1,
+    LXNS = 2,
+    WECHAT = 3
+}
+
+enum CardStatus {
+    DRAFTED = 1,
+    SCHEDULED = 2,
+    CONFIRMED = 3,
+    ACTIVATED = 4
 }
 
 enum LevelIndex {
@@ -83,12 +95,10 @@ interface UserAccount {
 
 interface UserProfile {
     username: string;
-    prefer_server: number;
+    prefer_server: AccountServer;
     privilege: Privilege;
-    nickname: string;
-    player_rating: number;
     preferences: Preference;
-    accounts: Record<string, UserAccount>;
+    accounts: Record<AccountServer, UserAccount>;
 }
 
 interface ServerMessage {
@@ -119,18 +129,16 @@ interface Score {
     dx_rating: number | null;
     rate: RateType;
     type: SongType;
-    user_id: number;
-    created_at: string;
-    updated_at: string;
 }
 
 interface Card {
+    id: number;
     uuid: string;
-    card_id?: number;
-    user_id?: number;
-    username?: string;
-    phone_number?: string;
+    status: CardStatus;
+    phone?: string;
+    account_id?: number;
     created_at: string;
+    updated_at: string;
 }
 
 interface Bests {
@@ -141,19 +149,40 @@ interface Bests {
     all_rating: number;
 }
 
-interface CardUser {
-    id: number;
-    created_at: string;
-    last_activity_at: string;
-    last_updated_at: string;
+interface CardAccount {
     player_rating: number;
     player_bests: Bests;
+    created_at: string;
 }
 
-const mapServerId: Record<Server, number> = {
-    "divingfish": 1,
-    "lxns": 2,
-};
+interface CardProfile {
+    id: number;
+    uuid: string;
+    status: CardStatus;
+    preferences: Preference;
+    accounts?: CardAccount;
+}
 
-export { mapServerId, Privilege };
-export type { Kind, Server, Image, Preference, UserAccount, UserProfile, Card, ServerMessage, CrawlerResult, Score, Bests, CardUser, FCType, FSType, RateType, SongType, LevelIndex };
+type CardStatusEntities = "tag" | "color"
+
+const CardStatusMap: Record<CardStatus, Record<CardStatusEntities, string>> = {
+    [CardStatus.DRAFTED]: {
+        tag: "草稿",
+        color: "bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-bold"
+    },
+    [CardStatus.SCHEDULED]: {
+        tag: "已付款",
+        color: "bg-orange-100 text-orange-800 px-2 py-1 rounded-full font-bold"
+    },
+    [CardStatus.CONFIRMED]: {
+        tag: "已确认",
+        color: "bg-green-100 text-green-800 px-2 py-1 rounded-full font-bold"
+    },
+    [CardStatus.ACTIVATED]: {
+        tag: "已激活",
+        color: "bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-bold"
+    }
+}
+
+export { Privilege, AccountServer, CardStatus, CardStatusMap };
+export type { Kind, Preference, UserAccount, UserProfile, ServerMessage, CrawlerResult, Score, Card, Bests, CardProfile, CardAccount, Image, FCType, FSType, RateType, SongType, LevelIndex };

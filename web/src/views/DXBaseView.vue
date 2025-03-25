@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRouter, type RouteLocationAsPathGeneric, type RouteLocationAsRelativeGeneric } from 'vue-router';
+import { type RouteLocationAsPathGeneric, type RouteLocationAsRelativeGeneric } from 'vue-router';
 import DXRating from '@/components/DXRating.vue';
 import QRCode from '@/components/QRCode.vue';
 import CharaInfo from '@/components/CharaInfo.vue';

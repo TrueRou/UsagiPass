@@ -24,9 +24,6 @@ async def update_user(user_update: UserUpdate, user: User = Depends(verify_user)
 async def get_profile(user: User = Depends(verify_user), session: Session = Depends(require_session)):
     db_accounts = session.exec(select(UserAccount).where(UserAccount.username == user.username)).all()
     db_preference = session.get(UserPreference, user.username)
-    prefer_account = session.exec(
-        select(UserAccount).where(UserAccount.username == user.username, UserAccount.account_server == user.prefer_server)
-    ).first()
     # we need to update the player rating if the user has not updated for 4 hours
     asyncio.ensure_future(maimai.update_rating_passive(user.username))
     if not db_preference:
@@ -39,8 +36,6 @@ async def get_profile(user: User = Depends(verify_user), session: Session = Depe
         username=user.username,
         prefer_server=user.prefer_server,
         privilege=user.privilege,
-        nickname=prefer_account.nickname,
-        player_rating=prefer_account.player_rating,
         preferences=preferences,
         accounts=accounts,
     )

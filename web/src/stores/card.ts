@@ -2,16 +2,14 @@ import { ref } from "vue";
 import { defineStore } from "pinia"
 import { useUserStore } from "./user";
 import { useNotificationStore } from "./notification";
-import type { Card, Preference, CardUser } from "@/types";
+import type { Preference, CardProfile } from "@/types";
 
 export const useCardStore = defineStore('card', () => {
     const userStore = useUserStore();
     const notificationStore = useNotificationStore();
 
-    const cardUUID = ref<string | null>(history.state.cardUUID || null);
-    const card = ref<Card | null>(null);
-    const cardPreference = ref<Preference | null>(null);
-    const cardAccount = ref<CardUser | null>(null);
+    const cardUUID = ref<string>(history.state.cardUUID);
+    const cardProfile = ref<CardProfile>();
 
     async function refreshCard(uuid?: string) {
         if (!cardUUID.value && !uuid) {
@@ -20,18 +18,17 @@ export const useCardStore = defineStore('card', () => {
         }
         try {
             cardUUID.value = uuid || cardUUID.value
-            card.value = (await userStore.axiosInstance.get(`/cards/${cardUUID.value}`)).data
-            cardPreference.value = (await userStore.axiosInstance.get(`/cards/${cardUUID.value}/preference`)).data
-            userStore.axiosInstance.get(`/cards/${cardUUID.value}/accounts`).then(resp => cardAccount.value = resp.data).catch(() => cardAccount.value = null)
+            cardProfile.value = (await userStore.axiosInstance.get(`/cards/${cardUUID.value}/profile`)).data
         } catch (error) {
             notificationStore.error("获取卡片失败", `无法获取卡片信息，请联系开发者\n卡片UUID: ${uuid}`)
             throw error
         }
     }
 
-    async function createAccount(activationCode: string) {
+    async function createAccount(activationCode?: string) {
         try {
-            await userStore.axiosInstance.post(`/cards/${cardUUID.value}/accounts?qrcode=${activationCode}`);
+            const append = activationCode ? `?qrcode=${activationCode}` : "";
+            await userStore.axiosInstance.post(`/cards/${cardUUID.value}/accounts` + append);
         } catch (error: any) {
             notificationStore.error("激活失败", error.response.data.detail || "未知错误");
             throw error;
@@ -41,7 +38,7 @@ export const useCardStore = defineStore('card', () => {
     async function patchPreferences(uuid?: string, preference?: Preference) {
         try {
             uuid = uuid ?? cardUUID.value!;
-            preference = preference ?? cardPreference.value!;
+            preference = preference ?? cardProfile.value?.preferences;
             await userStore.axiosInstance.patch(`/cards/${uuid}/preference`, preference);
         } catch (error: any) {
             notificationStore.error("保存失败", error.response.data.detail || "未知错误");
@@ -59,5 +56,5 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
-    return { refreshCard, createAccount, createCard, patchPreferences, cardUUID, card, cardPreference, cardAccount }
+    return { refreshCard, createAccount, createCard, patchPreferences, cardUUID, cardProfile }
 })

@@ -10,21 +10,28 @@ const matchPhoneNumber = (phoneNumber: string) => {
 }
 
 const getShortUuid = (uuid: string) => {
-    return uuid.substring(0, 6);
+    return uuid.substring(0, 8);
 };
 
 const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    const date = new Date(dateString + "Z");
+    return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+};
+
+const formatDateDetailed = (dateString: string) => {
+    const date = new Date(dateString + "Z");
     return date.toLocaleString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
     });
 };
 
-const getOrderStatus = (card: Card) => {
-    if (card.user_id && card.card_id) return '已激活';
-    return card.card_id ? '已确认' : '草稿';
-};
-
-export { matchPhoneNumber, getShortUuid, formatDate, getOrderStatus };
+export { matchPhoneNumber, getShortUuid, formatDate, formatDateDetailed };

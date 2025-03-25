@@ -1,11 +1,20 @@
 from datetime import datetime
 from enum import IntEnum, auto
+from sqlalchemy import Column, Integer
 from sqlmodel import Field, SQLModel
 from maimai_py import PlayerIdentifier, ArcadeProvider, Score as MpyScore
 from maimai_py.models import FCType, FSType, LevelIndex, RateType, SongType
 
 from usagipass.app import settings
 from usagipass.app.database import maimai_client
+
+convention = {
+    "ix": "ix_%(column_0_label)s",
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s",
+}
 
 image_kinds = {
     "background": {"hw": [(768, 1052)]},
@@ -16,6 +25,8 @@ image_kinds = {
 }
 
 sega_prefixs = ["UI_CardChara_", "UI_CardBase_", "UI_CMA_", "UI_CardCharaMask_"]
+
+SQLModel.metadata.naming_convention = convention
 
 
 class AccountServer(IntEnum):
@@ -28,6 +39,19 @@ class Privilege(IntEnum):
     BANNED = auto()
     NORMAL = auto()
     ADMIN = auto()
+
+
+class CardStatus(IntEnum):
+    DRAFTED = auto()  # 已建稿 (用户已经设计好卡片，等待管理员确认排产)
+    SCHEDULED = auto()  # 已排产 (卡片已经被管理员确认排产，等待创建打印任务)
+    CONFIRMED = auto()  # 已确认 (卡片打印任务已经创建，等待生产完成后发货)
+    ACTIVATED = auto()  # 已激活 (用户收到卡片，第一次使用并激活卡片)
+
+
+class ServerMessage(SQLModel):
+    maimai_version: str
+    server_motd: str
+    author_motd: str
 
 
 class Image(SQLModel, table=True):
@@ -62,6 +86,24 @@ class UserUpdate(SQLModel):
     prefer_server: AccountServer | None = None
 
 
+class Card(SQLModel, table=True):
+    __tablename__ = "cards"
+
+    id: int | None = Field(default=None, primary_key=True)
+    uuid: str = Field(index=True, unique=True, nullable=False)
+    status: CardStatus = Field(default=CardStatus.DRAFTED)
+    phone: str | None = Field(default=None, index=True)
+    account_id: int | None = Field(default=None, foreign_key="card_accounts.id", ondelete="SET NULL")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class CardUpdate(SQLModel):
+    id: int | None = None
+    status: CardStatus | None = None
+    phone: str | None = None
+
+
 class UserAccount(SQLModel, table=True):
     __tablename__ = "user_accounts"
 
@@ -76,6 +118,12 @@ class UserAccount(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class UserAccountPublic(SQLModel):
+    account_name: str
+    nickname: str
+    player_rating: int
+
+
 class PreferenceBase(SQLModel):
     maimai_version: str | None = None
     simplified_code: str | None = None
@@ -85,20 +133,6 @@ class PreferenceBase(SQLModel):
     dx_rating: str | None = None
     qr_size: int = Field(default=15)
     mask_type: int = Field(default=0)
-
-
-class PreferenceUpdate(PreferenceBase):
-    character_id: str | None = None
-    background_id: str | None = None
-    frame_id: str | None = None
-    passname_id: str | None = None
-
-
-class PreferencePublic(PreferenceBase):
-    character: ImagePublic | None = None
-    background: ImagePublic | None = None
-    frame: ImagePublic | None = None
-    passname: ImagePublic | None = None
 
 
 class UserPreference(PreferenceBase, table=True):
@@ -111,47 +145,6 @@ class UserPreference(PreferenceBase, table=True):
     passname_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
 
 
-class UserAccountPublic(SQLModel):
-    account_name: str
-    nickname: str
-    player_rating: int
-
-
-class UserProfile(SQLModel):
-    username: str
-    prefer_server: AccountServer
-    privilege: Privilege
-    nickname: str
-    player_rating: int
-    preferences: PreferencePublic
-    accounts: dict[int, UserAccountPublic]
-
-
-class ServerMessage(SQLModel):
-    maimai_version: str
-    server_motd: str
-    author_motd: str
-
-
-class CardUser(SQLModel, table=True):
-    __tablename__ = "card_users"
-
-    id: int = Field(primary_key=True)
-    mai_userid: str = Field(unique=True, index=True)
-    mai_rating: int
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_updated_at: datetime = Field(default_factory=datetime.utcnow)
-    last_activity_at: datetime = Field(default_factory=datetime.utcnow)
-
-    @property
-    def as_identifier(self):
-        return PlayerIdentifier(credentials=self.mai_userid)
-
-    @property
-    def as_provider(self):
-        return ArcadeProvider(settings.arcade_proxy)
-
-
 class CardPreference(PreferenceBase, table=True):
     __tablename__ = "card_preferences"
 
@@ -162,19 +155,30 @@ class CardPreference(PreferenceBase, table=True):
     passname_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
 
 
-class Card(SQLModel, table=True):
-    __tablename__ = "cards"
+class PreferencePublic(PreferenceBase):
+    character: ImagePublic | None = None
+    background: ImagePublic | None = None
+    frame: ImagePublic | None = None
+    passname: ImagePublic | None = None
 
-    uuid: str = Field(primary_key=True)
-    card_id: int | None = Field(default=None, unique=True, index=True)
-    user_id: int | None = Field(default=None, foreign_key="card_users.id", ondelete="SET NULL")
-    username: str | None = Field(default=None, foreign_key="users.username", ondelete="SET NULL")
-    phone_number: str | None = Field(default=None, index=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PreferenceUpdate(PreferenceBase):
+    character_id: str | None = None
+    background_id: str | None = None
+    frame_id: str | None = None
+    passname_id: str | None = None
+
+
+class UserProfile(SQLModel):
+    username: str
+    prefer_server: AccountServer
+    privilege: Privilege
+    preferences: PreferencePublic
+    accounts: dict[AccountServer, UserAccountPublic]
 
 
 class Score(SQLModel, table=True):
-    __tablename__ = "scores"
+    __tablename__ = "card_scores"
 
     id: int | None = Field(default=None, primary_key=True)
     song_id: int = Field(index=True)
@@ -186,12 +190,12 @@ class Score(SQLModel, table=True):
     dx_rating: float | None
     rate: RateType
     type: SongType
-    user_id: int = Field(foreign_key="card_users.id", index=True, ondelete="CASCADE")
+    account_id: int = Field(foreign_key="card_accounts.id", index=True, ondelete="CASCADE")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     @staticmethod
-    def from_mpy(mpy_score: MpyScore, user_id: int):
+    def from_mpy(mpy_score: MpyScore, account_id: int):
         return Score(
             song_id=mpy_score.id,
             level_index=mpy_score.level_index,
@@ -202,7 +206,7 @@ class Score(SQLModel, table=True):
             dx_rating=mpy_score.dx_rating,
             rate=mpy_score.rate,
             type=mpy_score.type,
-            user_id=user_id,
+            account_id=account_id,
         )
 
     async def as_mpy(self):
@@ -222,12 +226,6 @@ class Score(SQLModel, table=True):
         )
 
 
-class CardPublic(SQLModel):
-    uuid: str
-    card_id: int
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-
 class ScorePublic(SQLModel):
     song_id: int
     song_name: str
@@ -240,9 +238,6 @@ class ScorePublic(SQLModel):
     dx_rating: float | None
     rate: RateType
     type: SongType
-    user_id: int
-    created_at: datetime
-    updated_at: datetime
 
 
 class BestsPublic(SQLModel):
@@ -253,10 +248,33 @@ class BestsPublic(SQLModel):
     all_rating: int
 
 
-class CardUserPublic(SQLModel):
-    id: int
-    created_at: datetime
-    last_activity_at: datetime
-    last_updated_at: datetime
+class CardAccount(SQLModel, table=True):
+    __tablename__ = "card_accounts"
+
+    id: int = Field(primary_key=True)
+    credentials: str = Field(unique=True, index=True)
+    player_rating: int
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    @property
+    def as_identifier(self):
+        return PlayerIdentifier(credentials=self.credentials)
+
+    @property
+    def as_provider(self):
+        return ArcadeProvider(settings.arcade_proxy)
+
+
+class CardAccountPublic(SQLModel):
     player_rating: int
     player_bests: BestsPublic
+    created_at: datetime
+
+
+class CardProfile(SQLModel):
+    id: int
+    uuid: str
+    status: CardStatus
+    preferences: PreferencePublic
+    accounts: CardAccountPublic | None

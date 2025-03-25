@@ -2,7 +2,7 @@
 import { useImageStore } from '@/stores/image';
 import { useServerStore } from '@/stores/server';
 import { useUserStore } from '@/stores/user';
-import { mapServerId, type Kind, type Server } from '@/types';
+import { AccountServer, type Kind } from '@/types';
 import { ref, useTemplateRef } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
@@ -22,8 +22,8 @@ const openGallery = (kind: Kind) => {
     router.push({ name: 'gallery', params: { kind: kind } })
 };
 
-const bindBtn = (server: Server) => {
-    const isBinded = userStore.userProfile!.accounts[String(mapServerId[server])];
+const bindBtn = (server: AccountServer) => {
+    const isBinded = userStore.userProfile!.accounts[server];
     const colorSets = { orange: ["bg-orange-500", "hover:bg-orange-600"], blue: ["bg-blue-500", "hover:bg-blue-600"] };
     const classNames = ["text-white", "font-bold", "py-2", "px-4", "rounded", ...colorSets[isBinded ? 'orange' : 'blue']];
     return (
@@ -67,11 +67,11 @@ const bindBtn = (server: Server) => {
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>
-                    {{ userStore.userProfile!.nickname }} ({{ userStore.userProfile!.username }})
+                    {{ userStore.preferAccount!.nickname }} ({{ userStore.userProfile!.username }})
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;">
                     优先使用 <b>{{ serverStore.serverNames[userStore.userProfile!.prefer_server] }}</b> 数据
-                    DXRating: {{ userStore.userProfile!.player_rating }}
+                    DXRating: {{ userStore.preferAccount!.player_rating }}
                 </span>
             </div>
             <div class="flex items-center">
@@ -289,7 +289,7 @@ const bindBtn = (server: Server) => {
                     @click="userStore.patchPreferServer(1)">
                     优先
                 </button>
-                <component :is="bindBtn('divingfish')"></component>
+                <component :is="bindBtn(AccountServer.DIVINGFISH)"></component>
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
@@ -310,7 +310,7 @@ const bindBtn = (server: Server) => {
                         @click="userStore.patchPreferServer(2)">
                         优先
                     </button>
-                    <component :is="bindBtn('lxns')"></component>
+                    <component :is="bindBtn(AccountServer.LXNS)"></component>
                 </div>
             </div>
         </div>

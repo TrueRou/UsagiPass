@@ -5,7 +5,7 @@ import { computed, ref, type Ref } from "vue"
 import { type Router } from "vue-router"
 import { useImageStore } from "./image"
 import { useNotificationStore } from "./notification"
-import type { Kind, UserProfile } from "@/types"
+import type { AccountServer, Kind, UserProfile } from "@/types"
 
 export const useUserStore = defineStore('user', () => {
     const imageStore = useImageStore();
@@ -14,15 +14,17 @@ export const useUserStore = defineStore('user', () => {
     const token = ref(localStorage.getItem('token'));
     const maimaiCode = ref("");
     const timeLimit = ref("12:00:00");
+    const isSignedIn = ref(false);
+    const userProfile = ref<UserProfile | null>(null);
+    const cropperImage = ref<string | null>(null);
+
     const simplifiedCode = computed(() => maimaiCode.value.slice(8, 28).match(/.{1,4}/g)?.join(' '));
     const axiosInstance = computed(() => axios.create({
         baseURL: import.meta.env.VITE_URL,
         timeout: 10000,
         headers: { 'Authorization': `Bearer ${token.value}` },
     }));
-    const isSignedIn = ref(false);
-    const userProfile = ref<UserProfile | null>(null);
-    const cropperImage = ref<string | null>(null);
+    const preferAccount = computed(() => userProfile.value?.accounts[userProfile.value.prefer_server]);
 
     async function login(target: string, username: string, password: string) {
         try {
@@ -35,7 +37,7 @@ export const useUserStore = defineStore('user', () => {
             await refreshUser();
             // 如果之前获取过图片列表，刷新列表
             if (imageStore.images) await imageStore.refreshImages();
-            notificationStore.success("登录成功", `欢迎回来，${userProfile.value?.nickname}`);
+            notificationStore.success("登录成功", `欢迎回来，${preferAccount.value?.nickname}`);
             router.back();
         } catch (error: any) {
             notificationStore.error("登录失败", error.response?.data?.detail || "未知错误");
@@ -49,11 +51,11 @@ export const useUserStore = defineStore('user', () => {
         userProfile.value = null;
     }
 
-    async function bind(target: string, username: string, password: string) {
+    async function bind(server: AccountServer, username: string, password: string) {
         try {
-            await axiosInstance.value.post(`/accounts/bind/${target}`, new URLSearchParams({ username, password }));
+            await axiosInstance.value.post(`/accounts/bind/${server}`, new URLSearchParams({ username, password }));
             await refreshUser();
-            notificationStore.success("绑定成功", `${target === 'divingfish' ? '水鱼' : '落雪'}账户绑定成功`);
+            notificationStore.success("绑定成功", `查分器账户绑定成功`);
             router.back();
         } catch (error: any) {
             notificationStore.error("绑定失败", error.response?.data?.detail || "未知错误");
@@ -141,6 +143,7 @@ export const useUserStore = defineStore('user', () => {
         maimaiCode,
         timeLimit,
         simplifiedCode,
+        preferAccount,
         login,
         logout,
         bind,

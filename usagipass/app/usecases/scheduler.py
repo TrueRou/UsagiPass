@@ -6,7 +6,7 @@ from sqlmodel.sql.expression import SelectOfScalar
 
 from usagipass.app import settings
 from usagipass.app.database import session_ctx, maimai_client, scheduler
-from usagipass.app.models import CardUser
+from usagipass.app.models import CardAccount
 from usagipass.app.usecases import maimai
 
 
@@ -31,10 +31,10 @@ async def calculate_sched(user_ids: deque[int], period: str) -> int:
 
 
 # reschedule the cron job depends on job arguments
-async def update_sched(job_args: tuple[str, SelectOfScalar[CardUser]]) -> None:
+async def update_sched(job_args: tuple[str, SelectOfScalar[CardAccount]]) -> None:
     period, select_stmt = job_args
     with session_ctx() as session:
-        players = session.exec(select_stmt.order_by(CardUser.last_updated_at.desc()))
+        players = session.exec(select_stmt.order_by(CardAccount.last_updated_at.desc()))
         user_ids = deque([player.id for player in players])
     interval = await calculate_sched(user_ids, period)
     scheduler.add_job(process_sched, trigger="cron", args=[user_ids], hour=period, minute=f"*/{interval}", id=period, replace_existing=True)
@@ -44,8 +44,8 @@ async def update_sched(job_args: tuple[str, SelectOfScalar[CardUser]]) -> None:
 async def update_sched_hourly():
     threshold = timedelta(hours=settings.refresh_hour_threshold)
     job_args = [
-        (settings.refresh_hour_active, select(CardUser).where(CardUser.last_activity_at + threshold > datetime.now())),
-        (settings.refresh_hour_inactive, select(CardUser).where(CardUser.last_activity_at + threshold <= datetime.now())),
+        (settings.refresh_hour_active, select(CardAccount).where(CardAccount.last_activity_at + threshold > datetime.now())),
+        (settings.refresh_hour_inactive, select(CardAccount).where(CardAccount.last_activity_at + threshold <= datetime.now())),
     ]
     async with asyncio.TaskGroup() as tg:
         [tg.create_task(update_sched(args)) for args in job_args]

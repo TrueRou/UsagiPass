@@ -40,12 +40,12 @@ const openGallery = (kind: Kind) => {
 };
 
 const openPhoneDialog = () => {
-    if (!isAdmin && !newDraftPhone.value) showDialog.value = true;
+    if (!isAdmin.value && !newDraftPhone.value) showDialog.value = true;
     else createDraft();
 }
 
 const createDraft = async () => {
-    if (isAdmin) {
+    if (isAdmin.value) {
         await cardStore.createCard();
         router.push({ name: 'admin' });
         notificationStore.success("创建成功", "已成功创建一张卡片，卡片订单已自动确认");
@@ -57,29 +57,29 @@ const createDraft = async () => {
         showDialog.value = false;
         router.replace({ name: "designer", params: { uuid: card.uuid } });
         notificationStore.success("创建成功", "您的卡面已创建\n在订单确认前，您可以随时修改卡面设置");
-        router.push({ name: 'drafts', params: { phoneNumber: newDraftPhone.value } });
+        router.push({ name: 'drafts', state: { phoneNumber: newDraftPhone.value } });
     }
 }
 
 const updateDraft = async () => {
-    if (isAdmin) {
+    if (isAdmin.value) {
         await cardStore.patchPreferences(props.uuid!, preferences.value!);
         router.push({ name: 'admin' });
     } else {
         await draftStore.patchPreferences(props.uuid!, preferences.value!);
-        router.push({ name: 'drafts', params: { phoneNumber: newDraftPhone.value } });
+        router.push({ name: 'drafts', state: { phoneNumber: newDraftPhone.value } });
     }
     notificationStore.success("保存成功", "卡面设置已更新");
 }
 
 const openBatchDialog = () => {
-    if (isAdmin) {
+    if (isAdmin.value) {
         showBatchDialog.value = true;
     }
 }
 
 const createBatchCards = async () => {
-    if (!isAdmin) return;
+    if (!isAdmin.value) return;
 
     const count = parseInt(batchCount.value.toString());
     if (isNaN(count) || count < 1 || count > 32) {
@@ -273,11 +273,11 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
 
                     <div class="flex flex-col p-2">
                         <span>
-                            {{ userStore.userProfile!.nickname }} ({{ userStore.userProfile!.username }})
+                            {{ userStore.preferAccount?.nickname }} ({{ userStore.userProfile!.username }})
                         </span>
                         <span class="text-gray-600" style="font-size: 12px;">
                             该账号仅用于上传自定义图片
-                            DXRating: {{ userStore.userProfile!.player_rating }}
+                            DXRating: {{ userStore.preferAccount?.player_rating }}
                         </span>
                     </div>
                 </div>

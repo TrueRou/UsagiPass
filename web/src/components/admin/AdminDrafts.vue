@@ -2,11 +2,12 @@
 import { useDraftStore } from '@/stores/draft';
 import { useUserStore } from '@/stores/user';
 import { useNotificationStore } from '@/stores/notification';
-import type { Card, Preference } from '@/types';
+import { CardStatus, type Card, type Preference } from '@/types';
 import { computed, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DXBaseView from '@/views/DXBaseView.vue';
-import { getShortUuid, formatDate, getOrderStatus } from '@/utils';
+import { getShortUuid, formatDate, formatDateDetailed } from '@/utils';
+import { CardStatusMap } from '@/types';
 import Prompt from '@/components/widgets/Prompt.vue';
 
 const draftStore = useDraftStore();
@@ -20,7 +21,7 @@ const previewPreferences = ref<Preference | null>(null);
 const showPreview = ref(false);
 const showStatusConfirm = ref(false);
 const dateFilter = ref<'all' | '3days' | 'week' | 'month'>('all');
-const typeFilter = ref<'all' | 'draft'>('all');
+const statusFilter = ref<'all' | CardStatus>('all');
 const showDeleteConfirm = ref(false);
 const draftToDelete = ref("");
 const selectedCards = ref<Set<string>>(new Set());
@@ -35,10 +36,10 @@ const fetchCards = async () => {
     }
 };
 
-const updateCardStatus = async (uuid: string, mode: 'CONFIRMED' | 'UNSET') => {
+const updateCardStatus = async (uuid: string, status: CardStatus) => {
     // 再次检查卡片是否已激活（防止对话框打开后卡片状态发生变化）
     const card = cards.value.find(c => c.uuid === uuid);
-    if (card && card.user_id) {
+    if (card && card.status === CardStatus.ACTIVATED) {
         notificationStore.warning(
             "无法修改状态",
             "已激活的卡片不允许修改状态。"
@@ -48,8 +49,11 @@ const updateCardStatus = async (uuid: string, mode: 'CONFIRMED' | 'UNSET') => {
     }
 
     try {
-        await userStore.axiosInstance.patch(`/cards/${uuid}?mode=${mode}`);
-        notificationStore.success("状态更新成功", `卡片状态已更新为${mode === 'CONFIRMED' ? '已确认' : '草稿'}`);
+        await userStore.axiosInstance.patch(`/cards/${uuid}`, {
+            status: status
+        });
+
+        notificationStore.success("状态更新成功", `卡片状态已更新为 ${CardStatusMap[status].tag}`);
         await fetchCards();
         showStatusConfirm.value = false;
     } catch (error: any) {
@@ -88,14 +92,14 @@ const filteredCards = computed(() => {
     // 按手机号码筛选
     if (phoneNumber.value) {
         result = result.filter(card => {
-            const phoneNum = card.phone_number || '未知号码';
+            const phoneNum = card.phone || '未知号码';
             return phoneNum.includes(phoneNumber.value);
         });
     }
 
-    // 按是否为草稿筛选
-    if (typeFilter.value === 'draft') {
-        result = result.filter(card => !card.card_id);
+    // 按状态筛选
+    if (statusFilter.value !== 'all') {
+        result = result.filter(card => card.status === statusFilter.value);
     }
 
     // 按时间段筛选
@@ -138,7 +142,7 @@ const groupedCards = computed(() => {
     const groups: Record<string, Card[]> = {};
 
     filteredCards.value.forEach(card => {
-        const phoneNumber = card.phone_number || '未知号码';
+        const phoneNumber = card.phone || '未知号码';
         if (!groups[phoneNumber]) {
             groups[phoneNumber] = [];
         }
@@ -164,10 +168,10 @@ const closePreview = () => {
 
 const showStatusDialog = (card: Card) => {
     // 检查卡片是否已激活
-    if (card.user_id) {
+    if (card.status === CardStatus.ACTIVATED) {
         notificationStore.warning(
             "无法修改状态",
-            "已激活的卡片不允许修改状态。该卡片已有用户使用。"
+            "已激活的卡片不允许修改状态。"
         );
         return;
     }
@@ -215,27 +219,19 @@ const downloadBatchScreenshots = async () => {
     try {
         isDownloading.value = true;
 
-        // 过滤出已确认的卡片（有card_id的卡片）
+        // 过滤出已付款的卡片（状态为SCHEDULED的卡片）
         const selectedCardsList = cards.value.filter(card => selectedCards.value.has(card.uuid));
-        const confirmedCards = selectedCardsList.filter(card => card.card_id);
-        const draftCards = selectedCardsList.filter(card => !card.card_id);
+        const scheduledCards = selectedCardsList.filter(card => card.status === CardStatus.SCHEDULED);
+        const nonScheduledCards = selectedCardsList.filter(card => card.status !== CardStatus.SCHEDULED);
 
-        // 如果有草稿卡片，显示警告
-        if (draftCards.length > 0) {
-            notificationStore.warning(
-                "草稿卡片已被过滤",
-                `${draftCards.length}张草稿卡片不会被下载，因为它们尚未确认。只有已确认的卡片将被下载。`
-            );
-
-            // 如果过滤后没有可下载的卡片，直接返回
-            if (confirmedCards.length === 0) {
-                notificationStore.warning("无法下载", "您选择的卡片中没有已确认的卡片，请先确认卡片。");
-                isDownloading.value = false;
-                return;
-            }
+        // 如果有非SCHEDULED状态的卡片，显示警告
+        if (nonScheduledCards.length > 0) {
+            notificationStore.error(`您只能下载 已付款 状态的卡面`, `${nonScheduledCards.length}张卡片被过滤`);
+            isDownloading.value = false;
+            return;
         }
 
-        const uuidsToDownload = confirmedCards.map(card => card.uuid);
+        const uuidsToDownload = scheduledCards.map(card => card.uuid);
 
         const a = document.createElement('a');
         a.style.display = 'none';
@@ -254,7 +250,26 @@ const downloadBatchScreenshots = async () => {
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
 
-        notificationStore.success("下载成功", `已成功下载${confirmedCards.length}张卡片的截图`);
+        notificationStore.success("下载成功", `已成功下载${scheduledCards.length}张卡面`);
+
+        try {
+            notificationStore.info("正在更新状态", "正在将已下载的卡片更新为已确认状态...");
+
+            for (const card of scheduledCards) {
+                await userStore.axiosInstance.patch(`/cards/${card.uuid}`, {
+                    status: CardStatus.CONFIRMED
+                });
+            }
+
+            notificationStore.success(
+                "批量更新成功",
+                `${scheduledCards.length}张卡片已更新为"已确认"状态`
+            );
+
+            await fetchCards();
+        } catch (error: any) {
+            notificationStore.error("批量更新失败", error.response?.data?.detail || "未知错误");
+        }
     } catch (error: any) {
         notificationStore.error("下载失败", error.response?.data?.detail || "未知错误");
     } finally {
@@ -284,7 +299,7 @@ fetchCards();
         class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-lg w-full overflow-hidden" style="max-width: 30rem;">
             <div class="p-4 bg-blue-400 text-white flex justify-between items-center">
-                <span class="font-bold text-nowrap">卡面预览 - 订单号: {{ getShortUuid(selectedCard!.uuid) }}</span>
+                <span class="font-bold text-nowrap">卡面预览 - {{ selectedCard?.id }}</span>
                 <button @click="closePreview" class="text-white hover:text-gray-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -306,34 +321,34 @@ fetchCards();
         class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-lg w-full overflow-hidden" style="max-width: 30rem;">
             <div class="p-4 bg-blue-400 text-white">
-                <span class="font-bold">更新订单状态 - {{ getShortUuid(selectedCard.uuid) }}</span>
+                <span class="font-bold">更新订单状态 - {{ selectedCard.id }}</span>
             </div>
             <div class="p-6">
-                <p v-if="selectedCard.user_id" class="text-red-600 font-medium mb-4">
+                <p v-if="selectedCard.status === CardStatus.ACTIVATED" class="text-red-600 font-medium mb-4">
                     警告：该卡片已被激活，不应修改状态。
                 </p>
                 <p class="mb-4">当前状态:
-                    <span :class="{
-                        'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-bold': !selectedCard.card_id,
-                        'bg-green-100 text-green-800 px-2 py-1 rounded-full font-bold': selectedCard.card_id && !selectedCard.user_id,
-                        'bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-bold': selectedCard.user_id
-                    }">
-                        {{ getOrderStatus(selectedCard) }}
+                    <span :class="CardStatusMap[selectedCard.status].color">
+                        {{ CardStatusMap[selectedCard.status].tag }}
                     </span>
                 </p>
                 <p class="mb-6">请选择要更新的状态:</p>
-                <div class="flex justify-end gap-3">
+                <div class="flex flex-wrap justify-end gap-2 sm:gap-3">
                     <button @click="showStatusConfirm = false"
-                        class="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600">
+                        class="bg-gray-500 text-white py-1.5 px-3 sm:py-2 sm:px-4 rounded hover:bg-gray-600 text-sm sm:text-base whitespace-nowrap">
                         取消
                     </button>
-                    <button @click="updateCardStatus(selectedCard.uuid, 'UNSET')"
-                        class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                        设为草稿
+                    <button @click="updateCardStatus(selectedCard.uuid, CardStatus.DRAFTED)"
+                        class="bg-yellow-500 text-white py-1.5 px-3 sm:py-2 sm:px-4 rounded hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base whitespace-nowrap">
+                        草稿
                     </button>
-                    <button @click="updateCardStatus(selectedCard.uuid, 'CONFIRMED')"
-                        class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                        设为已确认
+                    <button @click="updateCardStatus(selectedCard.uuid, CardStatus.SCHEDULED)"
+                        class="bg-orange-500 text-white py-1.5 px-3 sm:py-2 sm:px-4 rounded hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base whitespace-nowrap">
+                        已付款
+                    </button>
+                    <button @click="updateCardStatus(selectedCard.uuid, CardStatus.CONFIRMED)"
+                        class="bg-green-500 text-white py-1.5 px-3 sm:py-2 sm:px-4 rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base whitespace-nowrap">
+                        已确认
                     </button>
                 </div>
             </div>
@@ -350,42 +365,55 @@ fetchCards();
                 </div>
 
                 <div class="flex items-center gap-4 flex-wrap">
-                    <!-- 改为按钮选择样式 -->
+                    <!-- 改为按卡片状态筛选 -->
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-gray-700">类型:</span>
                         <div class="flex border border-gray-300 rounded-md overflow-hidden">
-                            <button @click="typeFilter = 'all'; fetchCards()"
-                                :class="{ 'bg-blue-500 text-white': typeFilter === 'all', 'bg-gray-100 hover:bg-gray-200': typeFilter !== 'all' }"
+                            <button @click="statusFilter = 'all';"
+                                :class="{ 'bg-blue-500 text-white': statusFilter === 'all', 'bg-gray-100 hover:bg-gray-200': statusFilter !== 'all' }"
                                 class="px-3 py-1.5 text-sm font-medium">
                                 全部
                             </button>
-                            <button @click="typeFilter = 'draft'; fetchCards()"
-                                :class="{ 'bg-blue-500 text-white': typeFilter === 'draft', 'bg-gray-100 hover:bg-gray-200': typeFilter !== 'draft' }"
+                            <button @click="statusFilter = CardStatus.DRAFTED;"
+                                :class="{ 'bg-blue-500 text-white': statusFilter === CardStatus.DRAFTED, 'bg-gray-100 hover:bg-gray-200': statusFilter !== CardStatus.DRAFTED }"
                                 class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
-                                仅草稿
+                                草稿
+                            </button>
+                            <button @click="statusFilter = CardStatus.SCHEDULED;"
+                                :class="{ 'bg-blue-500 text-white': statusFilter === CardStatus.SCHEDULED, 'bg-gray-100 hover:bg-gray-200': statusFilter !== CardStatus.SCHEDULED }"
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
+                                已付款
+                            </button>
+                            <button @click="statusFilter = CardStatus.CONFIRMED;"
+                                :class="{ 'bg-blue-500 text-white': statusFilter === CardStatus.CONFIRMED, 'bg-gray-100 hover:bg-gray-200': statusFilter !== CardStatus.CONFIRMED }"
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
+                                已确认
+                            </button>
+                            <button @click="statusFilter = CardStatus.ACTIVATED;"
+                                :class="{ 'bg-blue-500 text-white': statusFilter === CardStatus.ACTIVATED, 'bg-gray-100 hover:bg-gray-200': statusFilter !== CardStatus.ACTIVATED }"
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
+                                已激活
                             </button>
                         </div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-gray-700">时间:</span>
                         <div class="flex border border-gray-300 rounded-md overflow-hidden">
-                            <button @click="dateFilter = 'all'; fetchCards()"
+                            <button @click="dateFilter = 'all';"
                                 :class="{ 'bg-blue-500 text-white': dateFilter === 'all', 'bg-gray-100 hover:bg-gray-200': dateFilter !== 'all' }"
                                 class="px-3 py-1.5 text-sm font-medium">
                                 全部
                             </button>
-                            <button @click="dateFilter = '3days'; fetchCards()"
+                            <button @click="dateFilter = '3days';"
                                 :class="{ 'bg-blue-500 text-white': dateFilter === '3days', 'bg-gray-100 hover:bg-gray-200': dateFilter !== '3days' }"
                                 class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
                                 三日内
                             </button>
-                            <button @click="dateFilter = 'week'; fetchCards()"
+                            <button @click="dateFilter = 'week';"
                                 :class="{ 'bg-blue-500 text-white': dateFilter === 'week', 'bg-gray-100 hover:bg-gray-200': dateFilter !== 'week' }"
                                 class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
                                 一周内
                             </button>
-                            <button @click="dateFilter = 'month'; fetchCards()"
+                            <button @click="dateFilter = 'month';"
                                 :class="{ 'bg-blue-500 text-white': dateFilter === 'month', 'bg-gray-100 hover:bg-gray-200': dateFilter !== 'month' }"
                                 class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
                                 一月内
@@ -453,7 +481,7 @@ fetchCards();
             <div v-for="(group, index) in groupedCards" :key="group.phoneNumber" class="mb-8 group-container">
                 <!-- 手机号码分组标题 -->
                 <div class="group-header flex justify-between items-center">
-                    <span>手机号码: {{ group.phoneNumber }} ({{ group.cards.length }}张卡片)</span>
+                    <span>手机: {{ group.phoneNumber }} ({{ group.cards.length }}张卡片)</span>
 
                     <!-- 全选/取消全选分组按钮 -->
                     <div class="flex items-center">
@@ -486,13 +514,9 @@ fetchCards();
                                     @change="toggleCardSelection(card.uuid)" class="h-4 w-4 cursor-pointer">
                             </div>
                             <div>
-                                <span class="font-bold">订单号: {{ getShortUuid(card.uuid) }}</span>
-                                <span :class="{
-                                    'ml-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-bold': !card.card_id && !card.user_id,
-                                    'ml-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold': card.card_id && !card.user_id,
-                                    'ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-bold': card.user_id && card.card_id
-                                }">
-                                    {{ getOrderStatus(card) }}
+                                <span class="font-bold mr-2">卡片ID: {{ card.id || '未分配' }}</span>
+                                <span :class="CardStatusMap[card.status].color">
+                                    {{ CardStatusMap[card.status].tag }}
                                 </span>
                             </div>
                         </div>
@@ -503,7 +527,8 @@ fetchCards();
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <span class="text-gray-700">
-                                    <span class="font-medium">卡片ID:</span> {{ card.card_id || '未分配' }}
+                                    <span class="font-medium">卡片UUID: </span> {{ getShortUuid(card.uuid) }}<br>
+                                    <span class="font-medium">创建时间: </span> {{ formatDateDetailed(card.created_at) }}
                                 </span>
                             </div>
                         </div>
@@ -535,8 +560,8 @@ fetchCards();
 
                             <!-- 状态按钮 -->
                             <button @click="showStatusDialog(card)" :class="{
-                                'bg-amber-500 hover:bg-amber-600': !card.user_id,
-                                'bg-gray-400 hover:bg-gray-500': card.user_id
+                                'bg-amber-500 hover:bg-amber-600': card.status !== CardStatus.ACTIVATED,
+                                'bg-gray-400 hover:bg-gray-500': card.status === CardStatus.ACTIVATED,
                             }" class="text-white py-2 px-4 rounded flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                                     fill="currentColor">
@@ -547,8 +572,8 @@ fetchCards();
                                 更新
                             </button>
 
-                            <!-- 删除按钮 - 修改点击事件 -->
-                            <button v-if="!card.card_id" @click="confirmDelete(card.uuid)"
+                            <!-- 删除按钮 -->
+                            <button v-if="card.status === CardStatus.DRAFTED" @click="confirmDelete(card.uuid)"
                                 class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
                                     fill="currentColor">
@@ -559,7 +584,7 @@ fetchCards();
                                 删除
                             </button>
                             <!-- 写卡按钮 -->
-                            <button v-if="card.card_id"
+                            <button v-if="card.status === CardStatus.CONFIRMED"
                                 class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 30 30"
                                     fill="currentColor" stroke="currentColor" stroke-width="0.6">

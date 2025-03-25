@@ -1,45 +1,47 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import type { Server } from '@/types';
 import { useUserStore } from '@/stores/user';
-import { useNotificationStore } from '@/stores/notification';
 import TermsLink from '@/components/widgets/TermsLink.vue';
+import { AccountServer } from '@/types';
 
 const props = defineProps<{
-    server: Server;
+    server: AccountServer;
 }>()
 
-const serverLang: Record<Server, any> = {
-    'divingfish': {
-        'title': '绑定水鱼账户',
-        'username': '用户名',
-        'password': '密码',
-        'subtitle': '请使用水鱼用户名与密码进行鉴权并绑定',
-        'subtitle2': '若水鱼账户已经绑定过其他账号, 请联系开发者'
+type Entries = 'title' | 'username' | 'password' | 'subtitle' | 'subtitle2';
+
+const serverLang: Record<AccountServer, Record<Entries, string>> = {
+    [AccountServer.DIVINGFISH]: {
+        title: '绑定水鱼账户',
+        username: '用户名',
+        password: '密码',
+        subtitle: '请使用水鱼用户名与密码进行鉴权并绑定',
+        subtitle2: '若水鱼账户已经绑定过其他账号, 请联系开发者'
     },
-    'lxns': {
-        'title': '绑定落雪账户',
-        'username': '用户名',
-        'password': '个人 API 密钥',
-        'subtitle': '请使用落雪用户名与个人 API 密钥进行鉴权并绑定',
-        'subtitle2': '若落雪账户已经绑定过其他账号, 请联系开发者'
+    [AccountServer.LXNS]: {
+        title: '绑定落雪账户',
+        username: '用户名',
+        password: '个人 API 密钥',
+        subtitle: '请使用落雪用户名与个人 API 密钥进行鉴权并绑定',
+        subtitle2: '若落雪账户已经绑定过其他账号, 请联系开发者'
     },
+    [AccountServer.WECHAT]: {
+        title: '绑定微信账户',
+        username: '微信 ID',
+        password: '微信 Token',
+        subtitle: '暂时不支持直接绑定微信账号',
+        subtitle2: '如果您对绑定微信账号有疑问，请联系开发者'
+    }
 }
 
 const username = ref('');
 const password = ref('');
 
 const userStore = useUserStore();
-const notificationStore = useNotificationStore();
 const router = useRouter();
 
 const bind = async () => await userStore.bind(props.server, username.value, password.value);
-
-if (props.server !== 'divingfish' && props.server !== 'lxns') {
-    notificationStore.error("资源不存在", `访问的资源 ${props.server} 不存在`);
-    router.back();
-}
 </script>
 <template>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">

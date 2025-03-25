@@ -4,16 +4,16 @@ from sqlmodel import select
 from maimai_py import ScoreKind
 
 from usagipass.app.database import session_ctx, maimai_client
-from usagipass.app.models import CardUser, Score, UserAccount
+from usagipass.app.models import CardAccount, Score, UserAccount
 from usagipass.app.usecases import crawler
 
 
 # trigger the update of the card user's scores
-async def update_scores(user: CardUser) -> None:
+async def update_scores(account: CardAccount) -> None:
     with session_ctx() as session:
-        user = session.get(CardUser, user.id)
-        new_scores = await maimai_client.scores(user.as_identifier, kind=ScoreKind.ALL, provider=user.as_provider)
-        old_scores = session.exec(select(Score).where(Score.user_id == user.id)).all()
+        account = session.get(CardAccount, account.id)
+        new_scores = await maimai_client.scores(account.as_identifier, kind=ScoreKind.ALL, provider=account.as_provider)
+        old_scores = session.exec(select(Score).where(Score.account_id == account.id)).all()
         old_scores_dict = {f"{old_score.song_id} {old_score.type} {old_score.level_index}": old_score for old_score in old_scores}
 
         for new_score in new_scores.scores:
@@ -33,12 +33,12 @@ async def update_scores(user: CardUser) -> None:
                     db_score.updated_at = datetime.utcnow()
             else:
                 # score does not exist in the database, add the score
-                score = Score.from_mpy(new_score, user.id)
+                score = Score.from_mpy(new_score, account.id)
                 session.add(score)
 
         # update the user's rating
-        user.mai_rating = max(user.mai_rating, new_scores.rating)
-        user.last_updated_at = datetime.utcnow()
+        account.player_rating = max(account.player_rating, new_scores.rating)
+        account.updated_at = datetime.utcnow()
         session.commit()
 
 

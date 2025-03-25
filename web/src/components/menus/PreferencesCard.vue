@@ -4,13 +4,12 @@ import { formatDate } from '@/utils';
 import { useCardStore } from '@/stores/card';
 import Prompt from '@/components/widgets/Prompt.vue';
 import TermsLink from '@/components/widgets/TermsLink.vue';
-
-
+import { CardStatus } from '@/types';
 
 const cardStore = useCardStore();
 
-if (!cardStore.cardPreference) await cardStore.refreshCard();
-const isActivated = ref(Boolean(cardStore.cardAccount));
+if (!cardStore.cardProfile) await cardStore.refreshCard();
+const isActivated = ref(Boolean(cardStore.cardProfile?.status === CardStatus.ACTIVATED));
 const activationCode = ref('');
 const showActivationPrompt = ref(false);
 
@@ -31,13 +30,9 @@ const cancelActivation = () => {
 const activateCard = async () => {
     if (!activationCode.value) return;
 
-    try {
-        await cardStore.createAccount(activationCode.value);
-        await cardStore.refreshCard();
-        isActivated.value = Boolean(cardStore.cardAccount);
-    } finally {
-        activationCode.value = '';
-    }
+    await cardStore.createAccount(activationCode.value);
+    await cardStore.refreshCard();
+    activationCode.value = '';
 };
 </script>
 <template>
@@ -49,13 +44,13 @@ const activateCard = async () => {
         <!-- 卡片激活状态 -->
         <div class="flex justify-between items-center w-full mt-3 px-4">
             <span class="font-medium">激活状态:</span>
-            <span class="font-bold" :class="isActivated ? 'text-green-600' : 'text-red-600'">
-                {{ isActivated ? '已激活' : '未激活' }}
+            <span class="font-bold" :class="cardStore.cardProfile?.accounts ? 'text-green-600' : 'text-gray-600'">
+                {{ cardStore.cardProfile?.accounts ? '已激活' : '已跳过' }}
             </span>
         </div>
 
         <!-- 卡片激活按钮 -->
-        <div v-if="!isActivated" class="flex justify-center w-full mt-3 px-4">
+        <div v-if="!cardStore.cardProfile?.accounts" class="flex justify-center w-full mt-3 px-4">
             <button @click="openActivationPrompt"
                 class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 w-full">
                 激活卡片
@@ -63,42 +58,25 @@ const activateCard = async () => {
         </div>
 
         <!-- 已激活卡片的详细信息 -->
-        <div v-if="isActivated && cardStore.cardAccount" class="w-full mt-3 mb-3 px-4">
+        <div v-if="isActivated && cardStore.cardProfile?.accounts" class="w-full mt-3 mb-3 px-4">
             <div class="bg-gray-100 rounded p-3 border border-gray-300">
                 <h2 class="font-bold text-lg mb-2 text-blue-600">卡片信息</h2>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div class="flex flex-col">
                         <span class="text-gray-600 text-sm">激活时间</span>
-                        <span class="font-medium">{{ formatDate(cardStore.cardAccount.created_at) }}</span>
+                        <span class="font-medium">{{ formatDate(cardStore.cardProfile.accounts.created_at) }}</span>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-gray-600 text-sm">最后活动</span>
-                        <span class="font-medium">
-                            {{ new Date(cardStore.cardAccount.last_activity_at).toLocaleString() }}
-                        </span>
-                    </div>
-                </div>
-
-                <div v-if="cardStore.cardAccount.player_bests" class="mt-3">
-                    <h2 class="font-bold text-lg mb-2 text-blue-600">成绩信息</h2>
-                    <div class="grid grid-cols-2 gap-2 mt-1">
-                        <div class="flex flex-col">
-                            <span class="text-gray-600 text-sm">总 Rating</span>
-                            <span class="font-medium">{{ cardStore.cardAccount.player_bests.all_rating }}</span>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-gray-600 text-sm">最后更新</span>
-                            <span class="font-medium">{{ new
-                                Date(cardStore.cardAccount.last_updated_at).toLocaleString() }}</span>
-                        </div>
+                        <span class="text-gray-600 text-sm">总 Rating</span>
+                        <span class="font-medium">{{ cardStore.cardProfile.accounts.player_bests.all_rating }}</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- 激活对话框 -->
-        <Prompt v-model="activationCode" :show="showActivationPrompt" text="请输入卡片激活码" placeholder="扫描二维码或输入激活码"
+        <Prompt v-model="activationCode" :show="showActivationPrompt" text="请输入卡片激活码" placeholder="输入二维码扫描内容"
             @confirm="confirmActivation" @cancel="cancelActivation">
             <TermsLink />
         </Prompt>

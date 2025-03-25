@@ -40,11 +40,11 @@ async def capture_card_screenshot(card: Card) -> dict[str, str]:
 
     params = {
         "front": {
-            "path": screenshots_folder / f"{card.card_id}_front.png",
+            "path": screenshots_folder / f"{card.id}_front.png",
             "url": f"{settings.app_url}cards/{card.uuid}?publish=true&back=false",
         },
         "back": {
-            "path": screenshots_folder / f"{card.card_id}_back.png",
+            "path": screenshots_folder / f"{card.id}_back.png",
             "url": f"{settings.app_url}cards/{card.uuid}?publish=true&back=true",
         },
     }
@@ -55,7 +55,7 @@ async def capture_card_screenshot(card: Card) -> dict[str, str]:
         for key, value in params.items():
             task = asyncio.to_thread(_capture_screenshot, value["path"], value["url"], target_width, target_height)
             if result := await group.create_task(task):
-                results[f"{card.card_id}_{key}"] = result
+                results[f"{card.id}_{key}"] = result
 
     return results
 
