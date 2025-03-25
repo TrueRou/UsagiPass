@@ -40,7 +40,7 @@ const gridClass = computed(() => {
             <div v-if="showScoreDetail && selectedScore"
                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] p-4">
                 <div class="bg-white dark:bg-gray-800 rounded-lg max-w-lg w-full max-h-[90vh] overflow-auto">
-                    <div class="p-4 bg-blue-400 text-white flex justify-between items-center">
+                    <div class="p-4 bg-blue-400 dark:bg-blue-600 text-white flex justify-between items-center">
                         <span class="font-bold">成绩详情</span>
                         <button @click="closeScoreDetail" class="text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
@@ -53,14 +53,14 @@ const gridClass = computed(() => {
                     </div>
                     <div class="p-4">
                         <div class="mb-4">
-                            <h3 class="font-bold">{{ selectedScore.song_name }}</h3>
-                            <p class="text-sm text-gray-500">难度: {{ selectedScore.level }}</p>
+                            <h3 class="font-bold dark:text-white">{{ selectedScore.song_name }}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">难度: {{ selectedScore.level }}</p>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="border rounded p-2">
-                                <p class="text-xs text-gray-500">达成率</p>
-                                <p class="font-bold">
+                            <div class="border rounded p-2 dark:border-gray-700 dark:bg-gray-700">
+                                <p class="text-xs text-gray-500 dark:text-gray-300">达成率</p>
+                                <p class="font-bold dark:text-white">
                                     {{ selectedScore.achievements ? parseInt(String(selectedScore.achievements)) : '-'
                                     }}
                                     <span v-if="selectedScore.achievements" class="text-sm">
@@ -69,24 +69,19 @@ const gridClass = computed(() => {
                                 </p>
                             </div>
 
-                            <div class="border rounded p-2">
-                                <p class="text-xs text-gray-500">DX Rating</p>
-                                <p class="font-bold">{{ selectedScore.dx_rating || '-' }}</p>
+                            <div class="border rounded p-2 dark:border-gray-700 dark:bg-gray-700">
+                                <p class="text-xs text-gray-500 dark:text-gray-300">DX Rating</p>
+                                <p class="font-bold dark:text-white">{{ selectedScore.dx_rating || '-' }}</p>
                             </div>
 
-                            <div class="border rounded p-2">
-                                <p class="text-xs text-gray-500">完美连击</p>
-                                <p class="font-bold">{{ selectedScore.fc || '无' }}</p>
+                            <div class="border rounded p-2 dark:border-gray-700 dark:bg-gray-700">
+                                <p class="text-xs text-gray-500 dark:text-gray-300">完美连击</p>
+                                <p class="font-bold dark:text-white">{{ selectedScore.fc || '无' }}</p>
                             </div>
 
-                            <div class="border rounded p-2">
-                                <p class="text-xs text-gray-500">同步率</p>
-                                <p class="font-bold">{{ selectedScore.fs || '无' }}</p>
-                            </div>
-
-                            <div class="border rounded p-2 col-span-2">
-                                <p class="text-xs text-gray-500">最后游玩时间</p>
-                                <p class="font-bold">{{ new Date(selectedScore.updated_at).toLocaleString() }}</p>
+                            <div class="border rounded p-2 dark:border-gray-700 dark:bg-gray-700">
+                                <p class="text-xs text-gray-500 dark:text-gray-300">同步率</p>
+                                <p class="font-bold dark:text-white">{{ selectedScore.fs || '无' }}</p>
                             </div>
                         </div>
                     </div>

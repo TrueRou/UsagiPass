@@ -54,7 +54,8 @@ const songTypeLabel = computed(() => {
         :style="{ borderColor: cardBackgroundColor }" @click="$emit('click')">
 
         <!-- 背景图片(假设) -->
-        <div class="absolute inset-0 opacity-25" :style="{ backgroundColor: cardBackgroundColor }"></div>
+        <div class="absolute inset-0 opacity-25 dark:opacity-15" :style="{ backgroundColor: cardBackgroundColor }">
+        </div>
 
         <div class="relative p-2 flex items-center h-full">
             <!-- 左侧信息 -->
@@ -65,24 +66,24 @@ const songTypeLabel = computed(() => {
                 </span>
 
                 <!-- 歌曲名称 (使用truncate确保不会超出) -->
-                <div class="font-bold text-sm truncate max-w-full">{{ props.score.song_name }}</div>
+                <div class="font-bold text-sm truncate max-w-full dark:text-white">{{ props.score.song_name }}</div>
 
                 <!-- 达成率和DX评分 -->
                 <div v-if="props.score.achievements" class="text-sm">
-                    <span class="font-bold">
+                    <span class="font-bold dark:text-white">
                         {{ parseInt(String(props.score.achievements)) }}
                         <span class="text-xs">.{{ (String(props.score.achievements).split(".")[1] || "0").padEnd(4, "0")
-                            }}%</span>
+                        }}%</span>
                     </span>
-                    <span class="text-xs text-gray-500 ml-1">DX: {{ props.score.dx_rating }}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">DX: {{ props.score.dx_rating }}</span>
                 </div>
-                <div v-else class="text-sm text-gray-500">未游玩</div>
+                <div v-else class="text-sm text-gray-500 dark:text-gray-400">未游玩</div>
             </div>
 
             <!-- 右侧等级和评级 -->
             <div class="flex flex-col items-center justify-center flex-shrink-0">
                 <!-- 难度等级 -->
-                <div class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300"
+                <div class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 dark:border-gray-600"
                     :style="{ backgroundColor: cardBackgroundColor, color: 'white' }">
                     {{ props.score.level }}
                 </div>

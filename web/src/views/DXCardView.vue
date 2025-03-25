@@ -106,7 +106,8 @@ watch(() => [cardStore.cardProfile], applyPreferences, { immediate: true });
         </div>
 
         <!-- 激活对话框 -->
-        <div v-if="showActivationDialog" class="fixed inset-0 bg-black/70 flex justify-center items-center z-10">
+        <div v-if="showActivationDialog && !isPublish"
+            class="fixed inset-0 bg-black/70 flex justify-center items-center z-10">
             <div class="bg-white p-5 rounded-lg w-[90%] max-w-md shadow-md text-gray-800">
                 <p>您的卡片尚未激活，绑定微信来进行激活。</p>
 
