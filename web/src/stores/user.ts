@@ -49,6 +49,7 @@ export const useUserStore = defineStore('user', () => {
         token.value = null;
         isSignedIn.value = false;
         userProfile.value = null;
+        router.push({ name: 'login' });
     }
 
     async function bind(server: AccountServer, username: string, password: string) {
