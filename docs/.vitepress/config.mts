@@ -41,7 +41,6 @@ export default defineConfig({
       {
         text: '其他',
         items: [
-          { text: '关于我们', link: '/about' },
           { text: '隐私政策', link: '/privacy-policy' },
           { text: '服务条款', link: '/terms-of-use' },
           { text: '特别感谢', link: '/thanks' },
