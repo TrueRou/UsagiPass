@@ -241,7 +241,7 @@ const downloadBatchScreenshots = async () => {
         a.style.display = 'none';
         document.body.appendChild(a);
 
-        const response = await userStore.axiosInstance.post('/cards/batch/screenshot',
+        const response = await userStore.axiosInstance.post('/cards/batch/screenshots',
             uuidsToDownload,
             { responseType: 'blob', timeout: 60000 }
         );

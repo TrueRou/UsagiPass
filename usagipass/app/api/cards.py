@@ -5,10 +5,6 @@ from fastapi.responses import FileResponse
 from sqlmodel import Session, select
 from maimai_py import MaimaiScores, MaimaiSongs, Score as MpyScore
 from maimai_py.exceptions import AimeServerError
-import tempfile
-import os
-import zipfile
-import shutil
 
 from usagipass.app import settings
 from usagipass.app import database
@@ -18,11 +14,11 @@ from usagipass.app.models import (
     Card,
     BestsPublic,
     CardPreference,
-    CardPreferencePublic,
-    CardPreferenceUpdate,
     CardPublic,
     CardUser,
     CardUserPublic,
+    PreferencePublic,
+    PreferenceUpdate,
     Privilege,
     Score,
     ScorePublic,
@@ -104,39 +100,31 @@ async def update_card(
     return {"message": "Card has been updated"}
 
 
-@router.get("/{uuid}/preference", response_model=CardPreferencePublic)
+@router.get("/{uuid}/preference", response_model=PreferencePublic)
 async def get_preference(
     card: Card = Depends(require_card),
     db_preference: CardPreference = Depends(require_preference),
     session: Session = Depends(require_session),
 ):
-    preferences = CardPreferencePublic.model_validate(db_preference)
+    preferences = PreferencePublic.model_validate(db_preference)
     apply_preference(preferences, db_preference, session)
     return preferences
 
 
 @router.patch("/{uuid}/preference")
 async def update_preference(
-    preference: CardPreferencePublic,
-    card: Card = Depends(require_card_strict),
+    preference: PreferencePublic,
     db_preference: CardPreference = Depends(require_preference),
     session: Session = Depends(require_session),
-    user: User = Depends(verify_user_optional),
+    user: User = Depends(verify_admin),
 ):
-    if user and user.privilege == Privilege.ADMIN:
-        update_preference = CardPreferenceUpdate(
-            **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
-            character_id=preference.character.id if preference.character else None,
-            background_id=preference.background.id if preference.background else None,
-            frame_id=preference.frame.id if preference.frame else None,
-            passname_id=preference.passname.id if preference.passname else None,
-        )
-
-    elif (user and db_preference.protect_card and card.username == user.username) or not db_preference.protect_card:
-        # user can update the preference if it's not protected, or if the user is the card owner
-        update_preference = CardPreferenceUpdate(
-            **preference.model_dump(include=["skip_activation", "protect_card"]),
-        )
+    update_preference = PreferenceUpdate(
+        **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
+        character_id=preference.character.id if preference.character else None,
+        background_id=preference.background.id if preference.background else None,
+        frame_id=preference.frame.id if preference.frame else None,
+        passname_id=preference.passname.id if preference.passname else None,
+    )
 
     partial_update_model(session, db_preference, update_preference)
     return {"message": "Preference has been updated"}
@@ -209,19 +197,8 @@ async def update_accounts(
     return {"message": "Card account has been updated"}
 
 
-@router.get("/{uuid}/screenshot")
-async def get_card_screenshot(
-    card: Card = Depends(require_card_strict),
-    user: User = Depends(verify_admin),
-):
-    success, result = await browser.capture_card_screenshot(str(card.uuid))
-    if not success:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"无法生成卡面截图")
-    return FileResponse(result, media_type="image/png")
-
-
-@router.post("/batch/screenshot")
-async def get_batch_screenshot(
+@router.post("/batch/screenshots")
+async def get_batch_screenshots(
     uuids: List[str] = Body(...),
     session: Session = Depends(require_session),
     user: User = Depends(verify_admin),

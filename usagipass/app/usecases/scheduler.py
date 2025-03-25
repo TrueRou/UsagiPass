@@ -53,7 +53,6 @@ async def update_sched_hourly():
 
 async def init_sched():
     asyncio.create_task(maimai_client.songs(alias_provider=None, curve_provider=None))
-    asyncio.ensure_future(update_sched_hourly())
     scheduler.add_job(maimai_client.flush, "cron", hour=0, minute=0)
-    scheduler.add_job(update_sched_hourly, "interval", hours=1)
+    # scheduler.add_job(update_sched_hourly, "interval", hours=1)
     scheduler.start()

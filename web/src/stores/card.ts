@@ -2,7 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia"
 import { useUserStore } from "./user";
 import { useNotificationStore } from "./notification";
-import type { Card, CardPreference, CardUser } from "@/types";
+import type { Card, Preference, CardUser } from "@/types";
 
 export const useCardStore = defineStore('card', () => {
     const userStore = useUserStore();
@@ -10,7 +10,7 @@ export const useCardStore = defineStore('card', () => {
 
     const cardUUID = ref<string | null>(history.state.cardUUID || null);
     const card = ref<Card | null>(null);
-    const cardPreference = ref<CardPreference | null>(null);
+    const cardPreference = ref<Preference | null>(null);
     const cardAccount = ref<CardUser | null>(null);
 
     async function refreshCard(uuid?: string) {
@@ -38,7 +38,7 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
-    async function patchPreferences(uuid?: string, preference?: CardPreference) {
+    async function patchPreferences(uuid?: string, preference?: Preference) {
         try {
             uuid = uuid ?? cardUUID.value!;
             preference = preference ?? cardPreference.value!;

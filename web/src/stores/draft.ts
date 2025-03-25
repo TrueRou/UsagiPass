@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
 import { useUserStore } from "./user";
 import { useNotificationStore } from "./notification";
-import type { Card, CardPreference, Preference } from "@/types";
+import type { Card, Preference } from "@/types";
 
 export const useDraftStore = defineStore('draft', () => {
     const userStore = useUserStore();
@@ -27,7 +27,7 @@ export const useDraftStore = defineStore('draft', () => {
         }
     }
 
-    async function fetchPreferences(uuid?: string): Promise<CardPreference> {
+    async function fetchPreferences(uuid?: string): Promise<Preference> {
         try {
             const path = uuid ? `/cards/${uuid}/preference` : '/defaults'
             const response = await userStore.axiosInstance.get(path)

@@ -101,16 +101,6 @@ class PreferencePublic(PreferenceBase):
     passname: ImagePublic | None = None
 
 
-class CardPreferenceUpdate(PreferenceUpdate):
-    skip_activation: bool | None = None
-    protect_card: bool | None = None
-
-
-class CardPreferencePublic(PreferencePublic):
-    skip_activation: bool | None = None
-    protect_card: bool | None = None
-
-
 class UserPreference(PreferenceBase, table=True):
     __tablename__ = "user_preferences"
 
@@ -170,8 +160,6 @@ class CardPreference(PreferenceBase, table=True):
     background_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
     frame_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
     passname_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
-    skip_activation: bool = Field(default=False)
-    protect_card: bool = Field(default=False)
 
 
 class Card(SQLModel, table=True):

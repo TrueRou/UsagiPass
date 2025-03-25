@@ -75,11 +75,6 @@ interface Preference {
     mask_type?: number;
 }
 
-interface CardPreference extends Preference {
-    skip_activation: boolean;
-    protect_card: boolean;
-}
-
 interface UserAccount {
     account_name: string;
     nickname: string;
@@ -161,4 +156,4 @@ const mapServerId: Record<Server, number> = {
 };
 
 export { mapServerId, Privilege };
-export type { Kind, Server, Image, Preference, UserAccount, UserProfile, Card, ServerMessage, CrawlerResult, Score, Bests, CardUser, CardPreference };
+export type { Kind, Server, Image, Preference, UserAccount, UserProfile, Card, ServerMessage, CrawlerResult, Score, Bests, CardUser, FCType, FSType, RateType, SongType, LevelIndex };

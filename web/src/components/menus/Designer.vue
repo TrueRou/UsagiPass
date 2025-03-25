@@ -6,7 +6,7 @@ import { computed, ref, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { useServerStore } from '@/stores/server';
 import { useUserStore } from '@/stores/user';
-import { Privilege, type CardPreference, type Kind } from '@/types';
+import { Privilege, type Preference, type Kind } from '@/types';
 import DXBaseView from '@/views/DXBaseView.vue';
 import Prompt from '../widgets/Prompt.vue';
 import { matchPhoneNumber } from '@/utils';
@@ -30,7 +30,7 @@ const showDialog = ref<boolean>(false);
 const showBatchDialog = ref<boolean>(false);
 const newDraftPhone = ref<string>(history.state.phoneNumber || '');
 const batchCount = ref<number>(1);
-const preferences = ref<CardPreference>(await draftStore.fetchPreferences(props.uuid));
+const preferences = ref<Preference>(await draftStore.fetchPreferences(props.uuid));
 
 const openPicker = (kind: Kind) => userStore.openImagePicker(kind, imagePicker.value!);
 
