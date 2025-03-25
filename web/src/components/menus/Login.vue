@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { useUserStore } from '@/stores/user';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
+import TermsLink from '@/components/widgets/TermsLink.vue';
+
+const userStore = useUserStore();
 
 const username = ref('');
 const password = ref('');
 
-const userStore = useUserStore();
-const router = useRouter();
-
-const login = async (target: string) => {
-    const result = await userStore.login(target, username.value, password.value);
-    if (result) router.push({ name: 'home' });
-};
+const login = async (target: string) => await userStore.login(target, username.value, password.value);
 </script>
 <template>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
@@ -25,6 +21,7 @@ const login = async (target: string) => {
             @click="login('divingfish')">使用水鱼登录</button>
         <button class="bg-pink-500 text-white font-bold py-2 px-4 rounded hover:bg-pink-600 mt-2 mb-2 w-[200px]"
             @click="login('lxns')">使用落雪登录</button>
+        <TermsLink />
     </div>
 </template>
 <style scoped>

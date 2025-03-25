@@ -69,7 +69,7 @@ watch([baseImage, numImages], drawCanvas);
 </script>
 
 <template>
-    <div class="relative">
+    <div class="relative" v-if="rating != 0">
         <canvas ref="canvasRef" width="269" height="70" class="w-full"></canvas>
     </div>
 </template>

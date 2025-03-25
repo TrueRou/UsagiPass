@@ -1,83 +1,132 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { CardStatus, type Preference } from '@/types';
 import { useCardStore } from '@/stores/card';
-import { useServerStore } from '@/stores/server';
-import DXRating from '@/components/DXRating.vue';
-import CharaInfo from '@/components/CharaInfo.vue';
-import PlayerInfo from '@/components/PlayerInfo.vue';
-import { useRouter } from 'vue-router';
-import CardBack from '@/components/CardBack.vue';
-
-const props = defineProps<{
-    uuid: string;
-}>()
+import DXBaseView from './DXBaseView.vue';
+import CardBests from '@/components/CardBests.vue';
+import TermsLink from '@/components/widgets/TermsLink.vue';
 
 const cardStore = useCardStore();
-const serverStore = useServerStore();
-const router = useRouter();
-const cardProfile = ref<CardProfile>(await cardStore.fetchCard(props.uuid));
+const activeView = ref(0); // 0: DXBaseView, 1: ScoreListView
+const touchStartX = ref(0);
+const touchEndX = ref(0);
+const minSwipeDistance = 50;
 
-const r = (image: ImagePublic) => import.meta.env.VITE_URL + "/images/" + image!.id;
+if (!cardStore.cardProfile) await cardStore.refreshCard();
+const cardPreference = ref<Preference>(JSON.parse(JSON.stringify(cardStore.cardProfile?.preferences)));
+const showActivationDialog = ref(cardStore.cardProfile?.status! < CardStatus.ACTIVATED);
+const activationCode = ref('');
 
-const prepareDefaultPreferences = () => {
-    cardProfile.value!.preferences.character_name ||= cardProfile.value!.preferences.character.name;
-    cardProfile.value!.preferences.display_name ||= cardProfile.value!.preferences.display_name;
-    cardProfile.value!.preferences.dx_rating ||= String(cardProfile.value.player_rating) || String(cardProfile.value!.player_rating);
-    cardProfile.value!.preferences.maimai_version ||= serverStore.serverMessage!.maimai_version;
+const activateCard = async () => {
+    if (activationCode.value) {
+        await cardStore.createAccount(activationCode.value);
+        await cardStore.refreshCard()
+        showActivationDialog.value = false;
+    }
+};
+
+const skipActivation = async () => {
+    await cardStore.createAccount();
+    await cardStore.refreshCard()
+    showActivationDialog.value = false;
+};
+
+const handleTouchStart = (e: TouchEvent) => {
+    touchStartX.value = e.changedTouches[0].screenX;
+};
+
+const handleTouchEnd = (e: TouchEvent) => {
+    touchEndX.value = e.changedTouches[0].screenX;
+    handleSwipe();
+};
+
+const handleSwipe = () => {
+    const distance = touchEndX.value - touchStartX.value;
+    if (Math.abs(distance) < minSwipeDistance) return;
+
+    if (distance > 0) {
+        if (activeView.value > 0) activeView.value--;
+    } else {
+        if (activeView.value < 1) activeView.value++;
+    }
+};
+
+const switchToView = (index: number) => {
+    activeView.value = index;
+};
+
+const isPublish = computed(() => history.state.publish === "true");
+const isBack = computed(() => history.state.back === "true");
+
+onMounted(async () => {
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchend', handleTouchEnd);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('touchstart', handleTouchStart);
+    document.removeEventListener('touchend', handleTouchEnd);
+});
+
+const applyPreferences = () => {
+    if (cardStore.cardProfile?.accounts?.player_rating != -1) {
+        cardPreference.value.dx_rating ||= String(cardStore.cardProfile?.accounts?.player_rating);
+    }
+    if (cardStore.cardProfile?.id) {
+        cardPreference.value.simplified_code = "CID: " + cardStore.cardProfile?.id;
+    }
 }
 
-prepareDefaultPreferences();
-
+watch(() => [cardStore.cardProfile], applyPreferences, { immediate: true });
 </script>
+
 <template>
-    <div class="flex items-center justify-center h-full w-full">
-        <div class="flex relative flex-col items-center justify-center h-full">
-            <CardBack :preferences="cardProfile?.preferences" />
-            <div class="flex flex-col absolute top-0 w-full h-full">
-                <div class="header-widget flex relative w-full justify-between">
-                    <img class="object-cover w-1/2" :src="r(cardProfile?.preferences.passname)">
-                    <DXRating class="w-1/2" :rating="Number(cardProfile?.preferences.dx_rating) || 0" />
-                </div>
-                <div class="header-widget flex relative w-full flex-row-reverse">
-                    <PlayerInfo class="w-1/2" :username="cardProfile?.preferences.display_name!"
-                        :friend-code="cardProfile?.preferences.friend_code!" />
-                </div>
+    <div class="w-full h-full overflow-hidden relative">
+        <!-- 视图容器 -->
+        <div class="flex w-[200%] h-full transition-transform duration-300 ease-in-out"
+            :style="{ transform: `translateX(-${activeView * 50}%)` }">
+            <div class="flex-none w-1/2 h-full overflow-y-auto relative">
+                <DXBaseView :preferences="cardPreference" timeLimit="12:00:00"
+                    class="h-full w-full absolute top-0 left-0" :cardBack="isBack"
+                    :settingsRoute="isPublish ? undefined : { name: 'preferencesCard', state: { 'cardUUID': cardStore.cardUUID } }" />
             </div>
-            <div class="absolute flex flex-col left-0" style="bottom: 8%;">
-                <CharaInfo :chara="cardProfile?.preferences.character_name!" :time="'12:00:00'" />
+            <div class="flex-none w-1/2 h-full relative">
+                <CardBests :bests="cardStore.cardProfile?.accounts?.player_bests" />
             </div>
-            <div class="flex absolute bottom-0 items-center justify-center w-full h-8">
-                <div class="footer-widget flex justify-between py-1 rounded-2xl bg-gray-800 text-white opacity-85">
-                    <p class="footer-text font-sega">{{ cardProfile?.preferences.simplified_code }}</p>
-                    <p class="footer-text font-sega">{{ cardProfile?.preferences.maimai_version }}</p>
+        </div>
+
+        <!-- 指示器和导航 -->
+        <div v-if="!isPublish" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 flex gap-2.5 z-10">
+            <div class="w-2.5 h-2.5 rounded-full cursor-pointer"
+                :class="{ 'bg-white': activeView === 0, 'bg-white/50': activeView !== 0 }" @click="switchToView(0)">
+            </div>
+            <div class="w-2.5 h-2.5 rounded-full cursor-pointer"
+                :class="{ 'bg-white': activeView === 1, 'bg-white/50': activeView !== 1 }" @click="switchToView(1)">
+            </div>
+        </div>
+
+        <!-- 激活对话框 -->
+        <div v-if="showActivationDialog && !isPublish"
+            class="fixed inset-0 bg-black/70 flex justify-center items-center z-10">
+            <div class="bg-white p-5 rounded-lg w-[90%] max-w-md shadow-md text-gray-800">
+                <p>您的卡片尚未激活，绑定微信来进行激活。</p>
+
+                <div class="my-5">
+                    <input id="activation-code" v-model="activationCode" type="text"
+                        class="w-full p-2.5 border border-gray-300 rounded text-base" placeholder="请输入二维码扫描后的内容" />
                 </div>
-                <div class="p-1 rounded-full bg-white" @click="router.push({ name: 'preferences' })">
-                    <img src="../assets/misc/settings.svg" style="width: 2vh;"></img>
+
+                <div class="flex justify-between mt-5">
+                    <button @click="skipActivation"
+                        class="px-5 py-2.5 rounded font-bold bg-gray-100 text-gray-800">跳过</button>
+                    <button @click="activateCard"
+                        class="px-5 py-2.5 rounded font-bold bg-green-600 text-white">激活</button>
                 </div>
+
+                <p class="text-xs text-gray-500 mt-4">* 跳过激活后，查分功能将无法使用</p>
+                <p class="text-xs text-gray-500">* 您可以随时进行激活，一旦激活后不可换绑</p>
+                <TermsLink />
             </div>
         </div>
     </div>
 </template>
-<style scoped>
-.qr-widget {
-    bottom: 5%;
-    right: 0;
-}
-
-.header-widget {
-    padding-left: 2%;
-    padding-right: 2%;
-    padding-top: 0.4%;
-}
-
-.footer-widget {
-    width: 85%;
-    padding-left: 3%;
-    padding-right: 3%;
-}
-
-.footer-text {
-    font-size: 1.2vh;
-    line-height: 120%;
-}
-</style>

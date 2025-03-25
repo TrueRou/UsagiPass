@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { useImageStore } from '@/stores/image';
-import { useUserStore } from '@/stores/user';
-import { storeToRefs } from 'pinia';
+import { useNotificationStore } from '@/stores/notification';
 import { useRouter } from 'vue-router';
-import Prompt from '../widgets/Prompt.vue';
 import { ref } from 'vue';
+import Prompt from '../widgets/Prompt.vue';
+import type { Image, Kind } from '@/types';
 
 const props = defineProps<{
-    kind: string;
+    kind: Kind;
 }>()
+
+const notificationStore = useNotificationStore();
 
 const kindDict: Record<string, string> = {
     'background': '背景',
@@ -17,44 +19,41 @@ const kindDict: Record<string, string> = {
     'passname': '通行证',
 }
 
-const userStore = useUserStore();
-const imageStore = useImageStore();
 const router = useRouter();
+const imageStore = useImageStore();
+
 const showDialog = ref<boolean>(false);
-const renamingImage = ref<ImagePublic>({ id: '', name: '', uploaded_by: '' });
-const { userProfile } = storeToRefs(userStore)
+const renameModel = ref<Image | null>(null);
 
 const r = (resource_id: string) => import.meta.env.VITE_URL + `/images/${resource_id}/thumbnail`;
 
-const selectImage = (image: ImagePublic) => {
-    (userProfile.value?.preferences as any)[props.kind].id = image.id;
-    router.push({ name: "preferences" });
-}
-
-const deleteImage = async (image: ImagePublic) => {
-    if (confirm(`确定删除 ${image.name} 吗？`)) {
-        await userStore.axiosInstance.delete("/images/" + image.id)
-        await imageStore.refreshImages();
+const selectImage = (image: Image) => {
+    if (imageStore.wanderingPreferences) {
+        (imageStore.wanderingPreferences as any)[props.kind].id = image.id;
+        router.back();
     }
 }
 
+const setRenameModel = (image: Image) => {
+    renameModel.value = Object.assign({}, image);
+    showDialog.value = true;
+}
+
 const renameImage = async () => {
-    await userStore.axiosInstance.patch("/images/" + renamingImage.value?.id + "?name=" + renamingImage.value?.name);
-    await imageStore.refreshImages();
-    renamingImage.value = { id: '', name: '', uploaded_by: '' };
+    await imageStore.patchImage(renameModel.value!)
+    renameModel.value = null;
     showDialog.value = false;
 }
 
-if (!imageStore.images) await imageStore.refreshImages();
-
 if (!Object.keys(imageStore.images!).includes(props.kind)) {
-    alert(`访问的资源 ${props.kind} 不存在`)
-    router.push({ name: 'home' }); // Redirect to home page
+    notificationStore.error("资源不存在", `访问的资源 ${props.kind} 不存在`);
+    router.back();
 }
 </script>
 <template>
-    <Prompt text="请修改图片名称: " v-model="renamingImage!['name']" :show="showDialog" @confirm="renameImage"
-        @cancel="showDialog = false;"></Prompt>
+    <Prompt v-if="renameModel" text="请修改图片名称: " v-model="renameModel!['name']" :show="showDialog" @confirm="renameImage"
+        @cancel="showDialog = false;">
+    </Prompt>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
             <h1 class="font-bold text-white">{{ '选取' + kindDict[props.kind] }}</h1>
@@ -64,7 +63,7 @@ if (!Object.keys(imageStore.images!).includes(props.kind)) {
                 <div class="relative rounded border-solid border-2 shadow-lg border-black p-2">
                     <button
                         class="absolute top-0 left-0 bg-black bg-opacity-50 text-white p-1 rounded-br-lg text-xs max-w-full z-10"
-                        v-if="image.uploaded_by" @click="renamingImage = Object.assign({}, image); showDialog = true;">
+                        v-if="image.uploaded_by" @click="setRenameModel(image)">
                         {{ image.name }}
                     </button>
                     <div class="absolute top-0 left-0 bg-black bg-opacity-50 text-white p-1 rounded-br-lg text-xs max-w-full z-10"
@@ -74,7 +73,7 @@ if (!Object.keys(imageStore.images!).includes(props.kind)) {
                     <img :src="r(image.id)" class="w-full h-48 object-contain rounded-lg">
                     <button
                         class="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-bl-lg text-xs max-w-full z-10"
-                        @click="deleteImage(image)" v-if="image.uploaded_by">
+                        @click="imageStore.deleteImage(image)" v-if="image.uploaded_by">
                         删除
                     </button>
                     <button
