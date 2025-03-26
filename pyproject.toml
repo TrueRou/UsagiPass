@@ -1,6 +1,6 @@
 [project]
 name = "UsagiPass"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = [
     {name = "Usagi no Niku",email = "chenbohan911@163.com"}
