@@ -3,9 +3,12 @@ import { computed } from 'vue';
 import type { Bests } from '@/types';
 import ScoreList from './ScoreList.vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     bests: Bests;
-}>();
+    isLoading?: boolean;
+}>(), {
+    isLoading: false
+});
 
 const stats = computed(() => {
     const data = [];
@@ -36,10 +39,10 @@ const stats = computed(() => {
             <div class="flex justify-between items-center mb-4">
                 <div>
                     <h3 class="text-xl font-bold mb-1 dark:text-white">{{ Math.floor(props.bests.all_rating * 100) / 100
-                        }}</h3>
+                    }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">DX Rating 总和</p>
                 </div>
-                <div class="animate-spin mr-2 text-gray-700 dark:text-gray-300">
+                <div v-if="props.isLoading" class="animate-spin mr-2 text-gray-700 dark:text-gray-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

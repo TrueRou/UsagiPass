@@ -286,6 +286,13 @@ const preferencesReadOnly = computed(() => {
     return JSON.parse(JSON.stringify(previewPreferences.value));
 });
 
+const copyUuid = (uuid?: string) => {
+    if (!uuid) return;
+    navigator.clipboard.writeText(uuid)
+        .then(() => notificationStore.success('复制成功', 'UUID已复制到剪贴板'))
+        .catch(() => notificationStore.error('复制失败', '无法复制UUID'))
+}
+
 fetchCards();
 </script>
 
@@ -300,13 +307,25 @@ fetchCards();
         <div class="bg-white rounded-lg w-full overflow-hidden" style="max-width: 30rem;">
             <div class="p-4 bg-blue-400 text-white flex justify-between items-center">
                 <span class="font-bold text-nowrap">卡面预览 - {{ selectedCard?.id }}</span>
-                <button @click="closePreview" class="text-white hover:text-gray-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+                <div class="flex items-center">
+                    <!-- Copy UUID button -->
+                    <button @click="copyUuid(selectedCard?.uuid)" class="text-white hover:text-gray-200 mr-2"
+                        title="复制UUID">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                    </button>
+                    <!-- Close button -->
+                    <button @click="closePreview" class="text-white hover:text-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
             <div class="p-4 flex flex-col items-center">
                 <div class="flex flex-1 preview-radius w-full" style="max-width: 100vw;">
@@ -460,6 +479,13 @@ fetchCards();
                                 d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
+                    <!-- 创建新卡按钮 -->
+                    <RouterLink to="/designer" class=" text-green-600 hover:text-green-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </RouterLink>
                     <!-- 刷新按钮 -->
                     <button @click="fetchCards" class="text-blue-600 hover:text-blue-800">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"

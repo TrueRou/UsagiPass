@@ -10,6 +10,7 @@ const cardStore = useCardStore();
 const activeView = ref(0); // 0: DXBaseView, 1: ScoreListView
 const touchStartX = ref(0);
 const touchEndX = ref(0);
+const isAccountUpdating = ref(false);
 const minSwipeDistance = 50;
 
 if (!cardStore.cardProfile) await cardStore.refreshCard();
@@ -61,6 +62,8 @@ const isBack = computed(() => history.state.back === "true");
 onMounted(async () => {
     document.addEventListener('touchstart', handleTouchStart);
     document.addEventListener('touchend', handleTouchEnd);
+    isAccountUpdating.value = true;
+    cardStore.updateAccount().then(() => isAccountUpdating.value = false).catch();
 });
 
 onUnmounted(() => {
@@ -91,7 +94,7 @@ watch(() => [cardStore.cardProfile], applyPreferences, { immediate: true });
                     :settingsRoute="isPublish ? undefined : { name: 'preferencesCard', state: { 'cardUUID': cardStore.cardUUID } }" />
             </div>
             <div class="flex-none w-1/2 h-full relative">
-                <CardBests :bests="cardStore.cardProfile?.accounts?.player_bests" />
+                <CardBests :bests="cardStore.cardProfile?.accounts?.player_bests" :isLoading="isAccountUpdating" />
             </div>
         </div>
 

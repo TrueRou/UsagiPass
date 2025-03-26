@@ -9,7 +9,7 @@ from usagipass.app.usecases import crawler
 
 
 # trigger the update of the card user's scores
-async def update_scores(account: CardAccount) -> None:
+async def update_scores(account: CardAccount) -> int:
     with session_ctx() as session:
         account = session.get(CardAccount, account.id)
         new_scores = await maimai_client.scores(account.as_identifier, kind=ScoreKind.ALL, provider=account.as_provider)
@@ -40,6 +40,7 @@ async def update_scores(account: CardAccount) -> None:
         account.player_rating = max(account.player_rating, new_scores.rating)
         account.updated_at = datetime.utcnow()
         session.commit()
+    return new_scores.rating
 
 
 # attempt to refresh the usagipass user's rating depends on check_delta

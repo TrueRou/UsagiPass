@@ -31,7 +31,7 @@ const tabActive = ref('bests'); // 可选择bests或statistics
             </div>
 
             <div v-else-if="bests" class="h-[calc(100%-44px)] overflow-y-auto">
-                <ScoreBestsSection v-if="tabActive === 'bests'" :bests="bests" />
+                <ScoreBestsSection v-if="tabActive === 'bests'" :bests="bests" :is-loading="isLoading" />
                 <ScoreStatisticsSection v-else-if="tabActive === 'statistics'" :bests="bests" />
             </div>
 

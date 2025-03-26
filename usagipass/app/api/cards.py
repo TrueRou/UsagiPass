@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Path, status, Body
 from fastapi.responses import FileResponse
@@ -18,6 +18,7 @@ from usagipass.app.models import (
     CardProfile,
     CardAccount,
     CardAccountPublic,
+    CardScoreUpdateResult,
     CardStatus,
     CardUpdate,
     PreferencePublic,
@@ -146,13 +147,18 @@ async def create_account(
     return {"message": "Card account has been created"}
 
 
-@router.patch("/{uuid}/accounts")
+@router.patch("/{uuid}/accounts", response_model=CardScoreUpdateResult | None)
 async def update_accounts(
     db_account: CardAccount = Depends(require_card_account),
 ):
-    if db_account:
-        await maimai.update_scores(db_account)
-    return {"message": "Card account has been updated"}
+    if db_account and datetime.utcnow() - db_account.updated_at > timedelta(minutes=15):
+        result = CardScoreUpdateResult(
+            player_rating_old=db_account.player_rating,
+            player_rating_new=await maimai.update_scores(db_account),
+        )
+        if result.player_rating_old != result.player_rating_new:
+            log(f"Card {db_account.id} has been updated ({result.player_rating_old} -> {result.player_rating_new})", Ansi.LGREEN)
+        return result
 
 
 @router.get("/{uuid}/profile", response_model=CardProfile)

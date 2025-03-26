@@ -48,7 +48,7 @@ const createDraft = async () => {
     if (isAdmin.value) {
         await cardStore.createCard();
         router.push({ name: 'admin' });
-        notificationStore.success("创建成功", "已成功创建一张卡片，卡片订单已自动确认");
+        notificationStore.success("创建成功", "已成功创建一张卡片，卡片订单已自动付款");
         return;
     }
     else if (matchPhoneNumber(newDraftPhone.value)) {

@@ -2,7 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia"
 import { useUserStore } from "./user";
 import { useNotificationStore } from "./notification";
-import type { Preference, CardProfile } from "@/types";
+import type { Preference, CardProfile, CardScoreUpdateResult } from "@/types";
 
 export const useCardStore = defineStore('card', () => {
     const userStore = useUserStore();
@@ -35,6 +35,20 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
+    async function updateAccount() {
+        try {
+            const resp = await userStore.axiosInstance.patch(`/cards/${cardUUID.value}/accounts`);
+            const result: Partial<CardScoreUpdateResult> = resp.data;
+            if (result && result.player_rating_old != result.player_rating_new) {
+                notificationStore.success("更新成功", `DX Rating已更新: ${result.player_rating_old} -> ${result.player_rating_new}`);
+                await refreshCard();
+            }
+        } catch (error: any) {
+            notificationStore.error("更新失败", error.response.data.detail || "未知错误");
+            throw error;
+        }
+    }
+
     async function patchPreferences(uuid?: string, preference?: Preference) {
         try {
             uuid = uuid ?? cardUUID.value!;
@@ -56,5 +70,5 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
-    return { refreshCard, createAccount, createCard, patchPreferences, cardUUID, cardProfile }
+    return { refreshCard, createAccount, updateAccount, createCard, patchPreferences, cardUUID, cardProfile }
 })

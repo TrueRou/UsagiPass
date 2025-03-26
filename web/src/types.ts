@@ -163,6 +163,11 @@ interface CardProfile {
     accounts?: CardAccount;
 }
 
+interface CardScoreUpdateResult {
+    player_rating_old: number;
+    player_rating_new: number;
+}
+
 type CardStatusEntities = "tag" | "color"
 
 const CardStatusMap: Record<CardStatus, Record<CardStatusEntities, string>> = {
@@ -185,4 +190,4 @@ const CardStatusMap: Record<CardStatus, Record<CardStatusEntities, string>> = {
 }
 
 export { Privilege, AccountServer, CardStatus, CardStatusMap };
-export type { Kind, Preference, UserAccount, UserProfile, ServerMessage, CrawlerResult, Score, Card, Bests, CardProfile, CardAccount, Image, FCType, FSType, RateType, SongType, LevelIndex };
+export type { Kind, Preference, UserAccount, UserProfile, ServerMessage, CrawlerResult, Score, Card, Bests, CardProfile, CardAccount, Image, FCType, FSType, RateType, SongType, LevelIndex, CardScoreUpdateResult, CardStatusEntities };

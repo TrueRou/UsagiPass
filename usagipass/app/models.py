@@ -278,3 +278,8 @@ class CardProfile(SQLModel):
     status: CardStatus
     preferences: PreferencePublic
     accounts: CardAccountPublic | None
+
+
+class CardScoreUpdateResult(SQLModel):
+    player_rating_old: int
+    player_rating_new: int
