@@ -143,22 +143,30 @@ async def create_account(
         log(f"Failed to activate card of {card.id}: {repr(e)}", Ansi.LRED)
         session.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to activate card")
-    await maimai.update_scores(account)  # away from try-except block
+    try:
+        await maimai.update_scores(account)  # away from try-except block
+    except Exception as e:
+        log(f"Failed to update scores of card {card.id}: {repr(e)}", Ansi.LRED)
     return {"message": "Card account has been created"}
 
 
 @router.patch("/{uuid}/accounts", response_model=CardScoreUpdateResult | None)
 async def update_accounts(
+    card: Card = Depends(require_card),
     db_account: CardAccount = Depends(require_card_account),
 ):
     if db_account and datetime.utcnow() - db_account.updated_at > timedelta(minutes=15):
-        result = CardScoreUpdateResult(
-            player_rating_old=db_account.player_rating,
-            player_rating_new=await maimai.update_scores(db_account),
-        )
-        if result.player_rating_old != result.player_rating_new:
-            log(f"Card {db_account.id} has been updated ({result.player_rating_old} -> {result.player_rating_new})", Ansi.LGREEN)
-        return result
+        try:
+            result = CardScoreUpdateResult(
+                player_rating_old=db_account.player_rating,
+                player_rating_new=await maimai.update_scores(db_account),
+            )
+            if result.player_rating_old != result.player_rating_new:
+                log(f"Card {db_account.id} has been updated ({result.player_rating_old} -> {result.player_rating_new})", Ansi.LGREEN)
+            return result
+        except Exception as e:
+            log(f"Failed to update scores of card {card.id}: {repr(e)}", Ansi.LRED)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update scores")
 
 
 @router.get("/{uuid}/profile", response_model=CardProfile)
