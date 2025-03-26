@@ -15,6 +15,7 @@ const props = defineProps<{
     maimaiCode?: string;
     settingsRoute?: string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric;
     cardBack?: boolean;
+    cardId?: number;
 }>()
 
 const serverStore = useServerStore();
@@ -32,6 +33,9 @@ watch(() => props.preferences, applyPreferences, { immediate: true });
     <div class="flex items-center justify-center h-full w-full">
         <div class="flex relative flex-col items-center justify-center h-full" v-if="cardBack">
             <img class="h-full object-cover -z-[20]" src="../assets/misc/UI_CardBase_Back.png">
+            <div v-if="cardId" class="card-id-display">
+                CID: {{ cardId }}
+            </div>
         </div>
         <div class="flex relative flex-col items-center justify-center h-full" v-else>
             <CardBack :preferences="preferences" />
@@ -46,7 +50,7 @@ watch(() => props.preferences, applyPreferences, { immediate: true });
                 </div>
             </div>
             <div class="absolute flex flex-col left-0" style="bottom: 8%;">
-                <CharaInfo :chara="preferences.character_name!" :time="timeLimit || '12:00:00'" />
+                <CharaInfo :chara="preferences.character_name!" :time="timeLimit || '12:00:00'" :card-id="cardId" />
             </div>
             <div class="qr-widget absolute" v-if="maimaiCode">
                 <QRCode :content="maimaiCode" :size="preferences.qr_size || 20" />
@@ -88,5 +92,17 @@ watch(() => props.preferences, applyPreferences, { immediate: true });
 .footer-text {
     font-size: 1.2vh;
     line-height: 120%;
+}
+
+.card-id-display {
+    position: absolute;
+    bottom: 1%;
+    right: 1%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.3vh 0.8vh;
+    border-radius: 1vh;
+    font-size: 3vh;
+    font-family: "SEGA_MARUGOTHICDB", sans-serif;
 }
 </style>

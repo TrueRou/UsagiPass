@@ -72,8 +72,8 @@ const applyPreferences = () => {
     if (cardStore.cardProfile?.accounts?.player_rating != -1) {
         cardPreference.value.dx_rating ||= String(cardStore.cardProfile?.accounts?.player_rating);
     }
-    if (cardStore.cardProfile?.id) {
-        cardPreference.value.simplified_code = "CID: " + cardStore.cardProfile?.id;
+    if (!cardStore.cardProfile?.preferences.simplified_code) {
+        cardPreference.value.simplified_code = "UsagiCard";
     }
 }
 
@@ -87,7 +87,7 @@ watch(() => [cardStore.cardProfile], applyPreferences, { immediate: true });
             :style="{ transform: `translateX(-${activeView * 50}%)` }">
             <div class="flex-none w-1/2 h-full overflow-y-auto relative">
                 <DXBaseView :preferences="cardPreference" timeLimit="12:00:00"
-                    class="h-full w-full absolute top-0 left-0" :cardBack="isBack"
+                    class="h-full w-full absolute top-0 left-0" :cardBack="isBack" :cardId="cardStore.cardProfile?.id"
                     :settingsRoute="isPublish ? undefined : { name: 'preferencesCard', state: { 'cardUUID': cardStore.cardUUID } }" />
             </div>
             <div class="flex-none w-1/2 h-full relative">
