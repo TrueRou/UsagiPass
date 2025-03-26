@@ -34,9 +34,9 @@ async def capture_multiple_screenshot(cards: list[Card]) -> tuple[dict[str, str]
 
 
 async def capture_card_screenshot(card: Card) -> dict[str, str]:
-    # ID-1 300dpi
-    target_width = 638
-    target_height = 1012
+    # ID-1 200dpi
+    target_width = 425
+    target_height = 675
 
     params = {
         "front": {

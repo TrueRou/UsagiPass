@@ -329,7 +329,7 @@ fetchCards();
             </div>
             <div class="p-4 flex flex-col items-center">
                 <div class="flex flex-1 preview-radius w-full" style="max-width: 100vw;">
-                    <DXBaseView :preferences="preferencesReadOnly" />
+                    <DXBaseView :preferences="preferencesReadOnly" :card-id="selectedCard?.id" />
                 </div>
             </div>
         </div>

@@ -6,7 +6,7 @@ import { computed, ref, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { useServerStore } from '@/stores/server';
 import { useUserStore } from '@/stores/user';
-import { Privilege, type Preference, type Kind } from '@/types';
+import { Privilege, type Preference, type Kind, type Card } from '@/types';
 import DXBaseView from '@/views/DXBaseView.vue';
 import Prompt from '../widgets/Prompt.vue';
 import { matchPhoneNumber } from '@/utils';
@@ -89,7 +89,8 @@ const createBatchCards = async () => {
 
     try {
         for (let i = 0; i < count; i++) {
-            await cardStore.createCard();
+            const card: Card = await cardStore.createCard();
+            await cardStore.patchPreferences(card.uuid, preferences.value!);
         }
         notificationStore.success("批量创建成功", `已成功创建${count}张卡片`);
         showBatchDialog.value = false;
@@ -116,10 +117,10 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-1 preview-radius mr-5" style="zoom: 0.4;">
-                <DXBaseView :preferences="preferencesReadOnly" />
+                <DXBaseView :preferences="preferencesReadOnly" :card-id="1000" />
             </div>
             <div class="flex flex-1 preview-radius" style="zoom: 0.4;">
-                <DXBaseView :preferences="preferencesReadOnly" card-back />
+                <DXBaseView :preferences="preferencesReadOnly" card-back :card-id="1000" />
             </div>
         </div>
         <div class="flex justify-between items-center w-full mt-2">

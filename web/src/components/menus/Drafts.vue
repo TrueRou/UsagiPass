@@ -94,7 +94,7 @@ onActivated(() => {
             </div>
             <div class="p-4 flex flex-col items-center">
                 <div class="flex flex-1 preview-radius w-full" style="max-width: 100vw; ">
-                    <DXBaseView :preferences="preferencesReadOnly" />
+                    <DXBaseView :preferences="preferencesReadOnly" :card-id="selectedDraft?.id" />
                 </div>
                 <div class="mt-4 flex justify-end w-full">
                     <button @click="closePreview"
