@@ -66,6 +66,7 @@ def _capture_screenshot(screenshot_path, url, target_width, target_height) -> st
     chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--force-device-scale-factor=4")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--incognito")
     chrome_options.add_argument("--log-level=3")
