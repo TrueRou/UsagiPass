@@ -1,13 +1,11 @@
 import asyncio
 import tempfile
+from time import sleep
 import zipfile
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 from usagipass.app import settings
@@ -78,8 +76,7 @@ def _capture_screenshot(screenshot_path, url, target_width, target_height) -> st
         driver = webdriver.Chrome(service=service, options=chrome_options)
         log(f"正在访问: {url}", Ansi.LCYAN)
 
-        wait = WebDriverWait(driver, 10)
-        wait.until(EC.visibility_of_all_elements_located((By.TAG_NAME, "img")))
+        sleep(5)  # wait for the page to load, this is quite bad, but I can't find a better way
 
         body_width = driver.execute_script("return document.body.scrollWidth")
         body_height = driver.execute_script("return document.body.scrollHeight")

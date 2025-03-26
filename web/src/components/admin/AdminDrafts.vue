@@ -237,9 +237,11 @@ const downloadBatchScreenshots = async () => {
         a.style.display = 'none';
         document.body.appendChild(a);
 
+        notificationStore.info("正在下载", `正在下载卡片，预计需要${scheduledCards.length * 10}秒`);
+
         const response = await userStore.axiosInstance.post('/cards/batch/screenshots',
             uuidsToDownload,
-            { responseType: 'blob', timeout: 60000 }
+            { responseType: 'blob', timeout: 600000 }
         );
 
         const url = window.URL.createObjectURL(new Blob([response.data]));
