@@ -9,6 +9,7 @@ app_port = int(os.environ.get("APP_PORT", 8000))
 app_root = os.environ.get("APP_ROOT", "")
 app_root = "" if app_root == "/" else app_root
 app_url = os.environ.get("APP_URL", "https://up.turou.fun/")
+localhost_app_url = os.environ.get("LOCALHOST_APP_URL", app_url)
 
 # mitmproxy settings
 mitm_host = os.environ.get("MITM_HOST", "0.0.0.0")

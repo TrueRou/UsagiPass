@@ -41,6 +41,7 @@ def init_middlewares(asgi_app: FastAPI) -> None:
     origins = [
         "http://localhost:5173",
         "http://localhost:3000",
+        settings.localhost_app_url.rstrip("/"),
     ]
 
     asgi_app.add_middleware(

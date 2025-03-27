@@ -225,5 +225,5 @@ async def get_batch_screenshots(
         lost_uuids = set(uuids) - {card.uuid for card in cards}
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Cards are not found: {', '.join(lost_uuids)}")
 
-    _, zip_file = await browser.capture_multiple_screenshot(list(cards))
+    _, zip_file = await browser.capture_card_screenshot_batch(list(cards))
     return FileResponse(zip_file, media_type="application/zip", filename=f"cards.zip")

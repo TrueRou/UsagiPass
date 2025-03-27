@@ -1,12 +1,15 @@
 import asyncio
 import tempfile
-from time import sleep
 import zipfile
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver import DesiredCapabilities
 
 from usagipass.app import settings
 from usagipass.app.logging import log, Ansi
@@ -16,7 +19,7 @@ screenshots_folder = Path.cwd() / ".data" / "screenshots"
 screenshots_folder.mkdir(exist_ok=True)
 
 
-async def capture_multiple_screenshot(cards: list[Card]) -> tuple[dict[str, str], Path]:
+async def capture_card_screenshot_batch(cards: list[Card]) -> tuple[dict[str, str], Path]:
     results = {}
     for card in cards:
         results.update(await capture_card_screenshot(card))
@@ -39,11 +42,11 @@ async def capture_card_screenshot(card: Card) -> dict[str, str]:
     params = {
         "front": {
             "path": screenshots_folder / f"{card.id}_front.png",
-            "url": f"{settings.app_url}cards/{card.uuid}?publish=true&back=false",
+            "url": f"{settings.localhost_app_url}cards/{card.uuid}?publish=true&back=false",
         },
         "back": {
             "path": screenshots_folder / f"{card.id}_back.png",
-            "url": f"{settings.app_url}cards/{card.uuid}?publish=true&back=true",
+            "url": f"{settings.localhost_app_url}cards/{card.uuid}?publish=true&back=true",
         },
     }
 
@@ -68,7 +71,6 @@ def _capture_screenshot(screenshot_path, url, target_width, target_height) -> st
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--force-device-scale-factor=4")
     chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--incognito")
     chrome_options.add_argument("--log-level=3")
     chrome_options.add_argument(f"--window-size={target_width},{target_height}")
     chrome_options.add_argument(f"--app={url}")
@@ -77,7 +79,8 @@ def _capture_screenshot(screenshot_path, url, target_width, target_height) -> st
         driver = webdriver.Chrome(service=service, options=chrome_options)
         log(f"正在访问: {url}", Ansi.LCYAN)
 
-        sleep(5)  # wait for the page to load, this is quite bad, but I can't find a better way
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.visibility_of_all_elements_located((By.TAG_NAME, "img")))
 
         body_width = driver.execute_script("return document.body.scrollWidth")
         body_height = driver.execute_script("return document.body.scrollHeight")
