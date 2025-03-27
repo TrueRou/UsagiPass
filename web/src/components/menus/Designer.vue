@@ -351,7 +351,7 @@ const preferencesReadOnly = computed(() => JSON.parse(JSON.stringify(preferences
                 </div>
                 <div>
                     <RouterLink class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
-                        :to="{ name: 'login' }">
+                        :to="{ name: 'login', state: { useBack: true } }">
                         登录
                     </RouterLink>
                 </div>

@@ -38,9 +38,10 @@ export const useUserStore = defineStore('user', () => {
             // 如果之前获取过图片列表，刷新列表
             if (imageStore.images) await imageStore.refreshImages();
             notificationStore.success("登录成功", `欢迎回来，${preferAccount.value?.nickname}`);
-            router.back();
+            return true;
         } catch (error: any) {
             notificationStore.error("登录失败", error.response?.data?.detail || "未知错误");
+            return false;
         }
     }
 
@@ -49,7 +50,7 @@ export const useUserStore = defineStore('user', () => {
         token.value = null;
         isSignedIn.value = false;
         userProfile.value = null;
-        router.push({ name: 'login' });
+        router.push({ name: 'login', state: { useBack: true } });
     }
 
     async function bind(server: AccountServer, username: string, password: string) {

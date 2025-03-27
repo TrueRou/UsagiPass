@@ -2,13 +2,20 @@
 import { ref } from 'vue';
 import { useUserStore } from '@/stores/user';
 import TermsLink from '@/components/widgets/TermsLink.vue';
+import router from '@/router';
 
 const userStore = useUserStore();
 
 const username = ref('');
 const password = ref('');
 
-const login = async (target: string) => await userStore.login(target, username.value, password.value);
+const login = async (target: string) => {
+    const result = await userStore.login(target, username.value, password.value)
+    if (result) {
+        if (history.state.useBack) router.back();
+        else router.replace({ name: 'home' });
+    }
+};
 </script>
 <template>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
