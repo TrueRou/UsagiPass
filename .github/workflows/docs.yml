@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - "pyproject.toml" # we consider version has been bumped
+      - "docs/**" # docs has been updated
 
 jobs:
   docs:

@@ -10,7 +10,7 @@ on:
     branches:
       - main
     paths:
-      - "pyproject.toml" # we consider version has been bumped
+      - "web/**" # frontend module has been updated
 
 jobs:
   frontend:
