@@ -213,17 +213,3 @@ async def get_profile(
         preferences=preferences,
         accounts=accounts,
     )
-
-
-@router.post("/batch/screenshots", dependencies=[Depends(verify_admin)])
-async def get_batch_screenshots(
-    uuids: List[str] = Body(...),
-    session: Session = Depends(require_session),
-):
-    cards = session.exec(select(Card).where(Card.uuid.in_(uuids), Card.status == CardStatus.SCHEDULED)).all()
-    if len(cards) != len(uuids):
-        lost_uuids = set(uuids) - {card.uuid for card in cards}
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Cards are not found: {', '.join(lost_uuids)}")
-
-    _, zip_file = await browser.capture_card_screenshot_batch(list(cards))
-    return FileResponse(zip_file, media_type="application/zip", filename=f"cards.zip")

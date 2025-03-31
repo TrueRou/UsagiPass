@@ -59,6 +59,13 @@ enum RateType {
     D = 13
 }
 
+enum TaskStatus {
+    PENDING = 1,
+    RUNNING = 2,
+    COMPLETED = 3,
+    FAILED = 4
+}
+
 enum SongType {
     STANDARD = "standard",
     DX = "dx",
@@ -168,6 +175,16 @@ interface CardScoreUpdateResult {
     player_rating_new: number;
 }
 
+interface Task {
+    id: string;
+    task_type: string;
+    status: TaskStatus;
+    created_by: string;
+    created_at: string;
+    updated_at: string;
+    error_message: string | null;
+}
+
 type CardStatusEntities = "tag" | "color"
 
 const CardStatusMap: Record<CardStatus, Record<CardStatusEntities, string>> = {
@@ -189,5 +206,12 @@ const CardStatusMap: Record<CardStatus, Record<CardStatusEntities, string>> = {
     }
 }
 
-export { Privilege, AccountServer, CardStatus, CardStatusMap };
-export type { Kind, Preference, UserAccount, UserProfile, ServerMessage, CrawlerResult, Score, Card, Bests, CardProfile, CardAccount, Image, FCType, FSType, RateType, SongType, LevelIndex, CardScoreUpdateResult, CardStatusEntities };
+const TaskStatusMap = {
+    [TaskStatus.PENDING]: { tag: '等待中', color: 'text-gray-500 font-medium' },
+    [TaskStatus.RUNNING]: { tag: '处理中', color: 'text-blue-500 font-medium' },
+    [TaskStatus.COMPLETED]: { tag: '已完成', color: 'text-green-500 font-medium' },
+    [TaskStatus.FAILED]: { tag: '失败', color: 'text-red-500 font-medium' }
+};
+
+export { Privilege, AccountServer, CardStatus, CardStatusMap, TaskStatusMap, TaskStatus };
+export type { Kind, Preference, UserAccount, UserProfile, ServerMessage, CrawlerResult, Score, Card, Bests, CardProfile, CardAccount, Image, FCType, FSType, RateType, SongType, LevelIndex, CardScoreUpdateResult, CardStatusEntities, Task };

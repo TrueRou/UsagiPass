@@ -280,6 +280,37 @@ class CardProfile(SQLModel):
     accounts: CardAccountPublic | None
 
 
+class TaskStatus(IntEnum):
+    PENDING = auto()  # 任务等待处理
+    RUNNING = auto()  # 任务正在处理中
+    COMPLETED = auto()  # 任务已完成
+    FAILED = auto()  # 任务失败
+
+
+class Task(SQLModel, table=True):
+    __tablename__ = "tasks"
+
+    id: str = Field(primary_key=True)
+    task_type: str
+    status: TaskStatus = Field(default=TaskStatus.PENDING)
+    params: str
+    result_path: str | None = Field(default=None)
+    created_by: str = Field(foreign_key="users.username", index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    error_message: str | None = Field(default=None)
+
+
+class TaskPublic(SQLModel):
+    id: str
+    task_type: str
+    status: TaskStatus
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+    error_message: str | None = None
+
+
 class CardScoreUpdateResult(SQLModel):
     player_rating_old: int
     player_rating_new: int

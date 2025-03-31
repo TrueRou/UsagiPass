@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import AdminDrafts from '@/components/admin/AdminDrafts.vue';
+import AdminTasks from '@/components/admin/AdminTasks.vue';
 
 const activeTab = ref('drafts');
 
 const tabs = [
     { id: 'drafts', label: '订单管理' },
+    { id: 'tasks', label: '任务管理' },
     { id: 'users', label: '用户管理' },
     { id: 'images', label: '图片管理' }
 ];
@@ -26,6 +28,7 @@ const tabs = [
         <!-- 标签页内容 -->
         <div class="w-full overflow-y-scroll">
             <AdminDrafts v-if="activeTab === 'drafts'" />
+            <AdminTasks v-else-if="activeTab === 'tasks'" />
             <!-- 其他标签页内容将在这里添加 -->
             <div v-else class="p-4 text-center text-gray-500 h-full">该功能正在开发中...</div>
         </div>

@@ -9,7 +9,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver import DesiredCapabilities
 
 from usagipass.app import settings
 from usagipass.app.logging import log, Ansi
@@ -77,7 +76,6 @@ def _capture_screenshot(screenshot_path, url, target_width, target_height) -> st
     try:
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=chrome_options)
-        log(f"正在访问: {url}", Ansi.LCYAN)
 
         wait = WebDriverWait(driver, 10)
         wait.until(EC.visibility_of_all_elements_located((By.TAG_NAME, "img")))
@@ -87,11 +85,11 @@ def _capture_screenshot(screenshot_path, url, target_width, target_height) -> st
 
         driver.set_window_size(2 * target_width - body_width, 2 * target_height - body_height)
         driver.get_screenshot_as_file(str(screenshot_path))
-        log(f"截图成功: {screenshot_path}", Ansi.LGREEN)
+        log(f"Screenshot saved at: {screenshot_path}", Ansi.LGREEN)
 
         return str(screenshot_path)
     except Exception as e:
-        log(f"截图过程中出错: {repr(e)}", Ansi.RED)
+        log(f"Error capturing screenshot: {repr(e)}", Ansi.RED)
         return None
     finally:
         driver.quit()

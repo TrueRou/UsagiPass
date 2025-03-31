@@ -233,47 +233,29 @@ const downloadBatchScreenshots = async () => {
 
         const uuidsToDownload = scheduledCards.map(card => card.uuid);
 
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        document.body.appendChild(a);
-
-        notificationStore.info("正在下载", `正在下载卡片，预计需要${scheduledCards.length * 10}秒`);
-
-        const response = await userStore.axiosInstance.post('/cards/batch/screenshots',
-            uuidsToDownload,
-            { responseType: 'blob', timeout: 600000 }
+        await userStore.axiosInstance.post('/tasks/screenshots', uuidsToDownload);
+        notificationStore.success(
+            "任务已创建",
+            `请前往"任务管理"页面查看进度`
         );
 
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        a.href = url;
-        a.download = `cards_${new Date().toISOString().slice(0, 10)}.zip`;
-        a.click();
-
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-
-        notificationStore.success("下载成功", `已成功下载${scheduledCards.length}张卡面`);
-
+        // 更新状态为已确认
         try {
-            notificationStore.info("正在更新状态", "正在将已下载的卡片更新为已确认状态...");
-
             for (const card of scheduledCards) {
                 await userStore.axiosInstance.patch(`/cards/${card.uuid}`, {
                     status: CardStatus.CONFIRMED
                 });
             }
-
-            notificationStore.success(
-                "批量更新成功",
-                `${scheduledCards.length}张卡片已更新为"已确认"状态`
-            );
-
             await fetchCards();
         } catch (error: any) {
             notificationStore.error("批量更新失败", error.response?.data?.detail || "未知错误");
         }
+
+        // 可选：清除已选择的卡片
+        selectedCards.value.clear();
+
     } catch (error: any) {
-        notificationStore.error("下载失败", error.response?.data?.detail || "未知错误");
+        notificationStore.error("创建任务失败", error.response?.data?.detail || "未知错误");
     } finally {
         isDownloading.value = false;
     }
