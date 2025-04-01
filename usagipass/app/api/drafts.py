@@ -14,14 +14,14 @@ router = APIRouter(prefix="/drafts", tags=["drafts"])
 
 def require_phone(phone: str) -> str:
     if not phone.isdigit() or len(phone) != 11:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid phone number")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="无效的手机号码")
     return phone
 
 
 def require_draft(card: Card = Depends(require_card)) -> Card:
     if card.status == CardStatus.DRAFTED:
         return card
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card is not a draft")
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="卡片不是草稿状态")
 
 
 @router.get("", response_model=list[Card])
@@ -43,7 +43,7 @@ async def create_draft(phone: str = Depends(require_phone), session: Session = D
 async def delete_draft(draft: Card = Depends(require_draft), session: Session = Depends(require_session)):
     session.delete(draft)
     session.commit()
-    return {"message": "Draft has been deleted"}
+    return {"message": "草稿已删除"}
 
 
 @router.patch("/{uuid}/preference", dependencies=[Depends(require_draft)])
@@ -62,4 +62,4 @@ async def update_preference(
     )
     # there's no problem with the image ids, we can update the preference
     partial_update_model(session, preference, update_preference)
-    return {"message": "Preference has been updated"}
+    return {"message": "偏好设置已更新"}

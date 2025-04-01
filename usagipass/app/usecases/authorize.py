@@ -26,12 +26,12 @@ def verify_admin(token: Annotated[str, Depends(oauth2_scheme)], session: Session
             return user
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not an administrator",
+            detail="您不是管理员",
         )
     except jwt.InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="无效的身份验证凭据",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -43,7 +43,7 @@ def verify_user(token: Annotated[str, Depends(oauth2_scheme)], session: Session 
     except jwt.InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="无效的身份验证凭据",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

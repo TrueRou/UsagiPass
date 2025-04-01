@@ -64,7 +64,7 @@ async def update_prober_oauth():
         except (ConnectError, ReadTimeout):
             raise HTTPException(status_code=503, detail="无法连接到华立 OAuth 服务", headers={"WWW-Authenticate": "Bearer"})
         if not resp.headers.get("location"):
-            raise HTTPException(status_code=500, detail="华立 OAuth 服务返回不正确", headers={"WWW-Authenticate": "Bearer"})
+            raise HTTPException(status_code=500, detail="华立 OAuth 服务返回的响应不正确", headers={"WWW-Authenticate": "Bearer"})
         # example: https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx1fcecfcbd16803b1&redirect_uri=https%3A%2F%2Ftgk-wcaime.wahlap.com%2Fwc_auth%2Foauth%2Fcallback%2Fmaimai-dx%3Fr%3DINesnJ5e%26t%3D214115533&response_type=code&scope=snsapi_base&state=5E7AB78BF1B35471B7BF8DD69E6B50F4361818FA6E01FC#wechat_redirect
         return {"url": resp.headers["location"].replace("redirect_uri=https", "redirect_uri=http")}
 
@@ -95,4 +95,4 @@ async def update_prober_callback(
         except (ConnectError, ReadTimeout):
             raise HTTPException(status_code=503, detail="无法连接到华立服务器", headers={"WWW-Authenticate": "Bearer"})
         except TimeoutError:
-            raise HTTPException(status_code=400, detail="华立 OAuth 已过期", headers={"WWW-Authenticate": "Bearer"})
+            raise HTTPException(status_code=400, detail="华立 OAuth 已过期或无效", headers={"WWW-Authenticate": "Bearer"})

@@ -39,9 +39,7 @@ async def get_preferences_defaults(session: Session = Depends(require_session)):
     frame = session.get(Image, default_frame)
     passname = session.get(Image, default_passname)
     if None in [character, background, frame, passname]:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Default image not found in database, please contact the administrator"
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="数据库中未找到默认图片，请联系开发者")
     return PreferencePublic(
         character=ImagePublic.model_validate(character),
         background=ImagePublic.model_validate(background),

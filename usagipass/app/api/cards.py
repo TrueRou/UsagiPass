@@ -35,19 +35,19 @@ router = APIRouter(prefix="/cards", tags=["cards"])
 def require_card(uuid: str = Path(...), session: Session = Depends(require_session)) -> Card:
     if card := session.exec(select(Card).where(Card.uuid == uuid)).first():
         return card
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="卡片未找到")
 
 
 def require_card_scheduled(card: Card = Depends(require_card)) -> Card:
     if card.status >= CardStatus.SCHEDULED:
         return card
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card has not been scheduled")
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="卡片尚未安排")
 
 
 def require_preference(card: Card = Depends(require_card), session: Session = Depends(require_session)) -> CardPreference:
     if preference := session.get(CardPreference, card.uuid):
         return preference
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card has not been initialized")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="卡片尚未初始化")
 
 
 def require_card_account(card: Card = Depends(require_card_scheduled), session: Session = Depends(require_session)) -> CardAccount | None:
@@ -79,7 +79,7 @@ async def update_card(
 ):
     card.updated_at = datetime.utcnow()
     partial_update_model(session, card, updates)
-    return {"message": "Card has been updated"}
+    return {"message": "卡片已更新"}
 
 
 @router.get("/{uuid}/preference", response_model=PreferencePublic)
@@ -108,7 +108,7 @@ async def update_preference(
     )
 
     partial_update_model(session, preference, update_preference)
-    return {"message": "Preference has been updated"}
+    return {"message": "偏好设置已更新"}
 
 
 @router.post("/{uuid}/accounts")
@@ -118,13 +118,13 @@ async def create_account(
     session: Session = Depends(require_session),
 ):
     if card.status == CardStatus.ACTIVATED and card.account_id is not None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Card has already been bound to an account")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="卡片已经绑定过账号")
 
     if card.status >= CardStatus.SCHEDULED and card.account_id is None and qrcode is None:
         # user skip the activation process, and the card will not bind to any account
         card.status = CardStatus.ACTIVATED
         session.commit()
-        return {"message": "Card has been activated with null account"}
+        return {"message": "卡片已激活"}
 
     try:
         if card.status >= CardStatus.SCHEDULED:
@@ -136,16 +136,16 @@ async def create_account(
             card.status = CardStatus.ACTIVATED
             session.commit()
     except AimeServerError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid QR code or expired")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="二维码无效或已过期")
     except Exception as e:
         log(f"Failed to activate card of {card.id}: {repr(e)}", Ansi.LRED)
         session.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to activate card")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="激活卡片失败")
     try:
         await maimai.update_scores(account)  # away from try-except block
     except Exception as e:
         log(f"Failed to update scores of card {card.id}: {repr(e)}", Ansi.LRED)
-    return {"message": "Card account has been created"}
+    return {"message": "卡片账号已创建"}
 
 
 @router.patch("/{uuid}/accounts", response_model=CardScoreUpdateResult | None)
@@ -164,7 +164,7 @@ async def update_accounts(
             return result
         except Exception as e:
             log(f"Failed to update scores of card {card.id}: {repr(e)}", Ansi.LRED)
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update scores")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="更新分数失败")
 
 
 @router.get("/{uuid}/profile", response_model=CardProfile)

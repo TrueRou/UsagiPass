@@ -24,4 +24,4 @@ def preference_in_font(preference: PreferencePublic) -> tuple[bool, list[str]]:
 def check_preference_throw(preference: PreferencePublic) -> None:
     legal, lacks = preference_in_font(preference)
     if not legal:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Missing characters: {', '.join(lacks)} in font")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"字体中缺少以下字符: {', '.join(lacks)}")

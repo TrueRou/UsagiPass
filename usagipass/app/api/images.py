@@ -25,9 +25,9 @@ def require_image(image_id: uuid.UUID, session: Session = Depends(require_sessio
     image = session.get(Image, str(image_id))
     image_path = images_folder / f"{image_id}.webp"
     if image is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image is not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="图片未找到")
     if not image_path.exists():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file is not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="图片文件未找到")
     return image
 
 
@@ -47,7 +47,7 @@ async def upload_image(
     session: Session = Depends(require_session),
 ):
     if kind not in image_kinds.keys():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid kind of image")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="图片种类无效")
     image_bytes = await file.read()
     try:
         file_name = str(uuid.uuid4())
@@ -58,9 +58,9 @@ async def upload_image(
         add_model(session, db_image)
         return db_image
     except PIL.UnidentifiedImageError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to load image file")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="无法加载图片文件")
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Irregular width or height")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="图片宽度或高度不规范")
 
 
 @router.get("/{image_id}")
@@ -76,12 +76,12 @@ async def delete_image(
     image: Image = Depends(require_image),
 ):
     if image.uploaded_by != user.username:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this image")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="您不是此图片的所有者")
     session.delete(image)
     session.commit()
     image_path = images_folder / f"{image.id}.png"
     image_path.unlink(missing_ok=True)
-    return {"message": "Image has been deleted"}
+    return {"message": "图片已删除"}
 
 
 @router.patch("/{image_id}")
@@ -92,10 +92,10 @@ async def patch_image(
     image: Image = Depends(require_image),
 ):
     if image.uploaded_by != user.username:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this image")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="您不是此图片的所有者")
     image.name = name
     session.commit()
-    return {"message": "Image has been renamed"}
+    return {"message": "图片已重命名"}
 
 
 @router.get("/{image_id}/related", response_model=list[ImagePublic])
@@ -115,7 +115,7 @@ async def get_image_thumbnail(image_id: uuid.UUID):
     image_path = images_folder / f"{image_id}.webp"
     if not thumbnail_path.exists():
         if not image_path.exists():
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file is not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="图片文件未找到")
         thumbnail = PIL.Image.open(image_path)
         thumbnail.thumbnail((256, 256))
         thumbnail.save(thumbnail_path, "webp", optimize=True, quality=80)

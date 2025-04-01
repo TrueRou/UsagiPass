@@ -30,7 +30,7 @@ async def get_task(
 ):
     if (task := session.get(Task, task_id)) and task.created_by == user.username:
         return task
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="任务未找到")
 
 
 @router.get("/{task_id}/download", dependencies=[Depends(verify_admin)])
@@ -41,9 +41,9 @@ async def download_task_result(
 ):
     task = session.get(Task, task_id)
     if not task or task.created_by != user.username:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="任务未找到")
     if task.status != TaskStatus.COMPLETED or not task.result_path:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Task result not available")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="任务结果不可用")
     return FileResponse(task.result_path, media_type="application/zip", filename=f"task_{task.id}.zip")
 
 
@@ -56,7 +56,7 @@ async def create_screenshots_task(
     cards = session.exec(select(Card).where(Card.uuid.in_(uuids))).all()
     if len(cards) != len(uuids):
         lost_uuids = set(uuids) - {card.uuid for card in cards}
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Cards are not found: {', '.join(lost_uuids)}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"未找到卡片: {', '.join(lost_uuids)}")
     return await scheduler.create_screenshot_task(uuids, user.username)
 
 
@@ -68,10 +68,10 @@ async def delete_task(
 ):
     task = session.get(Task, task_id)
     if not task or task.created_by != user.username:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="任务未找到")
 
     if task.status != TaskStatus.COMPLETED:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only completed tasks can be deleted")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="只有已完成的任务可以删除")
 
     if task.result_path and os.path.exists(task.result_path):
         Path(task.result_path).unlink(missing_ok=True)
@@ -79,4 +79,4 @@ async def delete_task(
     session.delete(task)
     session.commit()
 
-    return {"message": "Task deleted successfully"}
+    return {"message": "任务删除成功"}

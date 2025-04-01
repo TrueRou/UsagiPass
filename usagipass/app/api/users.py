@@ -50,9 +50,9 @@ async def update_preference(
 ):
     db_preference = session.get(UserPreference, user.username)
     if not db_preference:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User has not set up for his preference")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户尚未设置其偏好")
     if db_preference.username != user.username:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this preference")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="您不是该偏好设置的所有者")
     update_preference = PreferenceUpdate(
         **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
         character_id=preference.character.id if preference.character else None,

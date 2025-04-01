@@ -15,9 +15,7 @@ def apply_preference(preferences: PreferencePublic, db_preferences: UserPreferen
     frame = session.get(Image, db_preferences.frame_id or default_frame)
     passname = session.get(Image, db_preferences.passname_id or default_passname)
     if None in [character, background, frame, passname]:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Default image not found in database, please contact the administrator"
-        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="默认图片未在数据库中找到，请联系开发者")
     preferences.character = ImagePublic.model_validate(character)
     preferences.background = ImagePublic.model_validate(background)
     preferences.frame = ImagePublic.model_validate(frame)
