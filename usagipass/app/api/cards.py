@@ -1,8 +1,6 @@
 import uuid
 from datetime import datetime, timedelta
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Path, status, Body
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlmodel import Session, select
 from maimai_py import MaimaiScores, MaimaiSongs, Score as MpyScore
 from maimai_py.exceptions import AimeServerError
@@ -26,10 +24,9 @@ from usagipass.app.models import (
     Score,
     ScorePublic,
 )
-from usagipass.app.usecases import maimai
+from usagipass.app.usecases import fonts, maimai
 from usagipass.app.usecases.authorize import verify_admin
 from usagipass.app.usecases.accounts import apply_preference
-from usagipass.app.usecases import browser
 
 
 router = APIRouter(prefix="/cards", tags=["cards"])
@@ -101,6 +98,7 @@ async def update_preference(
     preference: CardPreference = Depends(require_preference),
     session: Session = Depends(require_session),
 ):
+    fonts.check_preference_throw(updates)
     update_preference = PreferenceUpdate(
         **updates.model_dump(exclude={"character", "background", "frame", "passname"}),
         character_id=updates.character.id if updates.character else None,

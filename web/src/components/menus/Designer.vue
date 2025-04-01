@@ -45,19 +45,21 @@ const openPhoneDialog = () => {
 }
 
 const createDraft = async () => {
-    if (isAdmin.value) {
-        await cardStore.createCard();
-        router.push({ name: 'admin' });
-        notificationStore.success("创建成功", "已成功创建一张卡片，卡片订单已自动付款");
-        return;
-    }
-    else if (matchPhoneNumber(newDraftPhone.value)) {
-        const card = await draftStore.createDraft(newDraftPhone.value);
-        await draftStore.patchPreferences(card.uuid, preferences.value!);
-        showDialog.value = false;
-        router.replace({ name: "designer", params: { uuid: card.uuid } });
-        notificationStore.success("创建成功", "您的卡面已创建\n在订单确认前，您可以随时修改卡面设置");
-        router.push({ name: 'drafts', state: { phoneNumber: newDraftPhone.value } });
+    if (await draftStore.testPreferences(preferences.value!)) {
+        if (isAdmin.value) {
+            await cardStore.createCard();
+            router.push({ name: 'admin' });
+            notificationStore.success("创建成功", "已成功创建一张卡片，卡片订单已自动付款");
+            return;
+        }
+        else if (matchPhoneNumber(newDraftPhone.value)) {
+            const card = await draftStore.createDraft(newDraftPhone.value);
+            await draftStore.patchPreferences(card.uuid, preferences.value!);
+            showDialog.value = false;
+            router.replace({ name: "designer", params: { uuid: card.uuid } });
+            notificationStore.success("创建成功", "您的卡面已创建\n在订单确认前，您可以随时修改卡面设置");
+            router.push({ name: 'drafts', state: { phoneNumber: newDraftPhone.value } });
+        }
     }
 }
 

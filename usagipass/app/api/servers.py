@@ -3,7 +3,7 @@ from sqlmodel import Session, or_, select
 
 from usagipass.app.models import ImagePublic, PreferencePublic, ServerMessage, Image, User, image_kinds
 from usagipass.app.database import require_session
-from usagipass.app.usecases import authorize
+from usagipass.app.usecases import authorize, fonts
 from usagipass.app.settings import maimai_version, server_motd, author_motd
 from usagipass.app.settings import default_background, default_character, default_frame, default_passname
 
@@ -31,8 +31,8 @@ async def get_images(user: User | None = Depends(authorize.verify_user_optional)
         return session.exec(clause).all()
 
 
-@router.get("/defaults", response_model=PreferencePublic)
-async def get_defaults(session: Session = Depends(require_session)):
+@router.get("/preferences/defaults", response_model=PreferencePublic)
+async def get_preferences_defaults(session: Session = Depends(require_session)):
     # we need to get the image objects from the database
     character = session.get(Image, default_character)
     background = session.get(Image, default_background)
@@ -48,3 +48,8 @@ async def get_defaults(session: Session = Depends(require_session)):
         frame=ImagePublic.model_validate(frame),
         passname=ImagePublic.model_validate(passname),
     )
+
+
+@router.post("/preferences/test")
+def post_preferences_tests(updates: PreferencePublic):
+    fonts.check_preference_throw(updates)

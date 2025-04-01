@@ -6,6 +6,7 @@ from usagipass.app import database
 from usagipass.app.api.cards import require_card, require_preference
 from usagipass.app.database import partial_update_model, require_session
 from usagipass.app.models import Card, CardPreference, CardStatus, PreferencePublic, PreferenceUpdate
+from usagipass.app.usecases import fonts
 
 
 router = APIRouter(prefix="/drafts", tags=["drafts"])
@@ -51,6 +52,7 @@ async def update_preference(
     preference: CardPreference = Depends(require_preference),
     session: Session = Depends(require_session),
 ):
+    fonts.check_preference_throw(updates)
     update_preference = PreferenceUpdate(
         **updates.model_dump(exclude={"character", "background", "frame", "passname", "simplified_code"}),
         character_id=updates.character.id if updates.character else None,

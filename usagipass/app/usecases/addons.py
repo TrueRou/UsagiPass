@@ -2,7 +2,6 @@ from datetime import datetime
 from mitmproxy.http import HTTPFlow, Response
 
 from usagipass.app import settings
-from usagipass.app.logging import Ansi, log
 
 
 class WechatWahlapAddon:
