@@ -75,6 +75,29 @@ const activateCard = async () => {
             </div>
         </div>
 
+        <!-- 卡片模式设置 -->
+        <div class="w-full mt-3 mb-3 px-4">
+            <div class="bg-gray-100 rounded p-3 border border-gray-300">
+                <h2 class="font-bold text-lg mb-2 text-blue-600">卡片模式</h2>
+
+                <div class="mb-3">
+                    <p class="text-gray-700 text-sm mb-2">
+                        您可以修改卡片的NFC模式以适应不同的设备环境。快速模式针对部分浏览器优化，兼容模式适用于所有支持NFC的设备。
+                    </p>
+                    <p class="text-gray-500 text-xs">
+                        提示：若您的卡片在某些设备上无法正常使用，可尝试切换模式。
+                    </p>
+                </div>
+
+                <div class="flex justify-center">
+                    <RouterLink to="/nfc"
+                        class="bg-indigo-500 text-white font-bold py-2 px-4 rounded hover:bg-indigo-600 inline-block w-full text-center">
+                        设置卡片模式
+                    </RouterLink>
+                </div>
+            </div>
+        </div>
+
         <!-- 激活对话框 -->
         <Prompt v-model="activationCode" :show="showActivationPrompt" text="请输入卡片激活码" placeholder="输入二维码扫描内容"
             @confirm="confirmActivation" @cancel="cancelActivation">

@@ -6,7 +6,7 @@ import { CardStatus, type Card, type Preference } from '@/types';
 import { computed, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DXBaseView from '@/views/DXBaseView.vue';
-import { getShortUuid, formatDate, formatDateDetailed } from '@/utils';
+import { getShortUuid, formatDate, formatDateDetailed, writeUuidToNfc } from '@/utils';
 import { CardStatusMap } from '@/types';
 import Prompt from '@/components/widgets/Prompt.vue';
 
@@ -594,7 +594,7 @@ fetchCards();
                                 删除
                             </button>
                             <!-- 写卡按钮 -->
-                            <button v-if="card.status === CardStatus.CONFIRMED"
+                            <button v-if="card.status === CardStatus.CONFIRMED" @click="writeUuidToNfc(card.uuid)"
                                 class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 30 30"
                                     fill="currentColor" stroke="currentColor" stroke-width="0.6">

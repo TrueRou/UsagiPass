@@ -43,7 +43,7 @@ const router = createRouter({
                 {
                     path: 'login',
                     name: 'login',
-                    component: () => import('../components/menus/Login.vue')
+                    component: () => import('../components/menus/Login.vue'),
                 },
                 {
                     path: 'preferences/pass',
@@ -54,21 +54,20 @@ const router = createRouter({
                 {
                     path: 'preferences/card',
                     name: 'preferencesCard',
-                    meta: { requireAuth: true },
                     component: () => import('../components/menus/PreferencesCard.vue'),
                 },
                 {
                     path: 'update',
                     name: 'update',
                     meta: { requireAuth: true },
-                    component: () => import('../components/menus/Update.vue')
+                    component: () => import('../components/menus/Update.vue'),
                 },
                 {
                     path: 'bind/:server',
                     name: 'bind',
                     props: true,
                     meta: { requireAuth: true },
-                    component: () => import('../components/menus/Bind.vue')
+                    component: () => import('../components/menus/Bind.vue'),
                 },
                 {
                     path: 'gallery/:kind',
@@ -87,15 +86,20 @@ const router = createRouter({
                 {
                     path: 'drafts',
                     name: 'drafts',
-                    component: () => import('../components/menus/Drafts.vue')
+                    component: () => import('../components/menus/Drafts.vue'),
+                },
+                {
+                    path: 'nfc',
+                    name: 'nfcMode',
+                    component: () => import('../components/menus/NFCMode.vue'),
                 },
             ]
         },
         {
             path: '/admin',
             name: 'admin',
+            meta: { requiresAuth: true, requiresAdmin: true },
             component: () => import('../views/AdminView.vue'),
-            meta: { requiresAuth: true, requiresAdmin: true }
         },
         {
             path: '/:pathMatch(.*)*',
