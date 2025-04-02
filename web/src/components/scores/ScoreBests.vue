@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { Bests } from '@/types';
+import { ViewMode, TileDisplayMode } from '@/types';
 import ScoreList from './ScoreList.vue';
 
 const props = withDefaults(defineProps<{
@@ -9,6 +10,17 @@ const props = withDefaults(defineProps<{
 }>(), {
     isLoading: false
 });
+
+const currentViewMode = ref<ViewMode>(ViewMode.LIST);
+const tileDisplayMode = ref<TileDisplayMode>(TileDisplayMode.RATING);
+
+function toggleViewMode(mode: ViewMode) {
+    currentViewMode.value = mode;
+}
+
+function toggleTileDisplayMode(mode: TileDisplayMode) {
+    tileDisplayMode.value = mode;
+}
 
 const stats = computed(() => {
     const data = [];
@@ -70,16 +82,62 @@ const stats = computed(() => {
 
         <!-- B35成绩展示 -->
         <div v-if="'b35_scores' in bests && bests.b35_scores.length" class="mb-6">
-            <h3 class="text-xl font-bold mb-1 dark:text-white">Best 35</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">旧版本最佳曲目</p>
-            <ScoreList :scores="bests.b35_scores" />
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <h3 class="text-xl font-bold mb-1 dark:text-white">Best 35</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">旧版本最佳曲目</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button @click="toggleViewMode(ViewMode.LIST)" class="p-2 rounded"
+                        :class="[currentViewMode === ViewMode.LIST ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-gray-300']">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <button @click="toggleViewMode(ViewMode.TILE)" class="p-2 rounded"
+                        :class="[currentViewMode === ViewMode.TILE ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-gray-300']">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <ScoreList :scores="bests.b35_scores" :view-mode="currentViewMode" :display-mode="tileDisplayMode"
+                @toggle-display-mode="toggleTileDisplayMode" />
         </div>
 
         <!-- B15成绩展示 -->
         <div v-if="'b15_scores' in bests && bests.b15_scores.length" class="mb-6">
-            <h3 class="text-xl font-bold mb-1 dark:text-white">Best 15</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">现版本最佳曲目</p>
-            <ScoreList :scores="bests.b15_scores" />
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <h3 class="text-xl font-bold mb-1 dark:text-white">Best 15</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">现版本最佳曲目</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button @click="toggleViewMode(ViewMode.LIST)" class="p-2 rounded"
+                        :class="[currentViewMode === ViewMode.LIST ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-gray-300']">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <button @click="toggleViewMode(ViewMode.TILE)" class="p-2 rounded"
+                        :class="[currentViewMode === ViewMode.TILE ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-gray-300']">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <ScoreList :scores="bests.b15_scores" :view-mode="currentViewMode" :display-mode="tileDisplayMode"
+                @toggle-display-mode="toggleTileDisplayMode" />
         </div>
     </div>
 </template>

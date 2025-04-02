@@ -27,6 +27,22 @@ enum LevelIndex {
     ReMASTER = 4
 }
 
+enum ViewMode {
+    LIST = 'list',
+    TILE = 'tile',
+    // 未来可能添加的其他视图模式
+    // COMPACT = 'compact',
+    // DETAIL = 'detail'
+}
+
+enum TileDisplayMode {
+    RATING = "rating",      // 评级 (SSS+, SS+等)
+    ACHIEVEMENT = "achievement", // 达成率
+    FC = "fc",              // Full Combo 状态
+    FS = "fs",              // Full Sync 状态
+    DX_RATING = "dx_rating" // DX评分
+}
+
 enum FCType {
     APP = 0,
     AP = 1,
@@ -213,5 +229,5 @@ const TaskStatusMap = {
     [TaskStatus.FAILED]: { tag: '失败', color: 'text-red-500 font-medium' }
 };
 
-export { Privilege, AccountServer, CardStatus, CardStatusMap, TaskStatusMap, TaskStatus };
+export { Privilege, AccountServer, CardStatus, CardStatusMap, TaskStatusMap, TaskStatus, ViewMode, TileDisplayMode };
 export type { Kind, Preference, UserAccount, UserProfile, ServerMessage, CrawlerResult, Score, Card, Bests, CardProfile, CardAccount, Image, FCType, FSType, RateType, SongType, LevelIndex, CardScoreUpdateResult, CardStatusEntities, Task };
