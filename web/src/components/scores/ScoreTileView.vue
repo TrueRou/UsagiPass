@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { Score } from '@/types';
-import { TileDisplayMode } from '@/types';
+import type { Score, FCType, FSType } from '@/types';
+import { TileDisplayMode, FCTypeMap, FSTypeMap } from '@/types';
 
 const props = defineProps<{
     scores: Score[];
@@ -47,6 +47,18 @@ const gridClass = computed(() => {
     return 'grid grid-cols-5 gap-2';
 });
 
+// 将FC状态转换为显示文本
+const getFCText = (fc: FCType | null) => {
+    if (fc === null) return 'NO FC';
+    return FCTypeMap[fc as FCType] || 'NO FC';
+};
+
+// 将FS状态转换为显示文本
+const getFSText = (fs: FSType | null) => {
+    if (fs === null) return 'NO FS';
+    return FSTypeMap[fs as FSType] || 'NO FS';
+};
+
 // 获取显示内容
 function getDisplayContent(score: Score) {
     switch (currentDisplayMode.value) {
@@ -55,9 +67,9 @@ function getDisplayContent(score: Score) {
         case TileDisplayMode.ACHIEVEMENT:
             return score.achievements ? `${score.achievements}%` : '-';
         case TileDisplayMode.FC:
-            return score.fc || 'NO FC';
+            return getFCText(score.fc);
         case TileDisplayMode.FS:
-            return score.fs || 'NO FS';
+            return getFSText(score.fs);
         case TileDisplayMode.DX_RATING:
             return `DX ${score.dx_rating || 0}`;
         default:

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { Score } from '@/types';
+import type { Score, FCType, FSType } from '@/types';
+import { FCTypeMap, FSTypeMap } from '@/types';
 
 const props = defineProps<{
     score: Score;
@@ -53,6 +54,18 @@ const songTypeLabel = computed(() => {
 
     return types[props.score.type] || { name: '标准', color: 'bg-blue-500' };
 });
+
+// 将FC状态转换为显示文本
+const getFCText = (fc: FCType | null) => {
+    if (fc === null) return '无';
+    return FCTypeMap[fc as FCType] || '无';
+};
+
+// 将FS状态转换为显示文本
+const getFSText = (fs: FSType | null) => {
+    if (fs === null) return '无';
+    return FSTypeMap[fs as FSType] || '无';
+};
 </script>
 
 <template>
@@ -89,7 +102,7 @@ const songTypeLabel = computed(() => {
                     <span class="font-bold dark:text-white">
                         {{ parseInt(String(props.score.achievements)) }}
                         <span class="text-xs">.{{ (String(props.score.achievements).split(".")[1] || "0").padEnd(4, "0")
-                        }}%</span>
+                            }}%</span>
                     </span>
                     <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">DX: {{ props.score.dx_rating }}</span>
                 </div>

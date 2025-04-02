@@ -229,5 +229,40 @@ const TaskStatusMap = {
     [TaskStatus.FAILED]: { tag: '失败', color: 'text-red-500 font-medium' }
 };
 
-export { Privilege, AccountServer, CardStatus, CardStatusMap, TaskStatusMap, TaskStatus, ViewMode, TileDisplayMode };
+// FC状态映射
+const FCTypeMap: Record<FCType, string> = {
+    [FCType.APP]: 'AP+',
+    [FCType.AP]: 'AP',
+    [FCType.FCP]: 'FC+',
+    [FCType.FC]: 'FC'
+};
+
+// FS状态映射
+const FSTypeMap: Record<FSType, string> = {
+    [FSType.SYNC]: 'SYNC',
+    [FSType.FS]: 'FS',
+    [FSType.FSP]: 'FS+',
+    [FSType.FSD]: 'FSD',
+    [FSType.FSDP]: 'FSD+'
+};
+
+// 成绩等级映射
+const RateTypeMap: Record<RateType, string> = {
+    [RateType.SSSP]: 'SSS+',
+    [RateType.SSS]: 'SSS',
+    [RateType.SSP]: 'SS+',
+    [RateType.SS]: 'SS',
+    [RateType.SP]: 'S+',
+    [RateType.S]: 'S',
+    [RateType.AAA]: 'AAA',
+    [RateType.AA]: 'AA',
+    [RateType.A]: 'A',
+    [RateType.BBB]: 'BBB',
+    [RateType.BB]: 'BB',
+    [RateType.B]: 'B',
+    [RateType.C]: 'C',
+    [RateType.D]: 'D'
+};
+
+export { Privilege, AccountServer, CardStatus, CardStatusMap, TaskStatusMap, TaskStatus, ViewMode, TileDisplayMode, FCTypeMap, FSTypeMap, RateTypeMap };
 export type { Kind, Preference, UserAccount, UserProfile, ServerMessage, CrawlerResult, Score, Card, Bests, CardProfile, CardAccount, Image, FCType, FSType, RateType, SongType, LevelIndex, CardScoreUpdateResult, CardStatusEntities, Task };

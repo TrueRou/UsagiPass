@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { Score } from '@/types';
-import { ViewMode, TileDisplayMode } from '@/types';
+import type { Score, FCType, FSType } from '@/types';
+import { ViewMode, TileDisplayMode, FCTypeMap, FSTypeMap } from '@/types';
 import ScoreCard from './ScoreCard.vue';
 import ScoreTileView from './ScoreTileView.vue';
 
@@ -50,6 +50,18 @@ const displayModeOptions = [
 function setTileDisplayMode(mode: TileDisplayMode) {
     emit('toggle-display-mode', mode);
 }
+
+// 将FC状态转换为显示文本
+const getFCText = (fc: FCType | null) => {
+    if (fc === null) return '无';
+    return FCTypeMap[fc as FCType] || '无';
+};
+
+// 将FS状态转换为显示文本
+const getFSText = (fs: FSType | null) => {
+    if (fs === null) return '无';
+    return FSTypeMap[fs as FSType] || '无';
+};
 </script>
 
 <template>
@@ -120,12 +132,12 @@ function setTileDisplayMode(mode: TileDisplayMode) {
 
                             <div class="border rounded p-2 dark:border-gray-700 dark:bg-gray-700">
                                 <p class="text-xs text-gray-500 dark:text-gray-300">完美连击</p>
-                                <p class="font-bold dark:text-white">{{ selectedScore.fc || '无' }}</p>
+                                <p class="font-bold dark:text-white">{{ getFCText(selectedScore.fc) }}</p>
                             </div>
 
                             <div class="border rounded p-2 dark:border-gray-700 dark:bg-gray-700">
                                 <p class="text-xs text-gray-500 dark:text-gray-300">同步率</p>
-                                <p class="font-bold dark:text-white">{{ selectedScore.fs || '无' }}</p>
+                                <p class="font-bold dark:text-white">{{ getFSText(selectedScore.fs) }}</p>
                             </div>
                         </div>
                     </div>
