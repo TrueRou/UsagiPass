@@ -94,9 +94,7 @@ function setTileDisplayMode(mode: TileDisplayMode) {
                     <div class="p-4">
                         <div class="mb-4 flex items-start">
                             <img :src="`https://assets2.lxns.net/maimai/jacket/${selectedScore.song_id}.png`"
-                                class="w-16 h-16 mr-3 rounded object-cover"
-                                @error="$event.target.src = 'https://via.placeholder.com/80?text=No+Image'"
-                                alt="歌曲封面" />
+                                class="w-16 h-16 mr-3 rounded object-cover" alt="歌曲封面" />
                             <div>
                                 <h3 class="font-bold dark:text-white">{{ selectedScore.song_name }}</h3>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">难度: {{ selectedScore.level }}</p>

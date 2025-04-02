@@ -1,4 +1,4 @@
-name: UsagiPass Frontend CI
+name: UsagiPass Frontend Localhost CI
 
 env:
   VITE_URL: http://127.0.0.1:8000

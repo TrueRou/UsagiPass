@@ -61,8 +61,7 @@ const songTypeLabel = computed(() => {
 
         <!-- 背景图片 -->
         <div class="absolute inset-0 opacity-25 dark:opacity-15">
-            <img v-if="songJacketUrl" :src="songJacketUrl" alt="歌曲封面" class="w-full h-full object-cover"
-                @error="$event.target.style.display = 'none'" />
+            <img v-if="songJacketUrl" :src="songJacketUrl" alt="歌曲封面" class="w-full h-full object-cover" />
             <div v-show="!songJacketUrl" class="w-full h-full" :style="{ backgroundColor: cardBackgroundColor }"></div>
         </div>
 
@@ -70,8 +69,7 @@ const songTypeLabel = computed(() => {
             <!-- 歌曲封面大方块 -->
             <div
                 class="w-14 h-14 flex-shrink-0 rounded-sm border border-gray-300 dark:border-gray-600 overflow-hidden mr-2">
-                <img v-if="songJacketUrl" :src="songJacketUrl" alt="歌曲封面" class="w-full h-full object-cover"
-                    @error="$event.target.style.display = 'none'" />
+                <img v-if="songJacketUrl" :src="songJacketUrl" alt="歌曲封面" class="w-full h-full object-cover" />
                 <div v-show="!songJacketUrl" class="w-full h-full" :style="{ backgroundColor: cardBackgroundColor }">
                 </div>
             </div>
@@ -91,7 +89,7 @@ const songTypeLabel = computed(() => {
                     <span class="font-bold dark:text-white">
                         {{ parseInt(String(props.score.achievements)) }}
                         <span class="text-xs">.{{ (String(props.score.achievements).split(".")[1] || "0").padEnd(4, "0")
-                            }}%</span>
+                        }}%</span>
                     </span>
                     <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">DX: {{ props.score.dx_rating }}</span>
                 </div>

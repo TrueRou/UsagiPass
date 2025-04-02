@@ -10,7 +10,7 @@ const props = defineProps<{
 
 // 获取成绩难度颜色
 function getDifficultyColor(levelIndex: number): string {
-    const colors = {
+    const colors: { [key: number]: string } = {
         0: '#6fe163', // BASIC
         1: '#ffd653', // ADVANCED
         2: '#ff7b7b', // EXPERT
