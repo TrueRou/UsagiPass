@@ -1,37 +1,4 @@
-import { useNotificationStore } from "./stores/notification";
-
-const matchPhoneNumber = (phoneNumber: string) => {
-    const notificationStore = useNotificationStore();
-    const re = /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/;
-    const result = re.test(phoneNumber);
-    if (!result) notificationStore.warning("格式错误", "请输入正确的手机号码");
-    return result;
-}
-
-const getShortUuid = (uuid: string) => {
-    return uuid.substring(0, 8);
-};
-
-const formatDate = (dateString: string) => {
-    const date = new Date(dateString + "Z");
-    return date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    });
-};
-
-const formatDateDetailed = (dateString: string) => {
-    const date = new Date(dateString + "Z");
-    return date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
-};
+import { useNotificationStore } from "../stores/notification";
 
 const ensureNfcSupport = () => {
     const notificationStore = useNotificationStore();
@@ -42,9 +9,9 @@ const ensureNfcSupport = () => {
     }
 
     return new (window as any).NDEFReader();
-}
+};
 
-const readUuidFromNfc = async (): Promise<string | null> => {
+export const readUuidFromNfc = async (): Promise<string | null> => {
     const notificationStore = useNotificationStore();
     const ndef = ensureNfcSupport();
     if (!ndef) return null;
@@ -73,9 +40,9 @@ const readUuidFromNfc = async (): Promise<string | null> => {
         notificationStore.error("读取失败", error instanceof Error ? error.message : "未知错误");
         return null;
     }
-}
+};
 
-const writeUuidToNfc = async (uuid: string, mode: ("normal" | "fast") = "fast"): Promise<boolean> => {
+export const writeUuidToNfc = async (uuid: string, mode: ("normal" | "fast") = "fast"): Promise<boolean> => {
     const notificationStore = useNotificationStore();
     const ndef = ensureNfcSupport();
     if (!ndef) return false;
@@ -111,7 +78,7 @@ const writeUuidToNfc = async (uuid: string, mode: ("normal" | "fast") = "fast"):
                 data: new TextEncoder().encode("com.android.browser")
             },
         ]
-    }
+    };
 
     try {
         notificationStore.info("写入中", "请将NFC卡片靠近手机背面");
@@ -123,4 +90,3 @@ const writeUuidToNfc = async (uuid: string, mode: ("normal" | "fast") = "fast"):
         return false;
     }
 };
-export { matchPhoneNumber, getShortUuid, formatDate, formatDateDetailed, readUuidFromNfc, writeUuidToNfc };

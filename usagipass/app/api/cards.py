@@ -179,10 +179,11 @@ async def get_profile(
             ScorePublic(
                 **(Score.from_mpy(score, account.id).model_dump()),
                 song_name=song.title,
-                level=song.get_difficulty(score.type, score.level_index).level,
+                level=diff.level,
+                level_value=diff.level_value,
             )
             for score in mpy_scores
-            if (song := songs.by_id(score.id))
+            if (song := songs.by_id(score.id)) and (diff := song.get_difficulty(score.type, score.level_index))
         ]
 
     # prepare the preference

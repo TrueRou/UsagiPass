@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import type { Bests } from '@/types';
 import { ViewMode, TileDisplayMode } from '@/types';
-import ScoreList from './ScoreList.vue';
+import ScoreList from './components/ScoreList.vue';
 
 const props = withDefaults(defineProps<{
     bests: Bests;
@@ -47,11 +47,11 @@ const stats = computed(() => {
 <template>
     <div>
         <!-- 评级统计区段 -->
-        <div class="bg-white dark:bg-gray-800 mt-4 mb-6 p-3 rounded-md">
+        <div class="bg-white dark:bg-gray-800 mt-4 mb-6 rounded-md">
             <div class="flex justify-between items-center mb-4">
                 <div>
                     <h3 class="text-xl font-bold mb-1 dark:text-white">{{ Math.floor(props.bests.all_rating * 100) / 100
-                    }}</h3>
+                        }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">DX Rating 总和</p>
                 </div>
                 <div v-if="props.isLoading" class="animate-spin mr-2 text-gray-700 dark:text-gray-300">

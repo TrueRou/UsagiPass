@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { readUuidFromNfc, writeUuidToNfc } from '@/utils';
+import { readUuidFromNfc, writeUuidToNfc } from '@/utils/nfcUtils';
 import { useNotificationStore } from '@/stores/notification';
 import { useRouter } from 'vue-router';
 
@@ -79,7 +79,7 @@ const resetState = () => {
                         </div>
                     </div>
 
-                    <!-- NFC动画 - 使用内联SVG -->
+                    <!-- NFC动画 -->
                     <div class="flex justify-center mb-8">
                         <!-- 初始状态 - 手机NFC位置 -->
                         <div v-if="scanStep === 1" class="w-64 h-64 relative">
@@ -100,7 +100,7 @@ const resetState = () => {
                             </svg>
                         </div>
 
-                        <!-- 扫描状态 - 带动画效果 -->
+                        <!-- 扫描状态 -->
                         <div v-else-if="scanStep === 2" class="w-64 h-64 relative nfc-scan-container">
                             <svg viewBox="0 0 200 200" class="w-full h-full">
                                 <!-- 手机外形 -->
@@ -189,7 +189,7 @@ const resetState = () => {
                                         repeatCount="indefinite" />
                                 </circle>
 
-                                <!-- NFC卡 - 带振动效果 -->
+                                <!-- NFC卡振动效果 -->
                                 <g>
                                     <animateTransform attributeName="transform" type="translate"
                                         values="0,0; 1,1; 0,-1; -1,0; 0,0" dur="0.5s" repeatCount="indefinite" />
@@ -300,7 +300,6 @@ const resetState = () => {
 </template>
 
 <style scoped>
-/* 保留必要的CSS样式，移除了与外部SVG相关的样式 */
 .nfc-scan-container,
 .nfc-write-container {
     position: relative;

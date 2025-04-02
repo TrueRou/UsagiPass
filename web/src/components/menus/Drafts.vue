@@ -5,7 +5,7 @@ import { computed, onActivated, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DXBaseView from '@/views/DXBaseView.vue';
 import { useNotificationStore } from '@/stores/notification';
-import { matchPhoneNumber, getShortUuid, formatDate, formatDateDetailed } from '@/utils';
+import { matchPhoneNumber, getShortUuid, formatDateDetailed } from '@/utils/formatUtils';
 import { CardStatusMap, CardStatus } from '@/types';
 import Prompt from '@/components/widgets/Prompt.vue';
 

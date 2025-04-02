@@ -231,6 +231,7 @@ class ScorePublic(SQLModel):
     song_name: str
     level: str
     level_index: LevelIndex
+    level_value: float
     achievements: float | None
     fc: FCType | None
     fs: FSType | None

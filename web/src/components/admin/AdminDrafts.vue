@@ -6,7 +6,8 @@ import { CardStatus, type Card, type Preference } from '@/types';
 import { computed, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import DXBaseView from '@/views/DXBaseView.vue';
-import { getShortUuid, formatDate, formatDateDetailed, writeUuidToNfc } from '@/utils';
+import { getShortUuid, formatDate, formatDateDetailed } from '@/utils/formatUtils';
+import { writeUuidToNfc } from '@/utils/nfcUtils';
 import { CardStatusMap } from '@/types';
 import Prompt from '@/components/widgets/Prompt.vue';
 

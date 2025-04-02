@@ -9,7 +9,7 @@ import { useUserStore } from '@/stores/user';
 import { Privilege, type Preference, type Kind, type Card } from '@/types';
 import DXBaseView from '@/views/DXBaseView.vue';
 import Prompt from '../widgets/Prompt.vue';
-import { matchPhoneNumber } from '@/utils';
+import { matchPhoneNumber } from '@/utils/formatUtils';
 import { useCardStore } from '@/stores/card';
 
 

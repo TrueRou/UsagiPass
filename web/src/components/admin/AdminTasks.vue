@@ -2,7 +2,7 @@
 import { useUserStore } from '@/stores/user';
 import { useNotificationStore } from '@/stores/notification';
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { formatDateDetailed, getShortUuid } from '@/utils';
+import { formatDateDetailed, getShortUuid } from '@/utils/formatUtils';
 import type { Task } from '@/types';
 import { TaskStatus, TaskStatusMap } from '@/types';
 
@@ -18,7 +18,6 @@ const taskToDelete = ref<string | null>(null);
 const dateFilter = ref('all');
 const statusFilter = ref<'all' | TaskStatus>('all');
 
-// 获取任务列表
 const fetchTasks = async () => {
     try {
         isLoading.value = true;
@@ -31,7 +30,6 @@ const fetchTasks = async () => {
     }
 };
 
-// 下载任务结果
 const downloadTaskResult = async (taskId: string) => {
     try {
         isDownloading.value = true;
@@ -60,7 +58,6 @@ const downloadTaskResult = async (taskId: string) => {
     }
 };
 
-// 删除任务
 const deleteTask = async (taskId: string) => {
     try {
         isDeleting.value = true;
@@ -78,19 +75,16 @@ const deleteTask = async (taskId: string) => {
     }
 };
 
-// 显示删除确认对话框
 const confirmDelete = (taskId: string) => {
     taskToDelete.value = taskId;
     showDeleteConfirm.value = true;
 };
 
-// 取消删除
 const cancelDelete = () => {
     showDeleteConfirm.value = false;
     taskToDelete.value = null;
 };
 
-// 计算过滤后的任务列表
 const filteredTasks = computed(() => {
     let result = [...tasks.value];
 
@@ -134,7 +128,6 @@ const filteredTasks = computed(() => {
     return result;
 });
 
-// 刷新任务状态
 const refreshTasks = async () => {
     await fetchTasks();
 };

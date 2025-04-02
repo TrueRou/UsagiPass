@@ -1,6 +1,6 @@
 <script setup lang="tsx">
 import { ref } from 'vue';
-import { formatDate } from '@/utils';
+import { formatDate } from '@/utils/formatUtils';
 import { useCardStore } from '@/stores/card';
 import Prompt from '@/components/widgets/Prompt.vue';
 import TermsLink from '@/components/widgets/TermsLink.vue';

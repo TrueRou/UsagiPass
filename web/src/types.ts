@@ -30,17 +30,16 @@ enum LevelIndex {
 enum ViewMode {
     LIST = 'list',
     TILE = 'tile',
-    // 未来可能添加的其他视图模式
-    // COMPACT = 'compact',
-    // DETAIL = 'detail'
 }
 
 enum TileDisplayMode {
-    RATING = "rating",      // 评级 (SSS+, SS+等)
-    ACHIEVEMENT = "achievement", // 达成率
-    FC = "fc",              // Full Combo 状态
-    FS = "fs",              // Full Sync 状态
-    DX_RATING = "dx_rating" // DX评分
+    NONE = "none",
+    RATING = "rating",
+    ACHIEVEMENT = "achievement",
+    FC = "fc",
+    FS = "fs",
+    DX_RATING = "dx_rating",
+    LEVEL_VALUE = "level_value",
 }
 
 enum FCType {
@@ -145,6 +144,7 @@ interface Score {
     song_name: string;
     level: string;
     level_index: LevelIndex;
+    level_value: number;
     achievements: number | null;
     fc: FCType | null;
     fs: FSType | null;

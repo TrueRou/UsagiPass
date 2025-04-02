@@ -214,7 +214,3 @@ const achievementStats = computed(() => {
         </div>
     </div>
 </template>
-
-<style scoped>
-/* 可以添加一些额外的样式 */
-</style>
