@@ -1,8 +1,9 @@
+from typing import Literal
 import uuid
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlmodel import Session, select
-from maimai_py import MaimaiScores, MaimaiSongs, Score as MpyScore
+from maimai_py import MaimaiPlates, MaimaiScores, MaimaiSongs, Score as MpyScore, PlateObject
 from maimai_py.exceptions import AimeServerError
 
 from usagipass.app import settings
@@ -19,6 +20,7 @@ from usagipass.app.models import (
     CardScoreUpdateResult,
     CardStatus,
     CardUpdate,
+    PlatePublic,
     PreferencePublic,
     PreferenceUpdate,
     Score,
@@ -212,3 +214,32 @@ async def get_profile(
         preferences=preferences,
         accounts=accounts,
     )
+
+
+@router.get("/{uuid}/plates", response_model=list[PlatePublic])
+async def get_plates(
+    plate: str,
+    attr: Literal["remained", "cleared", "played", "all"] = "remained",
+    account: CardAccount = Depends(require_card_account),
+    session: Session = Depends(require_session),
+):
+    def _ser_scores(mpy_scores: list[MpyScore], songs: MaimaiSongs) -> list[ScorePublic]:
+        return [
+            ScorePublic(
+                **(Score.from_mpy(score, account.id).model_dump()),
+                song_name=song.title,
+                level=diff.level,
+                level_value=diff.level_value,
+            )
+            for score in mpy_scores
+            if (song := songs.by_id(score.id)) and (diff := song.get_difficulty(score.type, score.level_index))
+        ]
+
+    if account:
+        songs = await maimai_client.songs()
+        scores = session.exec(select(Score).where(Score.account_id == account.id)).all()
+        if len(scores) > 0:
+            mplates = MaimaiPlates([await Score.as_mpy(score) for score in scores], plate[0], plate[1:], songs)
+            mplate_object: list[PlateObject] = getattr(mplates, attr)
+            return [PlatePublic(song=mplate.song, levels=mplate.levels, scores=_ser_scores(mplate.scores, songs)) for mplate in mplate_object]
+    return []

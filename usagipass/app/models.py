@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import IntEnum, auto
-from sqlalchemy import Column, Integer
 from sqlmodel import Field, SQLModel
 from maimai_py import PlayerIdentifier, ArcadeProvider, Score as MpyScore
 from maimai_py.models import FCType, FSType, LevelIndex, RateType, SongType
@@ -226,6 +225,12 @@ class Score(SQLModel, table=True):
         )
 
 
+class SongSimple(SQLModel):
+    id: int
+    title: str
+    artist: str
+
+
 class ScorePublic(SQLModel):
     song_id: int
     song_name: str
@@ -239,6 +244,12 @@ class ScorePublic(SQLModel):
     dx_rating: float | None
     rate: RateType
     type: SongType
+
+
+class PlatePublic(SQLModel):
+    song: SongSimple
+    levels: list[LevelIndex]
+    scores: list[ScorePublic]
 
 
 class BestsPublic(SQLModel):

@@ -17,19 +17,34 @@ if (!cardStore.cardProfile) await cardStore.refreshCard();
 const cardPreference = ref<Preference>(JSON.parse(JSON.stringify(cardStore.cardProfile?.preferences)));
 const showActivationDialog = ref(cardStore.cardProfile?.status! < CardStatus.ACTIVATED);
 const activationCode = ref('');
+const isActivating = ref(false);
 
 const activateCard = async () => {
-    if (activationCode.value) {
-        await cardStore.createAccount(activationCode.value);
-        await cardStore.refreshCard()
-        showActivationDialog.value = false;
+    if (activationCode.value && !isActivating.value) {
+        isActivating.value = true;
+        try {
+            await cardStore.createAccount(activationCode.value);
+            await cardStore.refreshCard();
+            showActivationDialog.value = false;
+        } finally {
+            isActivating.value = false;
+        }
     }
 };
 
 const skipActivation = async () => {
-    await cardStore.createAccount();
-    await cardStore.refreshCard()
-    showActivationDialog.value = false;
+    if (!isActivating.value) {
+        isActivating.value = true;
+        try {
+            await cardStore.createAccount();
+            await cardStore.refreshCard();
+            showActivationDialog.value = false;
+        } catch (error) {
+            console.error('跳过失败:', error);
+        } finally {
+            isActivating.value = false;
+        }
+    }
 };
 
 const handleTouchStart = (e: TouchEvent) => {
@@ -116,14 +131,41 @@ watch(() => [cardStore.cardProfile], applyPreferences, { immediate: true });
 
                 <div class="my-5">
                     <input id="activation-code" v-model="activationCode" type="text"
-                        class="w-full p-2.5 border border-gray-300 rounded text-base" placeholder="请输入二维码扫描后的内容" />
+                        class="w-full p-2.5 border border-gray-300 rounded text-base" placeholder="请输入二维码扫描后的内容"
+                        :disabled="isActivating" />
                 </div>
 
                 <div class="flex justify-between mt-5">
-                    <button @click="skipActivation"
-                        class="px-5 py-2.5 rounded font-bold bg-gray-100 text-gray-800">跳过</button>
-                    <button @click="activateCard"
-                        class="px-5 py-2.5 rounded font-bold bg-green-600 text-white">激活</button>
+                    <button @click="skipActivation" class="px-5 py-2.5 rounded font-bold bg-gray-100 text-gray-800"
+                        :disabled="isActivating">
+                        <span v-if="isActivating" class="inline-flex items-center">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                            处理中...
+                        </span>
+                        <span v-else>跳过</span>
+                    </button>
+                    <button @click="activateCard" class="px-5 py-2.5 rounded font-bold bg-green-600 text-white"
+                        :disabled="isActivating || !activationCode">
+                        <span v-if="isActivating" class="inline-flex items-center">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                            激活中...
+                        </span>
+                        <span v-else>激活</span>
+                    </button>
                 </div>
 
                 <p class="text-xs text-gray-500 mt-4">* 跳过激活后，查分功能将无法使用</p>
