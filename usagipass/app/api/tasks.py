@@ -1,8 +1,8 @@
+import os
 from pathlib import Path
 from typing import List
-import os
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 from fastapi.responses import FileResponse
 
 from usagipass.app.database import require_session
@@ -18,7 +18,7 @@ async def get_tasks(
     session: Session = Depends(require_session),
     user: User = Depends(verify_user),
 ):
-    user_tasks = session.exec(select(Task).where(Task.created_by == user.username).order_by(Task.created_at.desc())).all()
+    user_tasks = session.exec(select(Task).where(Task.created_by == user.username).order_by(col(Task.created_at).desc())).all()
     return [TaskPublic.model_validate(task) for task in user_tasks]
 
 
@@ -53,7 +53,7 @@ async def create_screenshots_task(
     user: User = Depends(verify_user),
     session: Session = Depends(require_session),
 ):
-    cards = session.exec(select(Card).where(Card.uuid.in_(uuids))).all()
+    cards = session.exec(select(Card).where(col(Card.uuid).in_(uuids))).all()
     if len(cards) != len(uuids):
         lost_uuids = set(uuids) - {card.uuid for card in cards}
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"未找到卡片: {', '.join(lost_uuids)}")

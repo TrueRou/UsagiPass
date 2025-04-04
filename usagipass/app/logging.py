@@ -4,7 +4,6 @@ import colorsys
 import datetime
 from enum import IntEnum
 from typing import Optional
-from typing import overload
 from typing import Union
 from zoneinfo import ZoneInfo
 
@@ -37,12 +36,6 @@ class Ansi(IntEnum):
 
 
 class RGB:
-    @overload
-    def __init__(self, rgb: int) -> None: ...
-
-    @overload
-    def __init__(self, r: int, g: int, b: int) -> None: ...
-
     def __init__(self, *args) -> None:
         largs = len(args)
 

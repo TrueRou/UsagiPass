@@ -54,7 +54,7 @@ class ServerMessage(SQLModel):
 
 
 class Image(SQLModel, table=True):
-    __tablename__ = "images"
+    __tablename__ = "images"  # type: ignore
 
     id: str = Field(primary_key=True)
     name: str
@@ -72,7 +72,7 @@ class ImagePublic(SQLModel):
 
 
 class User(SQLModel, table=True):
-    __tablename__ = "users"
+    __tablename__ = "users"  # type: ignore
 
     username: str = Field(primary_key=True)
     prefer_server: AccountServer
@@ -86,7 +86,7 @@ class UserUpdate(SQLModel):
 
 
 class Card(SQLModel, table=True):
-    __tablename__ = "cards"
+    __tablename__ = "cards"  # type: ignore
 
     id: int | None = Field(default=None, primary_key=True)
     uuid: str = Field(index=True, unique=True, nullable=False)
@@ -104,7 +104,7 @@ class CardUpdate(SQLModel):
 
 
 class UserAccount(SQLModel, table=True):
-    __tablename__ = "user_accounts"
+    __tablename__ = "user_accounts"  # type: ignore
 
     account_name: str = Field(primary_key=True)
     account_server: AccountServer = Field(primary_key=True)
@@ -135,23 +135,23 @@ class PreferenceBase(SQLModel):
 
 
 class UserPreference(PreferenceBase, table=True):
-    __tablename__ = "user_preferences"
+    __tablename__ = "user_preferences"  # type: ignore
 
     username: str = Field(primary_key=True, foreign_key="users.username")
-    character_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
-    background_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
-    frame_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
-    passname_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
+    character_id: str | None = Field(default=None, foreign_key="images.id", ondelete="SET NULL")
+    background_id: str | None = Field(default=None, foreign_key="images.id", ondelete="SET NULL")
+    frame_id: str | None = Field(default=None, foreign_key="images.id", ondelete="SET NULL")
+    passname_id: str | None = Field(default=None, foreign_key="images.id", ondelete="SET NULL")
 
 
 class CardPreference(PreferenceBase, table=True):
-    __tablename__ = "card_preferences"
+    __tablename__ = "card_preferences"  # type: ignore
 
     uuid: str = Field(primary_key=True, foreign_key="cards.uuid", ondelete="CASCADE")
-    character_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
-    background_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
-    frame_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
-    passname_id: str | None = Field(foreign_key="images.id", ondelete="SET NULL")
+    character_id: str | None = Field(default=None, foreign_key="images.id", ondelete="SET NULL")
+    background_id: str | None = Field(default=None, foreign_key="images.id", ondelete="SET NULL")
+    frame_id: str | None = Field(default=None, foreign_key="images.id", ondelete="SET NULL")
+    passname_id: str | None = Field(default=None, foreign_key="images.id", ondelete="SET NULL")
 
 
 class PreferencePublic(PreferenceBase):
@@ -177,7 +177,7 @@ class UserProfile(SQLModel):
 
 
 class Score(SQLModel, table=True):
-    __tablename__ = "card_scores"
+    __tablename__ = "card_scores"  # type: ignore
 
     id: int | None = Field(default=None, primary_key=True)
     song_id: int = Field(index=True)
@@ -213,7 +213,7 @@ class Score(SQLModel, table=True):
         return MpyScore(
             id=self.song_id,
             song_name=song.title if song else "Unknown",
-            level=song.get_difficulty(self.type, self.level_index).level if song else "Unknown",
+            level=diff.level if song and (diff := song.get_difficulty(self.type, self.level_index)) else "Unknown",
             level_index=self.level_index,
             achievements=self.achievements,
             fc=self.fc,
@@ -261,9 +261,9 @@ class BestsPublic(SQLModel):
 
 
 class CardAccount(SQLModel, table=True):
-    __tablename__ = "card_accounts"
+    __tablename__ = "card_accounts"  # type: ignore
 
-    id: int = Field(primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     credentials: str = Field(unique=True, index=True)
     player_rating: int
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -300,7 +300,7 @@ class TaskStatus(IntEnum):
 
 
 class Task(SQLModel, table=True):
-    __tablename__ = "tasks"
+    __tablename__ = "tasks"  # type: ignore
 
     id: str = Field(primary_key=True)
     task_type: str

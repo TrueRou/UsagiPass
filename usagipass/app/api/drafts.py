@@ -1,6 +1,6 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from usagipass.app import database
 from usagipass.app.api.cards import require_card, require_preference
@@ -26,7 +26,7 @@ def require_draft(card: Card = Depends(require_card)) -> Card:
 
 @router.get("", response_model=list[Card])
 async def get_drafts(phone: str = Depends(require_phone), session: Session = Depends(require_session)):
-    clause = select(Card).where(Card.phone == phone, Card.status != CardStatus.ACTIVATED).order_by(Card.created_at.desc())
+    clause = select(Card).where(Card.phone == phone, Card.status != CardStatus.ACTIVATED).order_by(col(Card.created_at).desc())
     return session.exec(clause).all()
 
 

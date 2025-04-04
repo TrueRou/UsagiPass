@@ -6,7 +6,8 @@ import PIL
 import httpx
 from pathlib import Path
 from sqlmodel import Session, and_, select
-from PIL import Image as PILImage, ImageChops, ImageFile
+from PIL import Image as PILImage, ImageChops
+from PIL.ImageFile import ImageFile
 
 sys.path.insert(0, os.path.dirname(os.getcwd()))
 os.chdir(os.path.dirname(os.getcwd()))
@@ -38,10 +39,10 @@ def _parse_dictionary(file: Path):
     if file.exists():
         with open(file, "r", encoding="utf-8") as f:
             for line in f.read().splitlines():
-                file, name = line.split(" ", maxsplit=1)
-                file1 = file.replace("cardChara0", "UI_CardChara_")
+                file_str, name = line.split(" ", maxsplit=1)
+                file1 = file_str.replace("cardChara0", "UI_CardChara_")
                 result[file1] = name
-                file2 = file.replace("cardChara00", "UI_CardChara_")  # SBGA what are you doing?
+                file2 = file_str.replace("cardChara00", "UI_CardChara_")  # SBGA what are you doing?
                 result[file2] = name
     return result
 

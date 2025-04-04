@@ -11,7 +11,7 @@ from usagipass.app.usecases import crawler
 # trigger the update of the card user's scores
 async def update_scores(account: CardAccount) -> int:
     with session_ctx() as session:
-        account = session.get(CardAccount, account.id)
+        account = session.get(CardAccount, account.id) or account
         new_scores = await maimai_client.scores(account.as_identifier, kind=ScoreKind.ALL, provider=account.as_provider)
         old_scores = session.exec(select(Score).where(Score.account_id == account.id)).all()
         old_scores_dict = {f"{old_score.song_id} {old_score.type} {old_score.level_index}": old_score for old_score in old_scores}

@@ -1,6 +1,6 @@
 import contextlib
 import httpx
-from typing import TypeVar
+from typing import Generator, TypeVar
 from fastapi import Request
 from maimai_py import MaimaiClient
 from sqlalchemy import text
@@ -22,7 +22,7 @@ V = TypeVar("V")
 def init_db():
     try:
         with session_ctx() as session:
-            session.exec(text("SELECT 1"))
+            session.execute(text("SELECT 1"))
     except OperationalError:
         log("Failed to connect to the database.", Ansi.RED)
     try:
@@ -53,7 +53,7 @@ def require_session(request: Request):
 
 
 @contextlib.contextmanager
-def session_ctx():
+def session_ctx() -> Generator[Session, None, None]:
     with Session(engine, expire_on_commit=False) as session:
         yield session
 

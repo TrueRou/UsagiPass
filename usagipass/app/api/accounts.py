@@ -20,7 +20,7 @@ router = APIRouter(prefix="/accounts", tags=["accounts"])
 async def get_token_divingfish(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
     account_name = form_data.username
     if await accounts.auth_divingfish(account_name, form_data.password):
-        user = await accounts.merge_user(session, account_name, AccountServer.DIVING_FISH)
+        user = accounts.merge_user(session, account_name, AccountServer.DIVING_FISH)
         await accounts.merge_divingfish(session, user, account_name, form_data.password)
         session.commit()
         return authorize.grant_user(user)
@@ -31,7 +31,7 @@ async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends
     personal_token = form_data.password
     if profile := await accounts.auth_lxns(personal_token):
         account_name = str(profile["friend_code"])
-        user = await accounts.merge_user(session, account_name, AccountServer.LXNS)
+        user = accounts.merge_user(session, account_name, AccountServer.LXNS)
         await accounts.merge_lxns(session, user, personal_token)
         session.commit()
         return authorize.grant_user(user)
@@ -87,12 +87,10 @@ async def update_prober_callback(
     async with async_httpx_ctx() as client:
         try:
             resp = await client.get("https://tgk-wcaime.wahlap.com/wc_auth/oauth/callback/maimai-dx", params=params, headers=headers)
-            if resp.status_code != 302:
-                raise TimeoutError
-            resp = await client.get(resp.next_request.url, headers=headers)
-            results = await crawler.crawl_async(resp.cookies, user, session)
-            return results
+            if resp.status_code == 302 and resp.next_request:
+                resp = await client.get(resp.next_request.url, headers=headers)
+                results = await crawler.crawl_async(resp.cookies, user, session)
+                return results
+            raise HTTPException(status_code=400, detail="华立 OAuth 已过期或无效", headers={"WWW-Authenticate": "Bearer"})
         except (ConnectError, ReadTimeout):
             raise HTTPException(status_code=503, detail="无法连接到华立服务器", headers={"WWW-Authenticate": "Bearer"})
-        except TimeoutError:
-            raise HTTPException(status_code=400, detail="华立 OAuth 已过期或无效", headers={"WWW-Authenticate": "Bearer"})

@@ -1,5 +1,6 @@
 import asyncio
 import tempfile
+from typing import Sequence
 import zipfile
 from pathlib import Path
 from selenium import webdriver
@@ -18,7 +19,7 @@ screenshots_folder = Path.cwd() / ".data" / "screenshots"
 screenshots_folder.mkdir(exist_ok=True)
 
 
-async def capture_card_screenshot_batch(cards: list[Card]) -> tuple[dict[str, str], Path]:
+async def capture_card_screenshot_batch(cards: Sequence[Card]) -> tuple[dict[str, str], Path]:
     results = {}
     for card in cards:
         results.update(await capture_card_screenshot(card))
@@ -60,7 +61,7 @@ async def capture_card_screenshot(card: Card) -> dict[str, str]:
     return results
 
 
-def _capture_screenshot(screenshot_path, url, target_width, target_height) -> str:
+def _capture_screenshot(screenshot_path, url, target_width, target_height) -> str | None:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -73,10 +74,9 @@ def _capture_screenshot(screenshot_path, url, target_width, target_height) -> st
     chrome_options.add_argument("--log-level=3")
     chrome_options.add_argument(f"--window-size={target_width},{target_height}")
     chrome_options.add_argument(f"--app={url}")
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
     try:
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-
         wait = WebDriverWait(driver, 10)
         wait.until(EC.visibility_of_all_elements_located((By.TAG_NAME, "img")))
 

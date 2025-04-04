@@ -39,7 +39,9 @@ def verify_admin(token: Annotated[str, Depends(oauth2_scheme)], session: Session
 def verify_user(token: Annotated[str, Depends(oauth2_scheme)], session: Session = Depends(require_session)) -> User:
     try:
         payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
-        return session.get(User, payload["username"])
+        if user := session.get(User, payload["username"]):
+            return user
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="用户不存在或已被禁用")
     except jwt.InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -50,6 +52,8 @@ def verify_user(token: Annotated[str, Depends(oauth2_scheme)], session: Session 
 
 def verify_user_optional(token: Annotated[str | None, Depends(optional_oauth2_scheme)], session: Session = Depends(require_session)) -> User | None:
     try:
-        return verify_user(token, session)
-    except HTTPException:
-        return None
+        if token and (payload := jwt.decode(token, jwt_secret, algorithms=["HS256"])):
+            if user := session.get(User, payload["username"]):
+                return user
+    except jwt.InvalidTokenError:
+        pass

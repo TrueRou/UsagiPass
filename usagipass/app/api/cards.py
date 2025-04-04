@@ -2,7 +2,7 @@ from typing import Literal
 import uuid
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Path, status
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 from maimai_py import MaimaiPlates, MaimaiScores, MaimaiSongs, Score as MpyScore, PlateObject
 from maimai_py.exceptions import AimeServerError
 
@@ -25,6 +25,7 @@ from usagipass.app.models import (
     PreferenceUpdate,
     Score,
     ScorePublic,
+    SongSimple,
 )
 from usagipass.app.usecases import fonts, maimai
 from usagipass.app.usecases.authorize import verify_admin
@@ -69,7 +70,7 @@ async def create_card(session: Session = Depends(require_session)):
 
 @router.get("", response_model=list[Card], dependencies=[Depends(verify_admin)])
 async def get_cards(session: Session = Depends(require_session)):
-    clause = select(Card).order_by(Card.created_at.desc())
+    clause = select(Card).order_by(col(Card.created_at).desc())
     return session.exec(clause).all()
 
 
@@ -128,10 +129,12 @@ async def create_account(
         session.commit()
         return {"message": "卡片已激活"}
 
+    account = None
+
     try:
         if card.status >= CardStatus.SCHEDULED:
             credentials = await maimai_client.qrcode(qrcode or "", settings.arcade_proxy)
-            account = CardAccount(credentials=credentials.credentials, player_rating=0)
+            account = CardAccount(credentials=str(credentials.credentials), player_rating=0)
             session.add(account)
             session.flush()
             card.account_id = account.id
@@ -144,7 +147,8 @@ async def create_account(
         session.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="激活卡片失败")
     try:
-        await maimai.update_scores(account)  # away from try-except block
+        if account:
+            await maimai.update_scores(account)  # away from try-except block
     except Exception as e:
         log(f"Failed to update scores of card {card.id}: {repr(e)}", Ansi.LRED)
     return {"message": "卡片账号已创建"}
@@ -179,7 +183,7 @@ async def get_profile(
     def _ser_scores(mpy_scores: list[MpyScore], songs: MaimaiSongs) -> list[ScorePublic]:
         return [
             ScorePublic(
-                **(Score.from_mpy(score, account.id).model_dump()),
+                **(Score.from_mpy(score, account.id or -1).model_dump()),
                 song_name=song.title,
                 level=diff.level,
                 level_value=diff.level_value,
@@ -208,7 +212,7 @@ async def get_profile(
         accounts = CardAccountPublic(player_rating=account.player_rating, created_at=account.created_at, player_bests=bests)
 
     return CardProfile(
-        id=card.id,
+        id=card.id or -1,
         uuid=card.uuid,
         status=card.status,
         preferences=preferences,
@@ -226,7 +230,7 @@ async def get_plates(
     def _ser_scores(mpy_scores: list[MpyScore], songs: MaimaiSongs) -> list[ScorePublic]:
         return [
             ScorePublic(
-                **(Score.from_mpy(score, account.id).model_dump()),
+                **(Score.from_mpy(score, account.id or -1).model_dump()),
                 song_name=song.title,
                 level=diff.level,
                 level_value=diff.level_value,
@@ -241,5 +245,12 @@ async def get_plates(
         if len(scores) > 0:
             mplates = MaimaiPlates([await Score.as_mpy(score) for score in scores], plate[0], plate[1:], songs)
             mplate_object: list[PlateObject] = getattr(mplates, attr)
-            return [PlatePublic(song=mplate.song, levels=mplate.levels, scores=_ser_scores(mplate.scores, songs)) for mplate in mplate_object]
+            return [
+                PlatePublic(
+                    song=SongSimple.model_validate(mplate.song),
+                    levels=mplate.levels,
+                    scores=_ser_scores(mplate.scores, songs),
+                )
+                for mplate in mplate_object
+            ]
     return []

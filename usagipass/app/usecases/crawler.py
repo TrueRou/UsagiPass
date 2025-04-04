@@ -32,24 +32,28 @@ async def fetch_wechat_retry(cookies: Cookies) -> MaimaiScores:
 
 @retry(stop=stop_after_attempt(3))
 async def fetch_rating_retry(account: UserAccount) -> int:
+    ident, provider = None, None
     if account.account_server == AccountServer.DIVING_FISH:
         ident = PlayerIdentifier(username=account.account_name)
         provider = DivingFishProvider(divingfish_developer_token)
     elif account.account_server == AccountServer.LXNS:
-        ident = PlayerIdentifier(friend_code=account.account_name)
+        ident = PlayerIdentifier(friend_code=int(account.account_name))
         provider = LXNSProvider(lxns_developer_token)
+    assert ident and provider, "Invalid account server"
     player: Player = await maimai_client.players(ident, provider)
     return player.rating
 
 
 @retry(stop=stop_after_attempt(3))
 async def upload_server_retry(account: UserAccount, scores: list[Score]):
+    ident, provider = None, None
     if account.account_server == AccountServer.DIVING_FISH:
         ident = PlayerIdentifier(username=account.account_name, credentials=account.account_password)
         provider = DivingFishProvider(divingfish_developer_token)
     elif account.account_server == AccountServer.LXNS:
         ident = PlayerIdentifier(credentials=account.account_password)
         provider = LXNSProvider(lxns_developer_token)
+    assert ident and provider, "Invalid account server"
     await maimai_client.updates(ident, scores, provider)
 
 
@@ -65,7 +69,7 @@ async def fetch_wechat(username: str, cookies: Cookies) -> tuple[list[Score], Cr
 
 async def update_rating(account: UserAccount, result: CrawlerResult = CrawlerResult()) -> CrawlerResult:
     with session_ctx() as session:
-        account = session.get(UserAccount, (account.account_name, account.account_server))
+        account = session.get(UserAccount, (account.account_name, account.account_server)) or account
         result.from_rating = account.player_rating
         try:
             result.to_rating = await fetch_rating_retry(account)

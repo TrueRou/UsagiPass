@@ -2,7 +2,7 @@ import io
 import uuid
 import PIL.Image
 from pathlib import Path
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 from fastapi.responses import FileResponse
 from PIL.Image import Image as PILImage, Resampling
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
@@ -100,12 +100,11 @@ async def patch_image(
 
 @router.get("/{image_id}/related", response_model=list[ImagePublic])
 async def get_images_related(session: Session = Depends(require_session), image: Image = Depends(require_image)):
-    # we don't verify the image here, due to related images are usually from SEGA
-    if not image.sega_name:
-        return []
-    suffix = _remove_sega_prefix(image.sega_name)
-    results = session.exec(select(Image).where(Image.sega_name.endswith(suffix)))
-    return results.all()
+    if image.sega_name:
+        suffix = _remove_sega_prefix(image.sega_name)
+        results = session.exec(select(Image).where(col(Image.sega_name).endswith(suffix)))
+        return results.all()
+    return []
 
 
 @router.get("/{image_id}/thumbnail")
