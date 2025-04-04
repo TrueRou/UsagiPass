@@ -37,7 +37,7 @@ async def update_scores(account: CardAccount) -> int:
                 session.add(score)
 
         # update the user's rating
-        account.player_rating = max(account.player_rating, new_scores.rating)
+        account.player_rating = new_scores.rating
         account.updated_at = datetime.utcnow()
         session.commit()
     return new_scores.rating
