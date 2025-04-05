@@ -11,6 +11,11 @@ const ensureNfcSupport = () => {
     return new (window as any).NDEFReader();
 };
 
+export const checkNfcEnvironment = (): boolean => {
+    const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    return isChrome && 'NDEFReader' in window;
+};
+
 export const readUuidFromNfc = async (): Promise<string | null> => {
     const notificationStore = useNotificationStore();
     const ndef = ensureNfcSupport();

@@ -26,6 +26,9 @@ const draftToDelete = ref("");
 
 const fetchDrafts = async () => {
     drafts.value = await draftStore.fetchDrafts(phoneNumber.value);
+    if (drafts.value.length === 0) {
+        notificationStore.warning("没有订单", "点击创建订单按钮开始新的草稿设计");
+    }
 };
 
 const deleteDraft = async (uuid: string) => {
@@ -106,9 +109,9 @@ onActivated(() => {
         </div>
     </div>
 
-    <!-- 我的订单部分 - 移除外框 -->
+    <!-- 我的订单部分 -->
     <div class="w-full mb-6">
-        <div class="w-full p-4 bg-gray-50 rounded-lg">
+        <div class="w-full p-4">
             <div class="flex flex-col items-center justify-center">
                 <div class="flex justify-between items-center w-full mb-4">
                     <div class="flex flex-col p-2">
@@ -145,7 +148,7 @@ onActivated(() => {
         </div>
     </div>
 
-    <!-- 查询结果部分 - 移除外框 -->
+    <!-- 查询结果部分 -->
     <template v-if="drafts.length">
         <div class="w-full">
             <div class="w-full">

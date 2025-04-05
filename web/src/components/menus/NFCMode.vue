@@ -241,7 +241,7 @@ const resetState = () => {
                             <h4 class="font-medium">快速模式</h4>
                         </div>
                         <p class="text-sm text-gray-600">
-                            针对Android优化，支持多种浏览器快速打开，但在部分设备上可能兼容性略差。
+                            无需二次确认即可跳转, 但缺失浏览器可能会跳转应用商店。
                         </p>
                     </div>
 
@@ -257,7 +257,7 @@ const resetState = () => {
                             <h4 class="font-medium">兼容模式</h4>
                         </div>
                         <p class="text-sm text-gray-600">
-                            通用模式，兼容所有支持NFC的设备，但可能需要手动选择浏览器打开链接。
+                            所有支持NFC的设备均可使用, 但可能每次都要点击确认。
                         </p>
                     </div>
                 </div>

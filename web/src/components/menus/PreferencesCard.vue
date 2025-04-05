@@ -5,13 +5,30 @@ import { useCardStore } from '@/stores/card';
 import Prompt from '@/components/widgets/Prompt.vue';
 import TermsLink from '@/components/widgets/TermsLink.vue';
 import { CardStatus } from '@/types';
+import { useNotificationStore } from '@/stores/notification';
+import { checkNfcEnvironment } from '@/utils/nfcUtils';
 
 const cardStore = useCardStore();
+const notificationStore = useNotificationStore();
 
 if (!cardStore.cardProfile) await cardStore.refreshCard();
 const isActivated = ref(Boolean(cardStore.cardProfile?.status === CardStatus.ACTIVATED));
 const activationCode = ref('');
 const showActivationPrompt = ref(false);
+const tapCount = ref(0);
+const showNfcSettings = ref(false);
+
+const handleActivationDateTap = () => {
+    tapCount.value++;
+    if (tapCount.value >= 5) { // 5次点击触发
+        if (checkNfcEnvironment()) {
+            showNfcSettings.value = true;
+        } else {
+            notificationStore.warning('不支持Web NFC的环境', '请在手机端使用Chrome浏览器访问');
+            tapCount.value = 0; // 重置点击次数
+        }
+    }
+};
 
 const openActivationPrompt = () => {
     showActivationPrompt.value = true;
@@ -44,12 +61,14 @@ const activateCard = async () => {
         <!-- 卡片激活状态 -->
         <div class="flex justify-between items-center w-full mt-3 px-4">
             <span class="font-medium">激活状态:</span>
-            <span class="font-bold" :class="cardStore.cardProfile?.accounts ? 'text-green-600' : 'text-gray-600'">
-                {{ cardStore.cardProfile?.accounts ? '已激活' : '已跳过' }}
+            <span class="font-bold no-select"
+                :class="cardStore.cardProfile?.accounts ? 'text-green-600' : 'text-gray-600'"
+                @click="handleActivationDateTap">
+                {{ cardStore.cardProfile?.accounts ? '已激活' : '未激活' }}
             </span>
         </div>
 
-        <!-- 卡片激活按钮 -->
+        <!-- 卡片未激活 显示激活按钮 -->
         <div v-if="!cardStore.cardProfile?.accounts" class="flex justify-center w-full mt-3 px-4">
             <button @click="openActivationPrompt"
                 class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 w-full">
@@ -57,52 +76,51 @@ const activateCard = async () => {
             </button>
         </div>
 
-        <!-- 已激活卡片的详细信息 -->
-        <div v-if="isActivated && cardStore.cardProfile?.accounts" class="w-full mt-3 mb-3 px-4">
-            <div class="bg-gray-100 rounded p-3 border border-gray-300">
-                <h2 class="font-bold text-lg mb-2 text-blue-600">卡片信息</h2>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="flex flex-col">
-                        <span class="text-gray-600 text-sm">激活时间</span>
-                        <span class="font-medium">{{ formatDate(cardStore.cardProfile.accounts.created_at) }}</span>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-gray-600 text-sm">总 Rating</span>
-                        <span class="font-medium">{{ cardStore.cardProfile.accounts.player_bests.all_rating }}</span>
-                    </div>
-                </div>
+        <!-- 卡片已激活 显示激活信息 -->
+        <template v-if="isActivated && cardStore.cardProfile?.accounts">
+            <div class="flex justify-between items-center w-full mt-3 px-4">
+                <span class="font-medium">激活时间:</span>
+                <span class="font-bold">
+                    {{ formatDate(cardStore.cardProfile.accounts.created_at) }}
+                </span>
             </div>
-        </div>
-
-        <!-- 卡片模式设置 -->
-        <div class="w-full mt-3 mb-3 px-4">
-            <div class="bg-gray-100 rounded p-3 border border-gray-300">
-                <h2 class="font-bold text-lg mb-2 text-blue-600">卡片模式</h2>
-
-                <div class="mb-3">
-                    <p class="text-gray-700 text-sm mb-2">
-                        您可以修改卡片的NFC模式以适应不同的设备环境。快速模式针对部分浏览器优化，兼容模式适用于所有支持NFC的设备。
-                    </p>
-                    <p class="text-gray-500 text-xs">
-                        提示：若您的卡片在某些设备上无法正常使用，可尝试切换模式。
-                    </p>
-                </div>
-
-                <div class="flex justify-center">
-                    <RouterLink to="/nfc"
-                        class="bg-indigo-500 text-white font-bold py-2 px-4 rounded hover:bg-indigo-600 inline-block w-full text-center">
-                        设置卡片模式
-                    </RouterLink>
-                </div>
+            <div class="flex justify-between items-center w-full mt-3 px-4">
+                <span class="font-medium">总 Rating:</span>
+                <span class="font-bold">
+                    {{ cardStore.cardProfile.accounts.player_bests.all_rating }}
+                </span>
             </div>
-        </div>
+        </template>
 
         <!-- 激活对话框 -->
         <Prompt v-model="activationCode" :show="showActivationPrompt" text="请输入卡片激活码" placeholder="输入二维码扫描内容"
             @confirm="confirmActivation" @cancel="cancelActivation">
             <TermsLink />
         </Prompt>
+    </div>
+
+    <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
+        <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
+            <h1 class="font-bold text-white">NFC模式</h1>
+        </div>
+
+        <div class="w-full mt-3 mb-3 px-4">
+            <div class="mb-4">
+                <p class="text-gray-800 font-medium text-sm mb-2">
+                    您可以修改卡片的NFC模式以适应不同的设备环境。
+                </p>
+                <p class="text-gray-600 text-xs leading-relaxed">
+                    <span class="font-semibold">兼容模式:</span> 所有支持NFC的设备均可使用, 但可能每次都要点击确认<br>
+                    <span class="font-semibold">快速模式:</span> 无需二次确认即可跳转, 但缺失浏览器可能会跳转应用商店
+                </p>
+            </div>
+            <div class="flex justify-center">
+                <RouterLink to="/nfc"
+                    class="bg-indigo-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-indigo-700 active:bg-indigo-800 transition-colors duration-200 ease-in-out shadow-sm inline-block w-full text-center">
+                    修改卡片模式
+                </RouterLink>
+            </div>
+        </div>
     </div>
 
     <div class="flex justify-end w-full mt-2 mr-5">
@@ -159,5 +177,9 @@ select {
     box-sizing: border-box;
     border: 2px solid #000;
     border-radius: 5px;
+}
+
+.no-select {
+    user-select: none;
 }
 </style>
