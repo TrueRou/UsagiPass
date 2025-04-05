@@ -1,10 +1,11 @@
+from pathlib import Path
 from typing import Any
 from fastapi import HTTPException, status
 from fontTools.ttLib import TTFont
 
 from usagipass.app.models import PreferencePublic
 
-font: Any = TTFont("usagipass/app/usecases/static/SEGAMaruGothicDB.woff2")
+font: Any = TTFont(Path(__file__).parent / "static" / "SEGAMaruGothicDB.woff2")
 uniMap: Any = font["cmap"].tables[0].ttFont.getBestCmap()
 
 

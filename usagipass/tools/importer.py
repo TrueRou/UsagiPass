@@ -1,6 +1,4 @@
 import io
-import os
-import sys
 import uuid
 import PIL
 import httpx
@@ -8,9 +6,6 @@ from pathlib import Path
 from sqlmodel import Session, and_, select
 from PIL import Image as PILImage, ImageChops
 from PIL.ImageFile import ImageFile
-
-sys.path.insert(0, os.path.dirname(os.getcwd()))
-os.chdir(os.path.dirname(os.getcwd()))
 
 from usagipass.app.logging import log, Ansi
 from usagipass.app.api.images import images_folder
@@ -102,8 +97,8 @@ def import_images(kind: str, session: Session):
     log(f"Imported {success + failed} images of {kind}, {success} success ({overwritten} overwritten) and {failed} failed", Ansi.LGREEN)
 
 
-if __name__ == "__main__":
-    init_db()  # ensure the database is created
+def main():
+    init_db(skip_migration=True)  # ensure the database is created
     with session_ctx() as session:
         import_images("background", session)
         import_images("frame", session)
@@ -112,3 +107,7 @@ if __name__ == "__main__":
         import_images("mask", session)
         session.commit()
     log("Import process complete.", Ansi.LGREEN)
+
+
+if __name__ == "__main__":
+    main()

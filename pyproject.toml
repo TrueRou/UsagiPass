@@ -37,6 +37,7 @@ dependencies = [
 [tool.poetry.scripts]
 app = "usagipass.main:main"
 mitm = "usagipass.main:mitm_main"
+import = "usagipass.tools.importer:main"
 
 [[tool.poetry.source]]
 name = "mirrors"

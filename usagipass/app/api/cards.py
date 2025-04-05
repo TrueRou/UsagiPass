@@ -249,7 +249,7 @@ async def get_plates(
                 PlatePublic(
                     song=SongSimple.model_validate(mplate.song),
                     levels=mplate.levels,
-                    scores=_ser_scores(mplate.scores, songs),
+                    scores=_ser_scores(mplate.scores or [], songs),
                 )
                 for mplate in mplate_object
             ]

@@ -25,6 +25,11 @@ const r = (image: Image) => import.meta.env.VITE_URL + "/images/" + image!.id;
 const applyPreferences = () => {
     props.preferences.character_name ||= props.preferences.character.name;
     props.preferences.maimai_version ||= serverStore.serverMessage!.maimai_version;
+    if (props.cardId) {
+        if (!props.preferences.simplified_code) {
+            props.preferences.simplified_code = "UsagiCard";
+        }
+    }
 }
 
 watch(() => props.preferences, applyPreferences, { immediate: true });
