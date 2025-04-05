@@ -326,3 +326,48 @@ class TaskPublic(SQLModel):
 class CardScoreUpdateResult(SQLModel):
     player_rating_old: int
     player_rating_new: int
+
+
+class Announcement(SQLModel, table=True):
+    __tablename__ = "announcements"  # type: ignore
+
+    id: int | None = Field(default=None, primary_key=True)
+    title: str = Field(index=True)
+    content: str
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class AnnouncementRead(SQLModel, table=True):
+    __tablename__ = "announcement_reads"  # type: ignore
+
+    id: int | None = Field(default=None, primary_key=True)
+    announcement_id: int = Field(foreign_key="announcements.id", index=True, ondelete="CASCADE")
+    username: str = Field(foreign_key="users.username", index=True, ondelete="CASCADE")
+    read_at: datetime = Field(default_factory=datetime.utcnow)
+
+    class Config:  # type: ignore
+        unique_together = [("announcement_id", "username")]
+
+
+class AnnouncementCreate(SQLModel):
+    title: str
+    content: str
+    is_active: bool = True
+
+
+class AnnouncementUpdate(SQLModel):
+    title: str | None = None
+    content: str | None = None
+    is_active: bool | None = None
+
+
+class AnnouncementPublic(SQLModel):
+    id: int
+    title: str
+    content: str
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    is_read: bool = False

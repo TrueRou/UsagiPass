@@ -361,15 +361,15 @@ fetchCards();
 
     <div class="w-full p-4">
         <!-- 搜索和筛选区域 -->
-        <div class="flex flex-col bg-white p-4 pt-0">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div class="flex flex-col bg-white pt-0">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex flex-1 items-center">
                     <input v-model="phoneNumber" type="text" placeholder="按手机号过滤..."
                         class="flex-1 p-2 border border-gray-300 rounded mr-2 w-full md:w-auto">
                 </div>
 
                 <div class="flex items-center gap-4 flex-wrap">
-                    <!-- 改为按卡片状态筛选 -->
+                    <!-- 按卡片状态筛选 -->
                     <div class="flex flex-wrap items-center gap-2">
                         <div class="flex border border-gray-300 rounded-md overflow-hidden">
                             <button @click="statusFilter = 'all';"
@@ -400,6 +400,7 @@ fetchCards();
                         </div>
                     </div>
 
+                    <!-- 按时间筛选 -->
                     <div class="flex flex-wrap items-center gap-2">
                         <div class="flex border border-gray-300 rounded-md overflow-hidden">
                             <button @click="dateFilter = 'all';"
@@ -427,7 +428,7 @@ fetchCards();
                 </div>
             </div>
 
-            <div class="flex justify-between items-center h-8">
+            <div class="flex justify-between items-center h-8 my-2">
                 <div class="flex items-center">
                     <span class="text-gray-600 mr-4" v-if="selectedCards.size == 0">总计: {{ filteredCards.length }}
                         条记录</span>

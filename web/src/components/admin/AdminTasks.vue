@@ -176,12 +176,12 @@ onUnmounted(() => {
         </div>
 
         <!-- 搜索和筛选区域 -->
-        <div class="flex flex-col bg-white p-4 py-0">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div class="flex flex-col bg-white pt-0">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
                     <!-- 按任务状态筛选 -->
-                    <div class="flex flex-col w-full sm:w-auto">
-                        <div class="flex flex-wrap border border-gray-300 rounded-md overflow-hidden w-full sm:w-auto">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex border border-gray-300 rounded-md overflow-hidden">
                             <button @click="statusFilter = 'all';"
                                 :class="{ 'bg-blue-500 text-white': statusFilter === 'all', 'bg-gray-100 hover:bg-gray-200': statusFilter !== 'all' }"
                                 class="px-3 py-1.5 text-sm font-medium flex-1 sm:flex-none">
@@ -189,30 +189,30 @@ onUnmounted(() => {
                             </button>
                             <button @click="statusFilter = TaskStatus.PENDING;"
                                 :class="{ 'bg-blue-500 text-white': statusFilter === TaskStatus.PENDING, 'bg-gray-100 hover:bg-gray-200': statusFilter !== TaskStatus.PENDING }"
-                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300 flex-1 sm:flex-none">
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
                                 等待中
                             </button>
                             <button @click="statusFilter = TaskStatus.RUNNING;"
                                 :class="{ 'bg-blue-500 text-white': statusFilter === TaskStatus.RUNNING, 'bg-gray-100 hover:bg-gray-200': statusFilter !== TaskStatus.RUNNING }"
-                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300 flex-1 sm:flex-none">
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
                                 处理中
                             </button>
                             <button @click="statusFilter = TaskStatus.COMPLETED;"
                                 :class="{ 'bg-blue-500 text-white': statusFilter === TaskStatus.COMPLETED, 'bg-gray-100 hover:bg-gray-200': statusFilter !== TaskStatus.COMPLETED }"
-                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300 flex-1 sm:flex-none">
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
                                 已完成
                             </button>
                             <button @click="statusFilter = TaskStatus.FAILED;"
                                 :class="{ 'bg-blue-500 text-white': statusFilter === TaskStatus.FAILED, 'bg-gray-100 hover:bg-gray-200': statusFilter !== TaskStatus.FAILED }"
-                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300 flex-1 sm:flex-none">
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
                                 失败
                             </button>
                         </div>
                     </div>
 
                     <!-- 按时间筛选 -->
-                    <div class="flex flex-col w-full sm:w-auto">
-                        <div class="flex flex-wrap border border-gray-300 rounded-md overflow-hidden w-full sm:w-auto">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex border border-gray-300 rounded-md overflow-hidden">
                             <button @click="dateFilter = 'all';"
                                 :class="{ 'bg-blue-500 text-white': dateFilter === 'all', 'bg-gray-100 hover:bg-gray-200': dateFilter !== 'all' }"
                                 class="px-3 py-1.5 text-sm font-medium flex-1 sm:flex-none">
@@ -220,17 +220,17 @@ onUnmounted(() => {
                             </button>
                             <button @click="dateFilter = '3days';"
                                 :class="{ 'bg-blue-500 text-white': dateFilter === '3days', 'bg-gray-100 hover:bg-gray-200': dateFilter !== '3days' }"
-                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300 flex-1 sm:flex-none">
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
                                 三日内
                             </button>
                             <button @click="dateFilter = 'week';"
                                 :class="{ 'bg-blue-500 text-white': dateFilter === 'week', 'bg-gray-100 hover:bg-gray-200': dateFilter !== 'week' }"
-                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300 flex-1 sm:flex-none">
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
                                 一周内
                             </button>
                             <button @click="dateFilter = 'month';"
                                 :class="{ 'bg-blue-500 text-white': dateFilter === 'month', 'bg-gray-100 hover:bg-gray-200': dateFilter !== 'month' }"
-                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300 flex-1 sm:flex-none">
+                                class="px-3 py-1.5 text-sm font-medium border-l border-gray-300">
                                 一月内
                             </button>
                         </div>
@@ -238,7 +238,7 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <div class="flex justify-between items-center h-8">
+            <div class="flex justify-between items-center h-8 my-2">
                 <div class="flex items-center">
                     <span class="text-gray-600 mr-4">总计: {{ filteredTasks.length }} 条记录</span>
                 </div>
