@@ -1,54 +1,37 @@
-<script setup lang="ts">
+<script setup lang="tsx">
 import { useImageStore } from '@/stores/image';
 import { useServerStore } from '@/stores/server';
 import { useUserStore } from '@/stores/user';
-import { storeToRefs } from 'pinia';
-import { onMounted, ref, useTemplateRef } from 'vue';
-import { useRouter } from 'vue-router';
+import { AccountServer, type Kind } from '@/types';
+import { ref, useTemplateRef } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 
+const router = useRouter();
 const userStore = useUserStore();
 const imageStore = useImageStore();
 const serverStore = useServerStore();
-const router = useRouter();
-const imagePicker = useTemplateRef('image-picker');
 
-const { userProfile, cropperImage } = storeToRefs(userStore);
-const uploadKind = ref<string | null>(null);
+const imagePicker = useTemplateRef('image-picker');
+const userProfile = ref(userStore.userProfile);
 
 const r = (resource_id: string) => import.meta.env.VITE_URL + "/images/" + resource_id;
+const openPicker = (kind: Kind) => userStore.openImagePicker(kind, imagePicker.value!);
 
-const patchPreference = async () => {
-    if (await userStore.patchPreferences()) {
-        router.push({ name: 'home' }); // Redirect to home page
-    }
-}
+const openGallery = (kind: Kind) => {
+    imageStore.wanderingPreferences = userProfile.value!.preferences;
+    router.push({ name: 'gallery', params: { kind: kind } })
+};
 
-const patchPreferServer = async (prefer_server: number) => {
-    const response = await userStore.axiosInstance.patch('/users', {
-        prefer_server: prefer_server
-    });
-    if (response.status === 200) await userStore.refreshUser();
-}
-
-const openPicker = (kind: string) => {
-    uploadKind.value = kind;
-    imagePicker.value?.click();
-}
-
-onMounted(async () => {
-    if (!imageStore.images) await imageStore.refreshImages();
-    imagePicker.value?.addEventListener('change', async () => {
-        const file = imagePicker.value?.files?.[0];
-        if (file && uploadKind.value) {
-            const reader = new FileReader();
-            reader.onload = function (ev) {
-                cropperImage.value = ev.target?.result as string;
-                router.push({ name: 'cropper', params: { kind: uploadKind.value } });
-            }
-            reader.readAsDataURL(file);
-        }
-    });
-});
+const bindBtn = (server: AccountServer) => {
+    const isBinded = userStore.userProfile!.accounts[server];
+    const colorSets = { orange: ["bg-orange-500", "hover:bg-orange-600"], blue: ["bg-blue-500", "hover:bg-blue-600"] };
+    const classNames = ["text-white", "font-bold", "py-2", "px-4", "rounded", ...colorSets[isBinded ? 'orange' : 'blue']];
+    return (
+        <RouterLink class={classNames} to={{ name: "bind", params: { server } }}>
+            {isBinded ? '改绑' : '绑定'}
+        </RouterLink>
+    );
+};
 </script>
 <template>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full">
@@ -84,21 +67,21 @@ onMounted(async () => {
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>
-                    {{ userStore.userProfile!.nickname }} ({{ userStore.userProfile!.username }})
+                    {{ userStore.preferAccount!.nickname }} ({{ userStore.userProfile!.username }})
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;">
                     优先使用 <b>{{ serverStore.serverNames[userStore.userProfile!.prefer_server] }}</b> 数据
-                    DXRating: {{ userStore.userProfile!.player_rating }}
+                    DXRating: {{ userStore.preferAccount!.player_rating }}
                 </span>
             </div>
             <div class="flex items-center">
                 <button
                     class="bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-2 px-2 rounded hover:from-pink-600 hover:to-blue-600 text-nowrap"
-                    @click="userStore.attemptUploadScores">
+                    @click="userStore.updateProber">
                     更新查分器
                 </button>
                 <a class="ml-2 bg-red-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-red-600 text-sm cursor-pointer"
-                    @click="userStore.logout">
+                    @click="userStore.logout(true)">
                     <img class="pl-1.5 pt-1" src="../../assets/misc/logout.svg">
                 </a>
             </div>
@@ -116,7 +99,7 @@ onMounted(async () => {
             <div><input v-model="userProfile!.preferences.friend_code"></div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>二维码尺寸</span>
                 <span class="text-gray-600" style="font-size: 12px;">如果机台无法识别, 请增大二维码尺寸</span>
@@ -134,14 +117,14 @@ onMounted(async () => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>背景图片</span>
                 <span class="text-gray-600" style="font-size: 12px;">选择卡面背景图片</span>
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/background')">
+                    @click="openGallery('background')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.background.id">
@@ -150,14 +133,14 @@ onMounted(async () => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>边框图片</span>
                 <span class="text-gray-600" style="font-size: 12px;">选择卡面边框图片</span>
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/frame')">
+                    @click="openGallery('frame')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.frame.id">
@@ -166,14 +149,14 @@ onMounted(async () => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>人物图片</span>
                 <span class="text-gray-600" style="font-size: 12px;">选择卡面人物图片</span>
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/character')">
+                    @click="openGallery('character')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.character.id">
@@ -182,14 +165,14 @@ onMounted(async () => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>通行证图片</span>
                 <span class="text-gray-600" style="font-size: 12px;">选择卡面通行证图片</span>
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer mr-1"
-                    @click="router.push('/gallery/passname')">
+                    @click="openGallery('passname')">
                     <img src="../../assets/misc/images.svg">
                 </a>
                 <select v-model="userProfile!.preferences.passname.id">
@@ -198,7 +181,7 @@ onMounted(async () => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>镭射设置</span>
                 <span class="text-gray-600" style="font-size: 12px;">背景镭射层的显示样式</span>
@@ -285,6 +268,23 @@ onMounted(async () => {
             </div>
             <div><input v-model="userProfile!.preferences.maimai_version"></div>
         </div>
+        <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+        <div class="flex justify-between items-center w-full">
+            <div class="flex flex-col p-2">
+                <span>角色框颜色</span>
+                <span class="text-gray-600" style="font-size: 12px;">覆盖卡面左下方的角色框颜色</span>
+            </div>
+            <div class="flex items-center">
+                <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer -mr-1"
+                    @click="() => userProfile!.preferences.chara_info_color = '#fee37c'">
+                    <img src="../../assets/misc/refresh.svg">
+                </a>
+                <div class="color-preview mr-2"
+                    :style="{ backgroundColor: userProfile!.preferences.chara_info_color || '#FFFFFF' }"></div>
+                <input type="color" class="color-picker bg-white cursor-pointer"
+                    v-model="userProfile!.preferences.chara_info_color">
+            </div>
+        </div>
     </div>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
@@ -303,21 +303,14 @@ onMounted(async () => {
             <div class="flex items-center">
                 <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mr-2"
                     v-if="userStore.userProfile!.prefer_server != 1 && userStore.userProfile!.accounts['1']"
-                    @click="patchPreferServer(1)">
+                    @click="userStore.patchPreferServer(1)">
                     优先
                 </button>
-                <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
-                    v-if="userStore.userProfile!.accounts['1']" @click="router.push('/bind/divingfish')">
-                    改绑
-                </button>
-                <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600" v-else
-                    @click="router.push('/bind/divingfish')">
-                    绑定
-                </button>
+                <component :is="bindBtn(AccountServer.DIVINGFISH)"></component>
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>
                     落雪账户: <b>{{ userStore.userProfile!.accounts['2'] ? '已绑定' : '未绑定' }}
@@ -331,17 +324,10 @@ onMounted(async () => {
                 <div class="flex items-center">
                     <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mr-2"
                         v-if="userStore.userProfile!.prefer_server != 2 && userStore.userProfile!.accounts['2']"
-                        @click="patchPreferServer(2)">
+                        @click="userStore.patchPreferServer(2)">
                         优先
                     </button>
-                    <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
-                        v-if="userStore.userProfile!.accounts['2']" @click="router.push('/bind/lxns')">
-                        改绑
-                    </button>
-                    <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600" v-else
-                        @click="router.push('/bind/lxns')">
-                        绑定
-                    </button>
+                    <component :is="bindBtn(AccountServer.LXNS)"></component>
                 </div>
             </div>
         </div>
@@ -364,7 +350,7 @@ onMounted(async () => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>上传边框</span>
                 <span class="text-gray-600" style="font-size: 12px;">上传自定义边框图片 (768 * 1052)</span>
@@ -377,7 +363,7 @@ onMounted(async () => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>上传人物</span>
                 <span class="text-gray-600" style="font-size: 12px;">上传自定义人物图片 (768 * 1052)</span>
@@ -390,7 +376,7 @@ onMounted(async () => {
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
-        <div class="flex justify-between items-center w-full mt-2">
+        <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>上传PASS</span>
                 <span class="text-gray-600" style="font-size: 12px;">上传自定义PASS图片 (338 * 112)</span>
@@ -405,7 +391,7 @@ onMounted(async () => {
     </div>
     <div class="flex justify-end w-full mt-2 mr-5">
         <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
-            v-on:click="patchPreference">
+            v-on:click="userStore.patchPreferences()">
             保存
         </button>
     </div>

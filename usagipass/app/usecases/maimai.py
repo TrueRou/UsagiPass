@@ -7,6 +7,7 @@ from usagipass.app.models import UserAccount
 from usagipass.app.usecases import crawler
 
 
+# attempt to refresh the usagipass user's rating depends on check_delta
 async def update_rating_passive(username: str):
     with session_ctx() as session:
         accounts = session.exec(select(UserAccount).where(UserAccount.username == username))

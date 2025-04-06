@@ -5,28 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from usagipass.app.models import *
 from usagipass.app.usecases import maimai
+from usagipass.app.usecases.accounts import apply_preference
 from usagipass.app.usecases.authorize import verify_user
 from usagipass.app.database import require_session, partial_update_model, add_model
-from usagipass.app.settings import default_character, default_background, default_frame, default_passname
 
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-
-def apply_default(preferences: UserPreferencePublic, db_preferences: UserPreference, session: Session):
-    # we need to get the image objects from the database
-    character = session.get(Image, db_preferences.character_id or default_character)
-    background = session.get(Image, db_preferences.background_id or default_background)
-    frame = session.get(Image, db_preferences.frame_id or default_frame)
-    passname = session.get(Image, db_preferences.passname_id or default_passname)
-    if None in [character, background, frame, passname]:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Default image not found in database, please contact the administrator"
-        )
-    preferences.character = ImagePublic.model_validate(character)
-    preferences.background = ImagePublic.model_validate(background)
-    preferences.frame = ImagePublic.model_validate(frame)
-    preferences.passname = ImagePublic.model_validate(passname)
 
 
 @router.patch("")
@@ -40,22 +24,18 @@ async def update_user(user_update: UserUpdate, user: User = Depends(verify_user)
 async def get_profile(user: User = Depends(verify_user), session: Session = Depends(require_session)):
     db_accounts = session.exec(select(UserAccount).where(UserAccount.username == user.username)).all()
     db_preference = session.get(UserPreference, user.username)
-    prefer_account = session.exec(
-        select(UserAccount).where(UserAccount.username == user.username, UserAccount.account_server == user.prefer_server)
-    ).first()
     # we need to update the player rating if the user has not updated for 4 hours
     asyncio.ensure_future(maimai.update_rating_passive(user.username))
     if not db_preference:
         db_preference = UserPreference(username=user.username)
         add_model(session, db_preference)
-    preferences = UserPreferencePublic.model_validate(db_preference)
+    preferences = PreferencePublic.model_validate(db_preference)
     accounts = {account.account_server: UserAccountPublic.model_validate(account) for account in db_accounts}
-    apply_default(preferences, db_preference, session)  # apply the default images if the user has not set up
+    apply_preference(preferences, db_preference, session)  # apply the default images if the user has not set up
     user_profile = UserProfile(
         username=user.username,
         prefer_server=user.prefer_server,
-        nickname=prefer_account.nickname,
-        player_rating=prefer_account.player_rating,
+        privilege=user.privilege,
         preferences=preferences,
         accounts=accounts,
     )
@@ -63,17 +43,17 @@ async def get_profile(user: User = Depends(verify_user), session: Session = Depe
 
 
 @router.patch("/preference")
-async def update_profile(
-    preference: UserPreferencePublic,
+async def update_preference(
+    preference: PreferencePublic,
     user: User = Depends(verify_user),
     session: Session = Depends(require_session),
 ):
     db_preference = session.get(UserPreference, user.username)
     if not db_preference:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User has not set up for his preference")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户尚未设置其偏好")
     if db_preference.username != user.username:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this preference")
-    update_preference = UserPreferenceUpdate(
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="您不是该偏好设置的所有者")
+    update_preference = PreferenceUpdate(
         **preference.model_dump(exclude={"character", "background", "frame", "passname"}),
         character_id=preference.character.id if preference.character else None,
         background_id=preference.background.id if preference.background else None,

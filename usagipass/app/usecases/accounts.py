@@ -1,12 +1,25 @@
-from datetime import datetime
 from httpx import ConnectError, ReadTimeout
 from fastapi import HTTPException, status
 from sqlmodel import Session
 
 from usagipass.app.database import async_httpx_ctx
-from usagipass.app.logging import Ansi, log
-from usagipass.app.models import AccountServer, User, UserAccount
+from usagipass.app.models import AccountServer, Image, ImagePublic, PreferencePublic, User, UserAccount, UserPreference
+from usagipass.app.settings import default_background, default_character, default_frame, default_passname
 from usagipass.app.usecases.crawler import fetch_rating_retry
+
+
+def apply_preference(preferences: PreferencePublic, db_preferences: UserPreference, session: Session):
+    # we need to get the image objects from the database
+    character = session.get(Image, db_preferences.character_id or default_character)
+    background = session.get(Image, db_preferences.background_id or default_background)
+    frame = session.get(Image, db_preferences.frame_id or default_frame)
+    passname = session.get(Image, db_preferences.passname_id or default_passname)
+    if None in [character, background, frame, passname]:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="默认图片未在数据库中找到，请联系开发者")
+    preferences.character = ImagePublic.model_validate(character)
+    preferences.background = ImagePublic.model_validate(background)
+    preferences.frame = ImagePublic.model_validate(frame)
+    preferences.passname = ImagePublic.model_validate(passname)
 
 
 async def auth_divingfish(account_name: str, account_password: str) -> dict:
@@ -25,7 +38,7 @@ async def auth_divingfish(account_name: str, account_password: str) -> dict:
 async def auth_lxns(personal_token: str) -> dict:
     async with async_httpx_ctx() as client:
         try:
-            headers = {"X-User-Token": personal_token.encode()}
+            headers = {"X-User-Token": personal_token}
             response = (await client.get("https://maimai.lxns.net/api/v0/user/maimai/player", headers=headers)).json()
             if not response["success"]:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="落雪服务个人令牌错误")
@@ -34,11 +47,14 @@ async def auth_lxns(personal_token: str) -> dict:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="无法连接到落雪查分器服务")
 
 
-async def merge_user(session: Session, account_name: str, server: AccountServer) -> User:
+def merge_user(session: Session, account_name: str, server: AccountServer) -> User:
     account = session.get(UserAccount, (account_name, server))
-    user = session.get(User, account.username) if account else User(username=account_name, prefer_server=server)
-    user.prefer_server = server
-    return session.merge(user)
+    if account and (user := session.get(User, account.username)):
+        user.prefer_server = server
+        return user
+    else:
+        user = User(username=account_name, prefer_server=server)
+        return session.merge(user)
 
 
 async def merge_divingfish(session: Session, user: User, account_name: str, account_password: str) -> UserAccount:

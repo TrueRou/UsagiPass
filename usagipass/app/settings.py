@@ -29,7 +29,7 @@ default_background = os.environ.get("DEFAULT_BACKGROUND", "default")
 default_frame = os.environ.get("DEFAULT_FRAME", "default")
 default_passname = os.environ.get("DEFAULT_PASSNAME", "default")
 
-# server settings
-maimai_version = os.environ.get("MAIMAI_VERSION", "[maimaiDX]1.45-0001")
-server_motd = os.environ.get("SERVER_MOTD", "Welcome to UsagiPass API server!")
-author_motd = os.environ.get("AUTHOR_MOTD", "Authored by TuRou")
+# refresh settings
+refresh_hour_threshold = int(os.environ.get("REFRESH_HOUR_THRESHOLD", 24))
+refresh_hour_active = os.environ.get("REFRESH_HOUR_ACTIVE", "10-17")
+refresh_hour_inactive = os.environ.get("REFRESH_HOUR_INACTIVE", "0-9,18-23")

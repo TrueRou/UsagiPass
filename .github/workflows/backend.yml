@@ -6,7 +6,9 @@ on:
     branches:
       - main
     paths:
-      - "pyproject.toml" # we consider version has been bumped
+      - "pyproject.toml" # upstream has been bumped
+      - "usagipass/**" # backend module has been updated
+      - "alembic/**" # database migration has been updated
 
 jobs:
   backend:

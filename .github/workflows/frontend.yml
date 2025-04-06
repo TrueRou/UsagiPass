@@ -2,6 +2,7 @@ name: UsagiPass Frontend CI
 
 env:
   VITE_URL: https://up.turou.fun/api
+  VITE_DOCS: https://dxpass.turou.fun
 
 on:
   workflow_dispatch:
@@ -9,7 +10,7 @@ on:
     branches:
       - main
     paths:
-      - "pyproject.toml" # we consider version has been bumped
+      - "web/**" # frontend module has been updated
 
 jobs:
   frontend:

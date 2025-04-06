@@ -1,15 +1,11 @@
 import io
-import os
-import sys
 import uuid
 import PIL
 import httpx
 from pathlib import Path
 from sqlmodel import Session, and_, select
-from PIL import Image as PILImage, ImageChops, ImageFile
-
-sys.path.insert(0, os.path.dirname(os.getcwd()))
-os.chdir(os.path.dirname(os.getcwd()))
+from PIL import Image as PILImage, ImageChops
+from PIL.ImageFile import ImageFile
 
 from usagipass.app.logging import log, Ansi
 from usagipass.app.api.images import images_folder
@@ -38,10 +34,10 @@ def _parse_dictionary(file: Path):
     if file.exists():
         with open(file, "r", encoding="utf-8") as f:
             for line in f.read().splitlines():
-                file, name = line.split(" ", maxsplit=1)
-                file1 = file.replace("cardChara0", "UI_CardChara_")
+                file_str, name = line.split(" ", maxsplit=1)
+                file1 = file_str.replace("cardChara0", "UI_CardChara_")
                 result[file1] = name
-                file2 = file.replace("cardChara00", "UI_CardChara_")  # SBGA what are you doing?
+                file2 = file_str.replace("cardChara00", "UI_CardChara_")  # SBGA what are you doing?
                 result[file2] = name
     return result
 
@@ -101,8 +97,8 @@ def import_images(kind: str, session: Session):
     log(f"Imported {success + failed} images of {kind}, {success} success ({overwritten} overwritten) and {failed} failed", Ansi.LGREEN)
 
 
-if __name__ == "__main__":
-    init_db()  # ensure the database is created
+def main():
+    init_db(skip_migration=True)  # ensure the database is created
     with session_ctx() as session:
         import_images("background", session)
         import_images("frame", session)
@@ -111,3 +107,7 @@ if __name__ == "__main__":
         import_images("mask", session)
         session.commit()
     log("Import process complete.", Ansi.LGREEN)
+
+
+if __name__ == "__main__":
+    main()

@@ -36,9 +36,16 @@ export default defineConfig({
         items: [
           { text: '实现方式', link: '/implementation' },
           { text: '参与开发', link: '/development' },
-          { text: '特别感谢', link: '/thanks' }
         ]
-      }
+      },
+      {
+        text: '其他',
+        items: [
+          { text: '隐私政策', link: '/privacy-policy' },
+          { text: '服务条款', link: '/terms-of-use' },
+          { text: '特别感谢', link: '/thanks' },
+        ],
+      },
     ],
 
     footer: {

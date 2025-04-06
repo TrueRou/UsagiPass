@@ -2,7 +2,6 @@ from datetime import datetime
 from mitmproxy.http import HTTPFlow, Response
 
 from usagipass.app import settings
-from usagipass.app.logging import Ansi, log
 
 
 class WechatWahlapAddon:
@@ -26,7 +25,7 @@ class WechatWahlapAddon:
         # example: http://wq.sys-all.cn/qrcode/req/MAID241020A01.html?l=1730217600&t=E8889E
         if flow.request.host in self.sysall_hosts and flow.request.path.find("qrcode") != -1 and flow.request.path.find("req") != -1:
             maid = flow.request.path_components[2].replace(".html", "")
-            timestamp = int(flow.request.query.get("l"))
+            timestamp = int(flow.request.query.get("l") or 0)
             timestr = datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
             location = settings.app_url + f"?maid={maid}&time={timestr}"
             flow.response = Response.make(302, headers={"Location": location})

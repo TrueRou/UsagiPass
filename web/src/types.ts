@@ -1,29 +1,41 @@
-interface ImagePublic {
+type Kind = "background" | "frame" | "character" | "passname" | "mask"
+
+enum Privilege {
+    BANNED = 1,
+    NORMAL = 2,
+    ADMIN = 3
+}
+
+enum AccountServer {
+    DIVINGFISH = 1,
+    LXNS = 2,
+    WECHAT = 3
+}
+
+interface Image {
     id: string;
     name: string;
+    kind: Kind;
     uploaded_by?: string;
 }
 
-interface ImageDetail extends ImagePublic {
-    kind: string;
-}
-
-interface UserPreferencePublic {
-    character: ImagePublic;
-    background: ImagePublic;
-    frame: ImagePublic;
-    passname: ImagePublic;
+interface Preference {
+    character: Image;
+    background: Image;
+    frame: Image;
+    passname: Image;
     maimai_version?: string;
     simplified_code?: string;
     character_name?: string;
     friend_code?: string;
     display_name?: string;
-    dx_rating?: number;
+    dx_rating?: string;
     qr_size?: number;
     mask_type?: number;
+    chara_info_color: string;
 }
 
-interface UserAccountPublic {
+interface UserAccount {
     account_name: string;
     nickname: string;
     player_rating: number;
@@ -31,17 +43,10 @@ interface UserAccountPublic {
 
 interface UserProfile {
     username: string;
-    prefer_server: number;
-    nickname: string;
-    player_rating: number;
-    preferences: UserPreferencePublic;
-    accounts: Record<string, UserAccountPublic>;
-}
-
-interface ServerMessage {
-    maimai_version: string;
-    server_motd: string;
-    author_motd: string;
+    prefer_server: AccountServer;
+    privilege: Privilege;
+    preferences: Preference;
+    accounts: Record<AccountServer, UserAccount>;
 }
 
 interface CrawlerResult {
@@ -53,3 +58,7 @@ interface CrawlerResult {
     err_msg: string;
     elapsed_time: number;
 }
+
+
+export { Privilege, AccountServer };
+export type { Kind, Preference, UserAccount, UserProfile, CrawlerResult, Image };

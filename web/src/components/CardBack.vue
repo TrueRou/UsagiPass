@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useServerStore } from '@/stores/server';
+import type { Image, Preference } from '@/types';
 
 const props = defineProps<{
-    preferences: UserPreferencePublic;
+    preferences: Preference;
 }>()
 
-const mask = ref<ImageDetail | undefined>(undefined);
+const mask = ref<Image | undefined>(undefined);
 const maskEnabled = computed(() => mask.value !== undefined)
-const r = (image?: ImagePublic) => import.meta.env.VITE_URL + "/images/" + image?.id;
+const r = (image?: Image) => import.meta.env.VITE_URL + "/images/" + image?.id;
 
 if (props.preferences.mask_type !== 0) {
     const serverStore = useServerStore();
     const response = await serverStore.axiosInstance.get(`/images/${props.preferences.character.id}/related`);
-    mask.value = (response.data as ImageDetail[]).filter(image => image.kind === 'mask').pop();
+    mask.value = (response.data as Image[]).filter(image => image.kind === 'mask').pop();
 }
 </script>
 <template>
