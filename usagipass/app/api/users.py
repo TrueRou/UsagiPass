@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+import uuid
 from sqlmodel import Session, select
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -32,8 +33,12 @@ async def get_profile(user: User = Depends(verify_user), session: Session = Depe
     preferences = PreferencePublic.model_validate(db_preference)
     accounts = {account.account_server: UserAccountPublic.model_validate(account) for account in db_accounts}
     apply_preference(preferences, db_preference, session)  # apply the default images if the user has not set up
+    if not user.api_token:
+        user.api_token = uuid.uuid4().hex
+        session.commit()
     user_profile = UserProfile(
         username=user.username,
+        api_token=user.api_token,
         prefer_server=user.prefer_server,
         privilege=user.privilege,
         preferences=preferences,

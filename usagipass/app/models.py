@@ -58,6 +58,7 @@ class User(SQLModel, table=True):
 
     username: str = Field(primary_key=True)
     prefer_server: AccountServer
+    api_token: str | None = Field(default=None, index=True, unique=True)
     privilege: Privilege = Field(default=Privilege.NORMAL, sa_column_kwargs={"server_default": "NORMAL"})
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -125,6 +126,7 @@ class PreferenceUpdate(PreferenceBase):
 
 class UserProfile(SQLModel):
     username: str
+    api_token: str
     prefer_server: AccountServer
     privilege: Privilege
     preferences: PreferencePublic

@@ -1,5 +1,6 @@
 <script setup lang="tsx">
 import { useImageStore } from '@/stores/image';
+import { useNotificationStore } from '@/stores/notification';
 import { useServerStore } from '@/stores/server';
 import { useUserStore } from '@/stores/user';
 import { AccountServer, type Kind } from '@/types';
@@ -10,6 +11,7 @@ const router = useRouter();
 const userStore = useUserStore();
 const imageStore = useImageStore();
 const serverStore = useServerStore();
+const notificationStore = useNotificationStore();
 
 const imagePicker = useTemplateRef('image-picker');
 const userProfile = ref(userStore.userProfile);
@@ -19,8 +21,18 @@ const openPicker = (kind: Kind) => userStore.openImagePicker(kind, imagePicker.v
 
 const openGallery = (kind: Kind) => {
     imageStore.wanderingPreferences = userProfile.value!.preferences;
-    router.push({ name: 'gallery', params: { kind: kind } })
+    router.push({ name: 'gallery', params: { kind: kind } });
 };
+
+const copyToken = () => {
+    if (!userStore.userProfile?.api_token) {
+        notificationStore.error('复制失败', 'Token不可用');
+        return;
+    }
+    navigator.clipboard.writeText(userStore.userProfile.api_token)
+        .then(() => notificationStore.success('复制成功', 'Token已复制到剪贴板'))
+        .catch(() => notificationStore.error('复制失败', '无法复制Token'))
+}
 
 const bindBtn = (server: AccountServer) => {
     const isBinded = userStore.userProfile!.accounts[server];
@@ -328,6 +340,25 @@ const bindBtn = (server: AccountServer) => {
                         优先
                     </button>
                     <component :is="bindBtn(AccountServer.LXNS)"></component>
+                </div>
+            </div>
+        </div>
+        <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+        <div class="flex justify-between items-center w-full">
+            <div class="flex flex-col p-2">
+                <span>
+                    联动账户: <b>可绑定</b>
+                </span>
+                <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile?.api_token">
+                    联动 Token 已生成
+                </span>
+            </div>
+            <div class="flex items-center">
+                <div class="flex items-center">
+                    <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+                        @click="copyToken()">
+                        复制
+                    </button>
                 </div>
             </div>
         </div>

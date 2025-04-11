@@ -43,6 +43,7 @@ interface UserAccount {
 
 interface UserProfile {
     username: string;
+    api_token: string;
     prefer_server: AccountServer;
     privilege: Privilege;
     preferences: Preference;
