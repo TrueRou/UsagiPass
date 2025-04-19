@@ -5,7 +5,7 @@ import { computed, ref, type Ref } from "vue"
 import { type Router } from "vue-router"
 import { useImageStore } from "./image"
 import { useNotificationStore } from "./notification"
-import type { AccountServer, Kind, UserProfile } from "@/types"
+import { AccountServer, type Kind, type UserProfile } from "@/types"
 
 export const useUserStore = defineStore('user', () => {
     const imageStore = useImageStore();
@@ -55,7 +55,7 @@ export const useUserStore = defineStore('user', () => {
 
     async function bind(server: AccountServer, username: string, password: string) {
         try {
-            await axiosInstance.value.post(`/accounts/bind/${server}`, new URLSearchParams({ username, password }));
+            await axiosInstance.value.post(`/accounts/bind/${AccountServer[server].toLowerCase()}`, new URLSearchParams({ username, password }));
             await refreshUser();
             notificationStore.success("绑定成功", `查分器账户绑定成功`);
             router.back();
