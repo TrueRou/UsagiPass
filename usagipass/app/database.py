@@ -24,7 +24,7 @@ def init_db(skip_migration: bool = False) -> None:
         with session_ctx() as session:
             session.execute(text("SELECT 1"))
     except OperationalError:
-        log("Failed to connect to the database.", Ansi.RED)
+        log("Failed to connect to the database.", Ansi.LRED)
     if not skip_migration:
         try:
             with engine.connect() as connection:
@@ -36,7 +36,7 @@ def init_db(skip_migration: bool = False) -> None:
                     command.stamp(AlembicConfig(config_args={"script_location": "alembic"}), "9cdcf6f8ca8c")
             command.upgrade(AlembicConfig(config_args={"script_location": "alembic"}), "head")
         except Exception as e:
-            log(f"Failed to run database migration: {e}", Ansi.RED)
+            log(f"Failed to run database migration: {e}", Ansi.LRED)
 
 
 # https://stackoverflow.com/questions/75487025/how-to-avoid-creating-multiple-sessions-when-using-fastapi-dependencies-with-sec

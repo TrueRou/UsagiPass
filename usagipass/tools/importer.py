@@ -63,7 +63,7 @@ def import_images(kind: str, session: Session):
     overwritten = 0
 
     if kind not in image_kinds.keys():
-        log(f"Invalid kind of image: {kind}", Ansi.RED)
+        log(f"Invalid kind of image: {kind}", Ansi.LRED)
         return
 
     images_path.mkdir(exist_ok=True)  # create the folder if it doesn't exist

@@ -21,7 +21,7 @@ jobs:
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SCRIPT_AFTER: "cd /UsagiPass && poetry install && pm2 restart up-backend"
+          SCRIPT_AFTER: "cd /UsagiPass && poetry install && pm2 restart usagipass"
           ARGS: '-rlgoDzvc -i --delete --exclude=".data" --exclude=".venv" --exclude=".env"'
           SOURCE: "/"
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}

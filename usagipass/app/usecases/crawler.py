@@ -52,7 +52,8 @@ async def fetch_wechat(username: str, cookies: Cookies) -> tuple[list[Score], Cr
         result = CrawlerResult(account_server=AccountServer.WECHAT, success=True, scores_num=len(scores.scores))
         return scores.as_distinct.scores, result
     except Exception as e:
-        log(f"Failed to fetch scores for {username}: {repr(e)}", Ansi.RED)
+        traceback.print_exc()
+        log(f"Failed to fetch scores from wechat for {username}.", Ansi.LRED)
         return [], CrawlerResult(account_server=AccountServer.WECHAT, success=False, scores_num=0, err_msg=repr(e))
 
 
@@ -65,8 +66,8 @@ async def update_rating(account: UserAccount, result: CrawlerResult = CrawlerRes
             log(f"{account.username}({account.account_server.name} {account.account_name}) {result.from_rating} -> {result.to_rating})", Ansi.GREEN)
         except Exception as e:
             result.to_rating = result.from_rating
-            log(f"Failed to update rating for {account.username}: {repr(e)}", Ansi.RED)
-            log(traceback.format_exc(), Ansi.RED)
+            traceback.print_exc()
+            log(f"Failed to update rating for {account.username}({account.account_server.name} {account.account_name}).", Ansi.LRED)
         account.player_rating = result.to_rating
         account.updated_at = datetime.utcnow()
         session.commit()
@@ -79,8 +80,8 @@ async def upload_server(account: UserAccount, scores: list[Score]) -> CrawlerRes
         await upload_server_retry(account, scores)
         return CrawlerResult(account_server=account.account_server, success=True, scores_num=len(scores), elapsed_time=time.time() - begin)
     except Exception as e:
-        log(f"Failed to upload {account.account_server.name} for {account.username}: {repr(e)}", Ansi.RED)
-        log(traceback.format_exc(), Ansi.RED)
+        traceback.print_exc()
+        log(f"Failed to upload {account.account_server.name} for {account.username}.", Ansi.LRED)
         return CrawlerResult(account_server=account.account_server, success=False, scores_num=len(scores), err_msg=str(e))
 
 
