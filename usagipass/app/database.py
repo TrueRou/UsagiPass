@@ -1,20 +1,36 @@
 import contextlib
+from urllib.parse import unquote, urlparse
 import httpx
 from typing import Generator, TypeVar
 from fastapi import Request
 from maimai_py import MaimaiClient
+from maimai_py.utils.sentinel import UNSET
 from sqlalchemy import text
 from alembic import command
+from aiocache import RedisCache
+from aiocache.serializers import PickleSerializer
 from alembic.config import Config as AlembicConfig
 from sqlalchemy.exc import OperationalError
 from sqlmodel import SQLModel, create_engine, Session
+
 
 from usagipass.app import settings
 from usagipass.app.logging import log, Ansi
 
 
 engine = create_engine(settings.mysql_url)
-maimai_client = MaimaiClient()
+redis_backend = UNSET
+if settings.redis_url:
+    redis_url = urlparse(settings.redis_url)
+    redis_backend = RedisCache(
+        serializer=PickleSerializer(),
+        endpoint=unquote(redis_url.hostname or "localhost"),
+        port=redis_url.port or 6379,
+        password=redis_url.password,
+        db=int(unquote(redis_url.path).replace("/", "")),
+    )
+maimai_client = MaimaiClient(cache=redis_backend)
+httpx_client = httpx.AsyncClient(proxy=settings.httpx_proxy, timeout=20)
 
 V = TypeVar("V")
 
@@ -56,12 +72,6 @@ def require_session(request: Request):
 @contextlib.contextmanager
 def session_ctx() -> Generator[Session, None, None]:
     with Session(engine, expire_on_commit=False) as session:
-        yield session
-
-
-@contextlib.asynccontextmanager
-async def async_httpx_ctx():
-    async with httpx.AsyncClient(proxy=settings.httpx_proxy, timeout=20) as session:
         yield session
 
 

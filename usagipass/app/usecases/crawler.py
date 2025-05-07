@@ -5,8 +5,8 @@ from httpx import Cookies
 from datetime import datetime
 from sqlmodel import Session, select
 from tenacity import retry, stop_after_attempt
-from maimai_py.models import Score, Player, MaimaiScores
-from maimai_py import PlayerIdentifier, WechatProvider, DivingFishProvider, LXNSProvider
+from maimai_py.models import Score, Player
+from maimai_py import PlayerIdentifier, WechatProvider, DivingFishProvider, LXNSProvider, MaimaiScores
 
 from usagipass.app.logging import Ansi, log
 from usagipass.app.database import session_ctx, maimai_client
@@ -50,7 +50,8 @@ async def fetch_wechat(username: str, cookies: Cookies) -> tuple[list[Score], Cr
     try:
         scores = await fetch_wechat_retry(cookies)
         result = CrawlerResult(account_server=AccountServer.WECHAT, success=True, scores_num=len(scores.scores))
-        return scores.as_distinct.scores, result
+        distinct_scores = await scores.get_distinct()
+        return distinct_scores.scores, result
     except Exception as e:
         traceback.print_exc()
         log(f"Failed to fetch scores from wechat for {username}.", Ansi.LRED)

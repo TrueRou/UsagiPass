@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 
 from usagipass.app import database, settings
 from usagipass.app.logging import log, Ansi
-from usagipass.app.usecases import scheduler
+from usagipass.app.database import maimai_client
 from usagipass.app.usecases.addons import WechatWahlapAddon
 
 
@@ -58,7 +58,7 @@ def init_middlewares(asgi_app: FastAPI) -> None:
 async def init_lifespan(asgi_app: FastAPI):
     database.init_db()
     asyncio.create_task(MitmMaster().run())
-    asyncio.create_task(scheduler.init_sched())
+    asyncio.create_task(maimai_client.songs(curve_provider=None))
     log("Startup process complete.", Ansi.LGREEN)
     yield  # Above: Startup process Below: Shutdown process
     database.engine.dispose()

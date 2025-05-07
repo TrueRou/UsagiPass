@@ -16,6 +16,7 @@ mitm_port = int(os.environ.get("MITM_PORT", 2560))
 
 # database settings
 mysql_url = os.environ["MYSQL_URL"]
+redis_url = os.environ.get("REDIS_URL", None) or None
 jwt_secret = os.environ.get("JWT_SECRET") or "change_me_in_production_enviroment"
 httpx_proxy = os.environ.get("HTTPX_PROXY", None) or None
 arcade_proxy = os.environ.get("ARCADE_PROXY", None) or None

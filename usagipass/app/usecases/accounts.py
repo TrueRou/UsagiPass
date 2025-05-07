@@ -2,7 +2,7 @@ from httpx import ConnectError, ReadTimeout
 from fastapi import HTTPException, status
 from sqlmodel import Session
 
-from usagipass.app.database import async_httpx_ctx
+from usagipass.app.database import httpx_client
 from usagipass.app.models import AccountServer, Image, ImagePublic, PreferencePublic, User, UserAccount, UserPreference
 from usagipass.app.settings import default_background, default_character, default_frame, default_passname
 from usagipass.app.usecases.crawler import fetch_rating_retry
@@ -23,28 +23,26 @@ def apply_preference(preferences: PreferencePublic, db_preferences: UserPreferen
 
 
 async def auth_divingfish(account_name: str, account_password: str) -> dict:
-    async with async_httpx_ctx() as client:
-        try:
-            json = {"username": account_name, "password": account_password}
-            response = await client.post("https://www.diving-fish.com/api/maimaidxprober/login", json=json)
-            if "errcode" in response.json():
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="水鱼查分器用户名或密码错误")
-            profile = (await client.get("https://www.diving-fish.com/api/maimaidxprober/player/profile", cookies=response.cookies)).json()
-            return profile
-        except (ConnectError, ReadTimeout):
-            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="无法连接到水鱼查分器服务")
+    try:
+        json = {"username": account_name, "password": account_password}
+        response = await httpx_client.post("https://www.diving-fish.com/api/maimaidxprober/login", json=json)
+        if "errcode" in response.json():
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="水鱼查分器用户名或密码错误")
+        profile = (await httpx_client.get("https://www.diving-fish.com/api/maimaidxprober/player/profile", cookies=response.cookies)).json()
+        return profile
+    except (ConnectError, ReadTimeout):
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="无法连接到水鱼查分器服务")
 
 
 async def auth_lxns(personal_token: str) -> dict:
-    async with async_httpx_ctx() as client:
-        try:
-            headers = {"X-User-Token": personal_token}
-            response = (await client.get("https://maimai.lxns.net/api/v0/user/maimai/player", headers=headers)).json()
-            if not response["success"]:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="落雪服务个人令牌错误")
-            return response["data"]
-        except (ConnectError, ReadTimeout):
-            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="无法连接到落雪查分器服务")
+    try:
+        headers = {"X-User-Token": personal_token}
+        response = (await httpx_client.get("https://maimai.lxns.net/api/v0/user/maimai/player", headers=headers)).json()
+        if not response["success"]:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="落雪服务个人令牌错误")
+        return response["data"]
+    except (ConnectError, ReadTimeout):
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="无法连接到落雪查分器服务")
 
 
 def merge_user(session: Session, account_name: str, server: AccountServer) -> User:
