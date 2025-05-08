@@ -1,6 +1,8 @@
-from httpx import ConnectError, ReadTimeout
+import asyncio
+
 from fastapi import HTTPException, status
-from sqlmodel import Session
+from httpx import ConnectError, ReadTimeout
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from usagipass.app.database import httpx_client
 from usagipass.app.models import AccountServer, Image, ImagePublic, PreferencePublic, User, UserAccount, UserPreference
@@ -8,12 +10,14 @@ from usagipass.app.settings import default_background, default_character, defaul
 from usagipass.app.usecases.crawler import fetch_rating_retry
 
 
-def apply_preference(preferences: PreferencePublic, db_preferences: UserPreference, session: Session):
+async def apply_preference(preferences: PreferencePublic, db_preferences: UserPreference, session: AsyncSession):
     # we need to get the image objects from the database
-    character = session.get(Image, db_preferences.character_id or default_character)
-    background = session.get(Image, db_preferences.background_id or default_background)
-    frame = session.get(Image, db_preferences.frame_id or default_frame)
-    passname = session.get(Image, db_preferences.passname_id or default_passname)
+    character, background, frame, passname = await asyncio.gather(
+        asyncio.create_task(session.get(Image, db_preferences.character_id or default_character)),
+        asyncio.create_task(session.get(Image, db_preferences.background_id or default_background)),
+        asyncio.create_task(session.get(Image, db_preferences.frame_id or default_frame)),
+        asyncio.create_task(session.get(Image, db_preferences.passname_id or default_passname)),
+    )
     if None in [character, background, frame, passname]:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="默认图片未在数据库中找到，请联系开发者")
     preferences.character = ImagePublic.model_validate(character)
@@ -45,18 +49,18 @@ async def auth_lxns(personal_token: str) -> dict:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="无法连接到落雪查分器服务")
 
 
-def merge_user(session: Session, account_name: str, server: AccountServer) -> User:
-    account = session.get(UserAccount, (account_name, server))
-    if account and (user := session.get(User, account.username)):
+async def merge_user(session: AsyncSession, account_name: str, server: AccountServer) -> User:
+    account = await session.get(UserAccount, (account_name, server))
+    if account and (user := await session.get(User, account.username)):
         user.prefer_server = server
         return user
     else:
         user = User(username=account_name, prefer_server=server)
-        return session.merge(user)
+        return await session.merge(user)
 
 
-async def merge_divingfish(session: Session, user: User, account_name: str, account_password: str) -> UserAccount:
-    account = session.get(UserAccount, (account_name, AccountServer.DIVING_FISH))
+async def merge_divingfish(session: AsyncSession, user: User, account_name: str, account_password: str) -> UserAccount:
+    account = await session.get(UserAccount, (account_name, AccountServer.DIVING_FISH))
     if account and account.username != user.username:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"该水鱼账号已被其他账号 {user.username} 绑定")
     profile = await auth_divingfish(account_name, account_password)
@@ -69,14 +73,14 @@ async def merge_divingfish(session: Session, user: User, account_name: str, acco
         bind_qq=profile["bind_qq"],
     )
     new_account.player_rating = await fetch_rating_retry(new_account)
-    session.merge(new_account)
+    asyncio.create_task(session.merge(new_account))
     return new_account
 
 
-async def merge_lxns(session: Session, user: User, personal_token: str) -> UserAccount:
+async def merge_lxns(session: AsyncSession, user: User, personal_token: str) -> UserAccount:
     profile = await auth_lxns(personal_token)
     account_name = str(profile["friend_code"])
-    account = session.get(UserAccount, (account_name, AccountServer.LXNS))
+    account = await session.get(UserAccount, (account_name, AccountServer.LXNS))
     if account and account.username != user.username:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"该落雪账号已被其他账号 {user.username} 绑定")
     new_account = UserAccount(
@@ -87,5 +91,5 @@ async def merge_lxns(session: Session, user: User, personal_token: str) -> UserA
         nickname=profile["name"],
     )
     new_account.player_rating = await fetch_rating_retry(new_account)
-    session.merge(new_account)
+    asyncio.create_task(session.merge(new_account))
     return new_account

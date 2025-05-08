@@ -1,24 +1,28 @@
+import asyncio
 import contextlib
+from typing import AsyncGenerator, Generator, TypeVar
 from urllib.parse import unquote, urlparse
+
 import httpx
-from typing import Generator, TypeVar
+from aiocache import RedisCache
+from aiocache.serializers import PickleSerializer
 from fastapi import Request
 from maimai_py import MaimaiClient
 from maimai_py.utils.sentinel import UNSET
 from sqlalchemy import text
-from alembic import command
-from aiocache import RedisCache
-from aiocache.serializers import PickleSerializer
-from alembic.config import Config as AlembicConfig
 from sqlalchemy.exc import OperationalError
-from sqlmodel import SQLModel, create_engine, Session
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.pool import AsyncAdaptedQueuePool, QueuePool
+from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-
+from alembic import command
+from alembic.config import Config as AlembicConfig
 from usagipass.app import settings
-from usagipass.app.logging import log, Ansi
+from usagipass.app.logging import Ansi, log
 
-
-engine = create_engine(settings.mysql_url)
+engine = create_engine(settings.mysql_url, poolclass=QueuePool)
+async_engine = create_async_engine(settings.mysql_url.replace("mysql+pymysql", "mysql+aiomysql"), poolclass=AsyncAdaptedQueuePool)
 redis_backend = UNSET
 if settings.redis_url:
     redis_url = urlparse(settings.redis_url)
@@ -33,6 +37,18 @@ maimai_client = MaimaiClient(cache=redis_backend)
 httpx_client = httpx.AsyncClient(proxy=settings.httpx_proxy, timeout=20)
 
 V = TypeVar("V")
+
+
+@contextlib.asynccontextmanager
+async def async_session_ctx() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSession(async_engine, expire_on_commit=False) as session:
+        yield session
+
+
+@contextlib.contextmanager
+def session_ctx() -> Generator[Session, None, None]:
+    with Session(engine, expire_on_commit=False) as session:
+        yield session
 
 
 def init_db(skip_migration: bool = False) -> None:
@@ -59,7 +75,7 @@ def init_db(skip_migration: bool = False) -> None:
 def register_middleware(asgi_app):
     @asgi_app.middleware("http")
     async def session_middleware(request: Request, call_next):
-        with Session(engine, expire_on_commit=False) as session:
+        async with async_session_ctx() as session:
             request.state.session = session
             response = await call_next(request)
             return response
@@ -69,22 +85,16 @@ def require_session(request: Request):
     return request.state.session
 
 
-@contextlib.contextmanager
-def session_ctx() -> Generator[Session, None, None]:
-    with Session(engine, expire_on_commit=False) as session:
-        yield session
-
-
-def add_model(session: Session, *models):
+async def add_model(session: AsyncSession, *models):
     [session.add(model) for model in models if model]
-    session.commit()
-    [session.refresh(model) for model in models if model]
+    await session.flush()
+    await asyncio.gather(*[session.refresh(model) for model in models if model])
 
 
-def partial_update_model(session: Session, item: SQLModel, updates: SQLModel):
+async def partial_update_model(session: AsyncSession, item: SQLModel, updates: SQLModel):
     if item and updates:
         update_data = updates.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             setattr(item, key, value)
-        session.commit()
-        session.refresh(item)
+        await session.flush()
+        await session.refresh(item)

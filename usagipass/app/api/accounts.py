@@ -1,59 +1,58 @@
 import asyncio
 from typing import Annotated
-from sqlmodel import Session
-from httpx import ConnectError, ReadTimeout
-from fastapi.security import OAuth2PasswordRequestForm
+
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+from httpx import ConnectError, ReadTimeout
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from usagipass.app.usecases import crawler
-from usagipass.app.usecases.crawler import CrawlerResult
-from usagipass.app.database import require_session, httpx_client
+from usagipass.app.database import httpx_client, require_session
 from usagipass.app.models import AccountServer, User
-from usagipass.app.usecases import accounts, authorize, maimai
+from usagipass.app.usecases import accounts, authorize, crawler, maimai
 from usagipass.app.usecases.authorize import verify_user
-
+from usagipass.app.usecases.crawler import CrawlerResult
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
 
 
 @router.post("/token/divingfish")
-async def get_token_divingfish(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
+async def get_token_divingfish(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: AsyncSession = Depends(require_session)):
     account_name = form_data.username
     if await accounts.auth_divingfish(account_name, form_data.password):
-        user = accounts.merge_user(session, account_name, AccountServer.DIVING_FISH)
+        user = await accounts.merge_user(session, account_name, AccountServer.DIVING_FISH)
         await accounts.merge_divingfish(session, user, account_name, form_data.password)
-        session.commit()
+        await session.commit()
         return authorize.grant_user(user)
 
 
 @router.post("/token/lxns")
-async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session)):
+async def get_token_lxns(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: AsyncSession = Depends(require_session)):
     personal_token = form_data.password
     if profile := await accounts.auth_lxns(personal_token):
         account_name = str(profile["friend_code"])
-        user = accounts.merge_user(session, account_name, AccountServer.LXNS)
+        user = await accounts.merge_user(session, account_name, AccountServer.LXNS)
         await accounts.merge_lxns(session, user, personal_token)
-        session.commit()
+        await session.commit()
         return authorize.grant_user(user)
 
 
 @router.post("/bind/divingfish")
 async def bind_diving(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session), user: User = Depends(verify_user)
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: AsyncSession = Depends(require_session), user: User = Depends(verify_user)
 ):
     await accounts.merge_divingfish(session, user, form_data.username, form_data.password)
-    asyncio.ensure_future(maimai.update_rating_passive(user.username))
-    session.commit()
+    asyncio.create_task(maimai.update_rating_passive(user.username))
+    await session.commit()
 
 
 @router.post("/bind/lxns")
 async def bind_lxns(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(require_session), user: User = Depends(verify_user)
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: AsyncSession = Depends(require_session), user: User = Depends(verify_user)
 ):
     personal_token = form_data.password
     await accounts.merge_lxns(session, user, personal_token)
-    asyncio.ensure_future(maimai.update_rating_passive(user.username))
-    session.commit()
+    asyncio.create_task(maimai.update_rating_passive(user.username))
+    await session.commit()
 
 
 @router.post("/update/oauth")
@@ -75,7 +74,7 @@ async def update_prober_callback(
     code: str,
     state: str,
     user: User = Depends(verify_user),
-    session: Session = Depends(require_session),
+    session: AsyncSession = Depends(require_session),
 ):
     params = {"r": r, "t": t, "code": code, "state": state}
     headers = {

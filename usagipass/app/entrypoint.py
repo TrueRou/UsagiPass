@@ -2,16 +2,17 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from fastapi import FastAPI
-from mitmproxy.master import Master
-from mitmproxy.options import Options
-from mitmproxy.addons import default_addons
-from starlette.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
+from fastapi import FastAPI
+from mitmproxy.addons import default_addons
+from mitmproxy.master import Master
+from mitmproxy.options import Options
+from starlette.middleware.cors import CORSMiddleware
+
 from usagipass.app import database, settings
-from usagipass.app.logging import log, Ansi
 from usagipass.app.database import maimai_client
+from usagipass.app.logging import Ansi, log
 from usagipass.app.usecases.addons import WechatWahlapAddon
 
 
@@ -61,7 +62,7 @@ async def init_lifespan(asgi_app: FastAPI):
     asyncio.create_task(maimai_client.songs(curve_provider=None))
     log("Startup process complete.", Ansi.LGREEN)
     yield  # Above: Startup process Below: Shutdown process
-    database.engine.dispose()
+    await database.async_engine.dispose()
 
 
 def init_routes(asgi_app: FastAPI) -> None:
