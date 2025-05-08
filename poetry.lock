@@ -1123,14 +1123,14 @@ reference = "mirrors"
 
 [[package]]
 name = "maimai-py"
-version = "1.0.2"
+version = "1.0.4"
 description = "The definitive python wrapper for MaimaiCN."
 optional = false
 python-versions = ">=3.10,<4.0"
 groups = ["main"]
 files = [
-    {file = "maimai_py-1.0.2-py3-none-any.whl", hash = "sha256:015639202a22b147084253af17f47290d144707ae8491e9d403d4b227450682b"},
-    {file = "maimai_py-1.0.2.tar.gz", hash = "sha256:ae3f1d211e69ffc8efae0a4b0d05bb230c6986e34636076a42a605b77869b8eb"},
+    {file = "maimai_py-1.0.4-py3-none-any.whl", hash = "sha256:39eb515ace6a2faef7aa4bed5a4d63f620dad014729e220c7784571d6e6997cb"},
+    {file = "maimai_py-1.0.4.tar.gz", hash = "sha256:8fec2d61357dd1b88ab7e3bbd7bce2e9d746a8a9e4250620beb5418d3ca868cc"},
 ]
 
 [package.dependencies]
@@ -2641,4 +2641,4 @@ reference = "mirrors"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4.0"
-content-hash = "aa9fe38e16adc54b2f89e9dd92f90a7c89b1d8f872bf3142e44fec1d468560ea"
+content-hash = "9680718263596fef0a7e8111395d23665c57247f102d3fa2ee6eb6474756690b"

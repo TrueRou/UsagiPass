@@ -1,23 +1,23 @@
 {
-    "configurations": [
-        {
-            "name": "Run Backend",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/usagipass/main.py",
-            "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "env": {
-                "PYDEVD_DISABLE_FILE_VALIDATION": "1"
-            }
-        },
-        {
-            "name": "Run Frontend",
-            "command": "npm run dev",
-            "request": "launch",
-            "type": "node-terminal",
-            "cwd": "${workspaceFolder}/web"
-        },
-    ]
+  "configurations": [
+    {
+      "name": "Run Backend",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/usagipass/main.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "PYDEVD_DISABLE_FILE_VALIDATION": "1"
+      }
+    },
+    {
+      "name": "Run Frontend",
+      "command": "npm run dev",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}/web"
+    }
+  ]
 }
