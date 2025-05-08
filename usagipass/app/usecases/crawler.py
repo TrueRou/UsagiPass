@@ -70,8 +70,8 @@ async def fetch_wechat(username: str, cookies: Cookies) -> tuple[list[Score], Cr
 
 
 async def update_rating(account: UserAccount, result: CrawlerResult = CrawlerResult()) -> CrawlerResult:
-    async with async_session_ctx() as session:
-        account = await session.get(UserAccount, (account.account_name, account.account_server)) or account
+    async with async_session_ctx() as scoped_session:
+        account = await scoped_session.get(UserAccount, (account.account_name, account.account_server)) or account
         result.from_rating = account.player_rating
         try:
             result.to_rating = await fetch_rating_retry(account)
@@ -88,7 +88,7 @@ async def update_rating(account: UserAccount, result: CrawlerResult = CrawlerRes
             )
         account.player_rating = result.to_rating
         account.updated_at = datetime.utcnow()
-        await session.commit()
+        await scoped_session.commit()
     return result
 
 

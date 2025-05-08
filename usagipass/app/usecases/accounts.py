@@ -12,12 +12,10 @@ from usagipass.app.usecases.crawler import fetch_rating_retry
 
 async def apply_preference(preferences: PreferencePublic, db_preferences: UserPreference, session: AsyncSession):
     # we need to get the image objects from the database
-    character, background, frame, passname = await asyncio.gather(
-        asyncio.create_task(session.get(Image, db_preferences.character_id or default_character)),
-        asyncio.create_task(session.get(Image, db_preferences.background_id or default_background)),
-        asyncio.create_task(session.get(Image, db_preferences.frame_id or default_frame)),
-        asyncio.create_task(session.get(Image, db_preferences.passname_id or default_passname)),
-    )
+    character = await session.get(Image, db_preferences.character_id or default_character)
+    background = await session.get(Image, db_preferences.background_id or default_background)
+    frame = await session.get(Image, db_preferences.frame_id or default_frame)
+    passname = await session.get(Image, db_preferences.passname_id or default_passname)
     if None in [character, background, frame, passname]:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="默认图片未在数据库中找到，请联系开发者")
     preferences.character = ImagePublic.model_validate(character)
@@ -91,5 +89,5 @@ async def merge_lxns(session: AsyncSession, user: User, personal_token: str) -> 
         nickname=profile["name"],
     )
     new_account.player_rating = await fetch_rating_retry(new_account)
-    asyncio.create_task(session.merge(new_account))
+    await session.merge(new_account)
     return new_account

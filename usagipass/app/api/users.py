@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from usagipass.app.database import add_model, partial_update_model, require_session
+from usagipass.app import database
+from usagipass.app.database import async_session_ctx, partial_update_model, require_session
 from usagipass.app.models import *
 from usagipass.app.usecases import maimai
 from usagipass.app.usecases.accounts import apply_preference
@@ -26,20 +27,22 @@ async def update_user(user_update: UserUpdate, user: User = Depends(verify_user)
 @router.get("/profile", response_model=UserProfile)
 async def get_profile(user: User = Depends(verify_user), session: AsyncSession = Depends(require_session)):
     async def prepare_preference() -> PreferencePublic:
-        db_preference = await session.get(UserPreference, user.username)
-        if not db_preference:
-            db_preference = UserPreference(username=user.username)
-            await add_model(session, db_preference)
-        preferences = PreferencePublic.model_validate(db_preference)
-        await apply_preference(preferences, db_preference, session)  # apply the default images if the user has not set up
-        return preferences
+        async with async_session_ctx() as scoped_session:
+            db_preference = await scoped_session.get(UserPreference, user.username)
+            if not db_preference:
+                db_preference = UserPreference(username=user.username)
+                await database.add_model(scoped_session, db_preference)
+            preferences = PreferencePublic.model_validate(db_preference)
+            await apply_preference(preferences, db_preference, scoped_session)  # apply the default images if the user has not set up
+            await scoped_session.commit()
+            return preferences
 
-    # we need to update the player rating if the user has not updated for 4 hours
-    task_rating = asyncio.create_task(maimai.update_rating_passive(user.username))
+    # we don't wait for this task to finish, because it will take a long time
+    asyncio.create_task(maimai.update_rating_passive(user.username))
     task_accounts = asyncio.create_task(session.exec(select(UserAccount).where(UserAccount.username == user.username)))
     task_preference = asyncio.create_task(prepare_preference())
 
-    _, db_accounts, preferences = await asyncio.gather(task_rating, task_accounts, task_preference)
+    db_accounts, preferences = await asyncio.gather(task_accounts, task_preference)
     accounts = {account.account_server: UserAccountPublic.model_validate(account) for account in db_accounts}
     if not user.api_token:
         user.api_token = uuid.uuid4().hex
@@ -52,7 +55,6 @@ async def get_profile(user: User = Depends(verify_user), session: AsyncSession =
         preferences=preferences,
         accounts=accounts,
     )
-    await session.commit()
     return user_profile
 
 
