@@ -71,7 +71,7 @@ async def merge_divingfish(session: AsyncSession, user: User, account_name: str,
         bind_qq=profile["bind_qq"],
     )
     new_account.player_rating = await fetch_rating_retry(new_account)
-    asyncio.create_task(session.merge(new_account))
+    await session.merge(new_account)
     return new_account
 
 
