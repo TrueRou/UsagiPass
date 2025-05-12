@@ -44,12 +44,17 @@ async def get_profile(user: User = Depends(verify_user), session: AsyncSession =
 
     db_accounts, preferences = await asyncio.gather(task_accounts, task_preference)
     accounts = {account.account_server: UserAccountPublic.model_validate(account) for account in db_accounts}
-    if not user.api_token:
-        user.api_token = uuid.uuid4().hex
+    api_token = user.api_token or ""
+    async with async_session_ctx() as scoped_session:
+        scoped_user = await scoped_session.get(User, user.username)
+        if scoped_user and not scoped_user.api_token:
+            api_token = uuid.uuid4().hex
+            scoped_user.api_token = api_token
+        await scoped_session.commit()
 
     user_profile = UserProfile(
         username=user.username,
-        api_token=user.api_token,
+        api_token=api_token,
         prefer_server=user.prefer_server,
         privilege=user.privilege,
         preferences=preferences,
