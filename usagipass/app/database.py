@@ -9,15 +9,12 @@ from aiocache.serializers import PickleSerializer
 from fastapi import Request
 from maimai_py import MaimaiClient
 from maimai_py.utils.sentinel import UNSET
-from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.pool import AsyncAdaptedQueuePool, QueuePool
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from alembic import command
-from alembic.config import Config as AlembicConfig
 from usagipass.app import settings
 from usagipass.app.logging import Ansi, log
 
@@ -52,6 +49,10 @@ def session_ctx() -> Generator[Session, None, None]:
 
 
 def init_db(skip_migration: bool = False) -> None:
+    from sqlalchemy import text
+    import alembic.command as command
+    from alembic.config import Config as AlembicConfig
+
     try:
         with session_ctx() as session:
             session.execute(text("SELECT 1"))
