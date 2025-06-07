@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from sqlmodel import select
 
 from usagipass.app.database import async_session_ctx
-from usagipass.app.models import UserAccount
+from usagipass.app.models import CrawlerResult, UserAccount
 from usagipass.app.usecases import crawler
 
 
@@ -15,4 +15,4 @@ async def update_rating_passive(username: str):
         async with TaskGroup() as tg:
             for account in accounts:
                 if datetime.utcnow() - account.updated_at > timedelta(minutes=30):
-                    tg.create_task(crawler.update_rating(account))
+                    tg.create_task(crawler.update_rating(account, CrawlerResult()))

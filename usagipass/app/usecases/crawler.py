@@ -1,4 +1,5 @@
 import asyncio
+import gc
 import time
 import traceback
 from datetime import datetime
@@ -51,41 +52,26 @@ async def upload_server_retry(account: UserAccount, scores: list[Score]):
 async def fetch_wechat(username: str, cookies: Cookies) -> tuple[list[Score], CrawlerResult]:
     try:
         scores = await fetch_wechat_retry(cookies)
-        result = CrawlerResult(
-            account_server=AccountServer.WECHAT,
-            success=True,
-            scores_num=len(scores.scores),
-        )
+        result = CrawlerResult(account_server=AccountServer.WECHAT, success=True, scores_num=len(scores.scores))
         distinct_scores = await scores.get_distinct()
         return distinct_scores.scores, result
     except Exception as e:
         traceback.print_exc()
         log(f"Failed to fetch scores from wechat for {username}.", Ansi.LRED)
-        return [], CrawlerResult(
-            account_server=AccountServer.WECHAT,
-            success=False,
-            scores_num=0,
-            err_msg=repr(e),
-        )
+        return [], CrawlerResult(account_server=AccountServer.WECHAT, success=False, scores_num=0, err_msg=repr(e))
 
 
-async def update_rating(account: UserAccount, result: CrawlerResult = CrawlerResult()) -> CrawlerResult:
+async def update_rating(account: UserAccount, result: CrawlerResult) -> CrawlerResult:
     async with async_session_ctx() as scoped_session:
         account = await scoped_session.get(UserAccount, (account.account_name, account.account_server)) or account
         result.from_rating = account.player_rating
         try:
             result.to_rating = await fetch_rating_retry(account)
-            log(
-                f"{account.username}({account.account_server.name} {account.account_name}) {result.from_rating} -> {result.to_rating})",
-                Ansi.GREEN,
-            )
+            log(f"{account.username}({account.account_server.name} {account.account_name}) {result.from_rating} -> {result.to_rating})", Ansi.GREEN)
         except Exception as e:
             result.to_rating = result.from_rating
             traceback.print_exc()
-            log(
-                f"Failed to update rating for {account.username}({account.account_server.name} {account.account_name}).",
-                Ansi.LRED,
-            )
+            log(f"Failed to update rating for {account.username}({account.account_server.name} {account.account_name}).", Ansi.LRED)
         account.player_rating = result.to_rating
         account.updated_at = datetime.utcnow()
         await scoped_session.commit()
@@ -96,38 +82,23 @@ async def upload_server(account: UserAccount, scores: list[Score]) -> CrawlerRes
     try:
         begin = time.time()
         await upload_server_retry(account, scores)
-        return CrawlerResult(
-            account_server=account.account_server,
-            success=True,
-            scores_num=len(scores),
-            elapsed_time=time.time() - begin,
-        )
+        result = CrawlerResult(account_server=account.account_server, success=True, scores_num=len(scores), elapsed_time=time.time() - begin)
+        return await update_rating(account, result)
     except Exception as e:
         traceback.print_exc()
-        log(
-            f"Failed to upload {account.account_server.name} for {account.username}.",
-            Ansi.LRED,
-        )
-        return CrawlerResult(
-            account_server=account.account_server,
-            success=False,
-            scores_num=len(scores),
-            err_msg=str(e),
-        )
+        log(f"Failed to upload {account.account_server.name} for {account.username}.", Ansi.LRED)
+        return CrawlerResult(account_server=account.account_server, success=False, scores_num=len(scores), err_msg=str(e))
 
 
 async def crawl_async(cookies: Cookies, user: User, session: AsyncSession) -> list[CrawlerResult]:
-    accounts = (await session.exec(select(UserAccount).where(UserAccount.username == user.username))).all()
     begin = time.time()
-    scores, result = await fetch_wechat(user.username, cookies)
-    result.elapsed_time = time.time() - begin
-    if result.success:
-        uploads = await asyncio.gather(
-            *[upload_server(account, scores) for account in accounts],
-            return_exceptions=False,
-        )
-        async with asyncio.TaskGroup() as tg:
-            for account, upload in zip(accounts, uploads):
-                tg.create_task(update_rating(account, upload))
-        return [result, *uploads]
-    return [result]
+    accounts, wechat_results = await asyncio.gather(
+        asyncio.create_task(session.exec(select(UserAccount).where(UserAccount.username == user.username))),
+        asyncio.create_task(fetch_wechat(user.username, cookies)),
+    )
+    wechat_results[1].elapsed_time = time.time() - begin
+    crawler_results = [wechat_results[1]]
+    if wechat_results[1].success:
+        uploads = await asyncio.gather(*[asyncio.create_task(upload_server(account, wechat_results[0])) for account in accounts])
+        crawler_results.extend(uploads)
+    return crawler_results
