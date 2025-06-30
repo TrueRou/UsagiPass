@@ -1,12 +1,10 @@
 import asyncio
-import gc
 import time
 import traceback
 from datetime import datetime
 
 from httpx import Cookies
-from maimai_py import DivingFishProvider, LXNSProvider, MaimaiScores, PlayerIdentifier, WechatProvider
-from maimai_py.models import Player, Score
+from maimai_py import DivingFishProvider, LXNSProvider, MaimaiScores, Player, PlayerIdentifier, ScoreExtend, WechatProvider
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from tenacity import retry, stop_after_attempt
@@ -37,7 +35,7 @@ async def fetch_rating_retry(account: UserAccount) -> int:
 
 
 @retry(stop=stop_after_attempt(3))
-async def upload_server_retry(account: UserAccount, scores: list[Score]):
+async def upload_server_retry(account: UserAccount, scores: list[ScoreExtend]):
     ident, provider = None, None
     if account.account_server == AccountServer.DIVING_FISH:
         ident = PlayerIdentifier(username=account.account_name, credentials=account.account_password)
@@ -49,12 +47,11 @@ async def upload_server_retry(account: UserAccount, scores: list[Score]):
     await maimai_client.updates(ident, scores, provider)
 
 
-async def fetch_wechat(username: str, cookies: Cookies) -> tuple[list[Score], CrawlerResult]:
+async def fetch_wechat(username: str, cookies: Cookies) -> tuple[list[ScoreExtend], CrawlerResult]:
     try:
         scores = await fetch_wechat_retry(cookies)
         result = CrawlerResult(account_server=AccountServer.WECHAT, success=True, scores_num=len(scores.scores))
-        distinct_scores = await scores.get_distinct()
-        return distinct_scores.scores, result
+        return scores.scores, result
     except Exception as e:
         traceback.print_exc()
         log(f"Failed to fetch scores from wechat for {username}.", Ansi.LRED)
@@ -78,7 +75,7 @@ async def update_rating(account: UserAccount, result: CrawlerResult) -> CrawlerR
     return result
 
 
-async def upload_server(account: UserAccount, scores: list[Score]) -> CrawlerResult:
+async def upload_server(account: UserAccount, scores: list[ScoreExtend]) -> CrawlerResult:
     try:
         begin = time.time()
         await upload_server_retry(account, scores)
