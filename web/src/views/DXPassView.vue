@@ -11,7 +11,7 @@ const preferences = ref<Preference>(JSON.parse(JSON.stringify(userStore.userProf
 const applyPreferences = () => {
     preferences.value.display_name ||= userStore.preferAccount!.nickname;
     preferences.value.dx_rating ||= String(userStore.preferAccount!.player_rating);
-    preferences.value.friend_code ||= "664994421382429"; // this is my friend code
+    preferences.value.friend_code ||= "000000000000000";
     preferences.value.simplified_code ||= userStore.simplifiedCode;
 }
 
