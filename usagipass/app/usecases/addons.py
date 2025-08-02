@@ -26,7 +26,7 @@ class WechatWahlapAddon:
         if flow.request.host in self.sysall_hosts and flow.request.path.find("qrcode") != -1 and flow.request.path.find("req") != -1:
             maid = flow.request.path_components[2].replace(".html", "")
             timestamp = int(flow.request.query.get("l") or 0)
-            timestr = datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
+            timestr = datetime.fromtimestamp(timestamp).strftime("%Y/%m/%d %H:%M:%S")
             location = settings.app_url + f"?maid={maid}&time={timestr}"
             flow.response = Response.make(302, headers={"Location": location})
 
