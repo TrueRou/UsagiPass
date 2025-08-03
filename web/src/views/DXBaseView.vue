@@ -43,6 +43,8 @@ watch(() => props.preferences, applyPreferences, { immediate: true });
             </div>
             <div class="absolute flex flex-col left-0" style="bottom: 8%;">
                 <CharaInfo :chara="preferences.character_name!" :time="timeLimit || '12:00:00'"
+                    :date="$route.query.date as string"
+                    :show-date="preferences.show_date"
                     :chara-info-color="preferences.chara_info_color" />
             </div>
             <div class="qr-widget absolute" v-if="maimaiCode">

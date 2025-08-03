@@ -113,6 +113,19 @@ const bindBtn = (server: AccountServer) => {
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
+                <span>显示日期</span>
+                <span class="text-gray-600" style="font-size: 12px;">设置日期的可见性</span>
+            </div>
+            <div>
+                <select v-model="userProfile!.preferences.show_date">
+                    <option :value="true">可见</option>
+                    <option :value="false">不可见</option>
+                </select>
+            </div>
+        </div>
+        <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+        <div class="flex justify-between items-center w-full">
+            <div class="flex flex-col p-2">
                 <span>二维码尺寸</span>
                 <span class="text-gray-600" style="font-size: 12px;">如果机台无法识别, 请增大二维码尺寸</span>
             </div>
