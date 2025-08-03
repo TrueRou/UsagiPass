@@ -11,8 +11,8 @@ const renderedContent = computed(() => {
   return '';
 });
 
-const closeAndMarkAsRead = async () => {
-  await announcementStore.handleCurrentAnnouncementRead();
+const closeAndMarkAsRead = async (mark: boolean) => {
+  await announcementStore.handleCurrentAnnouncementRead(mark);
 };
 </script>
 
@@ -24,7 +24,7 @@ const closeAndMarkAsRead = async () => {
         <!-- 公告标题 -->
         <div class="p-4 bg-blue-400 dark:bg-blue-600 text-white flex justify-between items-center">
           <span class="font-bold text-lg">{{ announcementStore.currentAnnouncement.title }}</span>
-          <button @click="closeAndMarkAsRead" class="text-white hover:text-gray-200">
+          <button @click="closeAndMarkAsRead(false)" class="text-white hover:text-gray-200">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -39,7 +39,7 @@ const closeAndMarkAsRead = async () => {
 
         <!-- 底部操作区 -->
         <div class="p-4 bg-gray-100 dark:bg-gray-700 flex justify-end">
-          <button @click="closeAndMarkAsRead"
+          <button @click="closeAndMarkAsRead(true)"
             class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors">
             我已阅读
           </button>

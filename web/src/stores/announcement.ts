@@ -120,9 +120,9 @@ export const useAnnouncementStore = defineStore('announcement', () => {
         return false;
     };
 
-    const handleCurrentAnnouncementRead = async () => {
+    const handleCurrentAnnouncementRead = async (mark: boolean = true) => {
         if (currentAnnouncement.value) {
-            await markAsRead(currentAnnouncement.value.id);
+            if (mark) await markAsRead(currentAnnouncement.value.id);
             showAnnouncementModal.value = false;
             return showNextUnreadAnnouncement();
         }
