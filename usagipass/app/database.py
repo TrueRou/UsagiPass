@@ -50,6 +50,7 @@ def session_ctx() -> Generator[Session, None, None]:
 
 def init_db(skip_migration: bool = False) -> None:
     from sqlalchemy import text
+
     import alembic.command as command
     from alembic.config import Config as AlembicConfig
 

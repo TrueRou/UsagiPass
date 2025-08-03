@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import IntEnum, auto
+
 from sqlmodel import Field, SQLModel
 
 convention = {
@@ -98,6 +99,7 @@ class PreferenceBase(SQLModel):
     qr_size: int = Field(default=15)
     mask_type: int = Field(default=0)
     chara_info_color: str = Field(default="#fee37c", sa_column_kwargs={"server_default": "#fee37c"})
+    show_date: bool = Field(default=False)
 
 
 class UserPreference(PreferenceBase, table=True):

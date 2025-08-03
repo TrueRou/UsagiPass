@@ -3,8 +3,7 @@
 import colorsys
 import datetime
 from enum import IntEnum
-from typing import Optional
-from typing import Union
+from typing import Optional, Union
 from zoneinfo import ZoneInfo
 
 
