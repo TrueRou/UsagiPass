@@ -33,6 +33,7 @@ interface Preference {
     qr_size?: number;
     mask_type?: number;
     chara_info_color: string;
+    show_date?: boolean;
 }
 
 interface UserAccount {

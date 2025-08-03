@@ -3,7 +3,9 @@
 const props = defineProps<{
     chara: string;
     time: string;
+    date?: string;
     charaInfoColor?: string;
+    showDate?: boolean;
 }>()
 
 </script>
@@ -18,6 +20,7 @@ const props = defineProps<{
                 ブ一スト期限
                 <b class="text-lg">{{ props.time }}</b>
             </p>
+            <p v-if="props.showDate && props.date" class="text-center text-nowrap text-sm font-sega">{{ props.date }}</p>
         </div>
     </div>
 </template>

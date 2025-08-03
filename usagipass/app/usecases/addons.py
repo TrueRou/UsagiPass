@@ -26,8 +26,13 @@ class WechatWahlapAddon:
         if flow.request.host in self.sysall_hosts and flow.request.path.find("qrcode") != -1 and flow.request.path.find("req") != -1:
             maid = flow.request.path_components[2].replace(".html", "")
             timestamp = int(flow.request.query.get("l") or 0)
+            # 日本星期映射
+            weekdays_jp = ["月", "火", "水", "木", "金", "土", "日"]
+            weekday_jp = weekdays_jp[datetime.fromtimestamp(timestamp).weekday()]
+            #
             timestr = datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
-            location = settings.app_url + f"?maid={maid}&time={timestr}"
+            datestr = datetime.fromtimestamp(timestamp).strftime(f"%Y/%m/%d({weekday_jp})")
+            location = settings.app_url + f"?maid={maid}&time={timestr}&date={datestr}"
             flow.response = Response.make(302, headers={"Location": location})
 
         # response wahlap mitm connection test
