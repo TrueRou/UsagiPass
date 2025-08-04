@@ -14,9 +14,9 @@ DXPass 是**日服限定**的，可以在制卡机上制作的具有特殊功能
 
 ## ✨ 主要功能
 
-- **动态生成**：基于水鱼 / 落雪查分器的数据动态生成玩家的 DXPASS，用户个性化数据云端储存。
-- **高度自定义**：自定义 DXPASS 背景、外框、角色，支持使用预设素材或个性化上传自己的图片。
-- **支持登录**：通过代理直接嵌入微信玩家二维码页面，可直接扫描 DXPASS 上机，逼格满满。
+- **动态生成**：基于水鱼 / 落雪查分器的数据动态生成玩家的 DXPASS，用户个性化数据云端储存；
+- **高度自定义**：自定义 DXPASS 背景、外框、角色，支持使用预设素材或个性化上传自己的图片；
+- **支持登录**：通过代理直接嵌入微信玩家二维码页面，可直接扫描 DXPASS 上机，逼格满满；
 - **更新查分器**：支持一键更新水鱼/落雪查分器，无需复杂的配置。
 
 ## 📦 安装使用
@@ -24,12 +24,12 @@ DXPass 是**日服限定**的，可以在制卡机上制作的具有特殊功能
 ### 安装步骤
 
 1. **安装代理软件**：
-     - 安卓：[**Clash(推荐)**](https://dxpass.turou.fun/proxies/clash.html)，[Sing-box](https://dxpass.turou.fun/proxies/singbox.html)
-     - iOS：[**Shadowrocket(推荐)**](https://dxpass.turou.fun/proxies/rocket.html)，[Sing-box](https://dxpass.turou.fun/proxies/singbox.html)，[QuantX](https://dxpass.turou.fun/proxies/quantx.html)
+     - 安卓：[**Clash（推荐）**](https://dxpass.turou.fun/proxies/clash.html)，[Sing-box](https://dxpass.turou.fun/proxies/singbox.html)
+     - iOS：[**Shadowrocket（推荐）**](https://dxpass.turou.fun/proxies/rocket.html)，[Sing-box](https://dxpass.turou.fun/proxies/singbox.html)，[QuantX](https://dxpass.turou.fun/proxies/quantx.html)
 
-2. **启动代理**：确保代理软件在手机后台运行中。
+2. **启动代理**：确保代理软件在手机后台运行中；
 
-3. **打开微信二维码**：在微信中打开舞萌或中二公众号的**登入二维码**，将自动跳转至 UsagiPass 登录界面。
+3. **打开微信二维码**：在微信中打开舞萌或中二公众号的**登入二维码**，将自动跳转至 UsagiPass 登录界面；
 
 4. **登录使用**：使用水鱼或落雪查分器账号进行登录，登录后即可进入 UsagiPass 主页。
 
@@ -70,17 +70,17 @@ UsagiPass 利用中间人代理（MITM）技术修改华立服务器的流量：
 
 ## 🤔 常见问题
 
-**Q: 我不清楚 UsagiPass 的某某功能如何使用**
+**Q：我不清楚 UsagiPass 的某某功能如何使用**
 
-A: 可以在[官网](https://dxpass.turou.fun/)中找到部分功能的详细介绍。如果仍有疑问，可以加群进行询问。
+A：可以在[官网](https://dxpass.turou.fun/)中找到部分功能的详细介绍。如果仍有疑问，可以加群进行询问。
 
-**Q: IOS 使用小火箭需要购买**
+**Q：IOS 使用小火箭需要购买**
 
-A: 可以使用 Sing-box 方案，Sing-box 是一款在外区商店可以免费下载的代理软件。
+A：可以使用 Sing-box 方案，Sing-box 是一款在外区商店可以免费下载的代理软件。
 
-**Q: IOS 我不知道应该如何获得外区账号**
+**Q：IOS 我不知道应该如何获得外区账号**
 
-A: 可以在 B 站搜索相关关键词，这类视频还是挺多的，请尽量不要在群内讨论相关话题。
+A：可以在 B 站搜索相关关键词，这类视频还是挺多的，请尽量不要在群内讨论相关话题。
 
 ## 🤝 支持项目
 
