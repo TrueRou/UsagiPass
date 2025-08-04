@@ -20,7 +20,9 @@ const props = defineProps<{
                 ブ一スト期限
                 <b class="text-lg">{{ props.time }}</b>
             </p>
-            <p v-if="props.showDate && props.date" class="text-center text-nowrap text-sm font-sega">{{ props.date }}</p>
+            <p v-if="props.showDate && props.date" class="text-center text-nowrap text-sm font-sega">
+                <b class="text-lg">{{ props.date }}</b>
+            </p>
         </div>
     </div>
 </template>
