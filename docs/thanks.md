@@ -16,9 +16,9 @@ outline: deep
 - 生盐诺亚
 - Dream_Rain
 
-另外，UsagiPass 建立在许多开源项目和开发者的技术积累上，特别感谢以下开发者和相关项目
+另外，UsagiPass 建立在许多开源项目和开发者的技术积累上，特别感谢以下开发者和相关项目：
 
-- Diving-Fish: https://www.diving-fish.com/maimaidx/prober/
-- LXNS: https://maimai.lxns.net/
-- Bakapiano: https://github.com/bakapiano/maimaidx-prober-proxy-updater
-- maimai.py: https://github.com/TrueRou/maimai.py
+- Diving-Fish：https://www.diving-fish.com/maimaidx/prober/
+- LXNS：https://maimai.lxns.net/
+- Bakapiano：https://github.com/bakapiano/maimaidx-prober-proxy-updater
+- maimai.py：https://github.com/TrueRou/maimai.py

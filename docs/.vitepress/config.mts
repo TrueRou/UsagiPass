@@ -50,7 +50,7 @@ export default defineConfig({
 
     footer: {
       message: '欢迎加入UsagiPass兔兔群: 363346002',
-      copyright: 'Copyright © 2019-2024 TuRou'
+      copyright: 'Copyright © 2019-2025 TuRou'
     },
 
     socialLinks: [

@@ -22,7 +22,7 @@ outline: deep
 
 通过代理替换 sys-all.cn 网页，将请求重定向到 dxpass.turou.fun。
 
-重定向时携带原网页中的查询参数(SGWCMAID)，**在前端**以 JS 的方式直接绘制出二维码。
+重定向时携带原网页中的查询参数（SGWCMAID），在**前端**以 JS 的方式直接绘制出二维码。
 
 ::: tip
 UsagiPass 前后端代码在 GitHub 开源：[https://github.com/TrueRou/UsagiPass](https://github.com/TrueRou/UsagiPass)。
@@ -30,7 +30,7 @@ UsagiPass 前后端代码在 GitHub 开源：[https://github.com/TrueRou/UsagiPa
 
 ## 关于更新查分器
 
-在20241116更新中，我们支持了更新水鱼和落雪查分器。更新原理类似 [Bakapiano方案](https://github.com/bakapiano/maimaidx-prober-proxy-updater)。
+在 20241116 更新中，我们支持了更新水鱼和落雪查分器。更新原理类似 [Bakapiano 方案](https://github.com/bakapiano/maimaidx-prober-proxy-updater)。
 
 由于 UsagiPass 天然运行在微信浏览器中，我们就不需要玩家手动复制更新链接到微信并打开了。
 
