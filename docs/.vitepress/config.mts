@@ -4,7 +4,6 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   lang: 'zh-CN',
   title: "UsagiPass",
-  titleTemplate: ':title - UsagiPass',
   description: "UsagiPass 文档",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
@@ -49,7 +48,7 @@ export default defineConfig({
     ],
 
     footer: {
-      message: '欢迎加入UsagiPass兔兔群: 363346002',
+      message: '欢迎加入 UsagiPass 兔兔群：363346002',
       copyright: 'Copyright © 2019-2025 TuRou'
     },
 
