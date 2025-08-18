@@ -15,6 +15,7 @@ outline: deep
 - 原味零花
 - 生盐诺亚
 - Dream_Rain
+- AxelPLN
 
 另外，UsagiPass 建立在许多开源项目和开发者的技术积累上，特别感谢以下开发者和相关项目：
 
