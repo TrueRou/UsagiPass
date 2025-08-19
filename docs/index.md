@@ -1,6 +1,7 @@
 ---
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
+title: 动态生成可登录的 DXPASS
 
 hero:
   name: "UsagiPass"
