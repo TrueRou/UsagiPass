@@ -20,6 +20,11 @@ async def fetch_wechat_retry(cookies: Cookies) -> MaimaiScores:
     return await maimai_client.scores(PlayerIdentifier(credentials=cookies), provider=WechatProvider())
 
 
+@retry(stop=stop_after_attempt(3), reraise=True)
+async def fetch_wahlap_player_retry(cookies: Cookies) -> Player:
+    return await maimai_client.players(PlayerIdentifier(credentials=cookies), provider=WechatProvider())
+
+
 @retry(stop=stop_after_attempt(3))
 async def fetch_rating_retry(account: UserAccount) -> int:
     ident, provider = None, None
@@ -56,6 +61,25 @@ async def fetch_wechat(username: str, cookies: Cookies) -> tuple[list[ScoreExten
         traceback.print_exc()
         log(f"Failed to fetch scores from wechat for {username}.", Ansi.LRED)
         return [], CrawlerResult(account_server=AccountServer.WECHAT, success=False, scores_num=0, err_msg=repr(e))
+
+
+async def fetch_wahlap_player(username: str, cookies: Cookies, session: AsyncSession) -> None:
+    """获取华立玩家信息并更新所有用户账户"""
+    try:
+        player = await fetch_wahlap_player_retry(cookies)
+        
+        # 更新所有属于该用户的账户的华立玩家信息
+        accounts = await session.exec(select(UserAccount).where(UserAccount.username == username))
+        for account in accounts:
+            account.wahlap_name = player.name
+            account.wahlap_friend_code = getattr(player, 'friend_code', None)
+            account.updated_at = datetime.utcnow()
+        
+        await session.commit()
+        log(f"Updated Wahlap player info for {username}: {player.name} (FC: {getattr(player, 'friend_code', 'N/A')})", Ansi.GREEN)
+    except Exception as e:
+        traceback.print_exc()
+        log(f"Failed to fetch Wahlap player info for {username}.", Ansi.LRED)
 
 
 async def update_rating(account: UserAccount, result: CrawlerResult) -> CrawlerResult:
@@ -95,7 +119,14 @@ async def crawl_async(cookies: Cookies, user: User, session: AsyncSession) -> li
     )
     wechat_results[1].elapsed_time = time.time() - begin
     crawler_results = [wechat_results[1]]
+    
     if wechat_results[1].success:
-        uploads = await asyncio.gather(*[asyncio.create_task(upload_server(account, wechat_results[0])) for account in accounts])
+        # 同时获取华立玩家信息并上传成绩数据
+        upload_tasks = [asyncio.create_task(upload_server(account, wechat_results[0])) for account in accounts]
+        wahlap_task = asyncio.create_task(fetch_wahlap_player(user.username, cookies, session))
+        
+        uploads = await asyncio.gather(*upload_tasks)
+        await wahlap_task  # 等待华立玩家信息获取完成
+        
         crawler_results.extend(uploads)
     return crawler_results

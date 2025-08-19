@@ -79,6 +79,8 @@ class UserAccount(SQLModel, table=True):
     bind_qq: str = Field(default="")
     player_rating: int = Field(default=10000)
     username: str = Field(index=True)
+    wahlap_name: str | None = Field(default=None)
+    wahlap_friend_code: int | None = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -87,6 +89,8 @@ class UserAccountPublic(SQLModel):
     account_name: str
     nickname: str
     player_rating: int
+    wahlap_name: str | None = None
+    wahlap_friend_code: int | None = None
 
 
 class PreferenceBase(SQLModel):
@@ -100,6 +104,7 @@ class PreferenceBase(SQLModel):
     mask_type: int = Field(default=0)
     chara_info_color: str = Field(default="#fee37c", sa_column_kwargs={"server_default": "#fee37c"})
     show_date: bool = Field(default=False)
+    player_name_source: str = Field(default="prober")
 
 
 class UserPreference(PreferenceBase, table=True):

@@ -34,12 +34,15 @@ interface Preference {
     mask_type?: number;
     chara_info_color: string;
     show_date?: boolean;
+    player_name_source?: 'prober' | 'wahlap';
 }
 
 interface UserAccount {
     account_name: string;
     nickname: string;
     player_rating: number;
+    wahlap_name?: string;
+    wahlap_friend_code?: number;
 }
 
 interface UserProfile {
