@@ -14,7 +14,7 @@ UsagiPass 的前后端以及官网均已开源，欢迎提出 Issues 和 PullReq
 
 UsagiPass 使用 [MITM 中间人](https://developer.mozilla.org/zh-CN/docs/Glossary/MitM)转发并修改来自华立服务器的流量。
 
-当前版本的 UsagiPass 会修改来自 wq.sys-all.cn 和 tgk-wcaime.wahlap.com 的流量，后者主要用于更新查分器。
+当前版本的 UsagiPass 会修改来自 `wq.sys-all.cn` 和 `tgk-wcaime.wahlap.com` 的流量，后者主要用于更新查分器。
 
 有条件的开发者可以搭建属于自己的代理服务器，可以在降低服务器负载的同时提升安全性。
 

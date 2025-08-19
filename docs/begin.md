@@ -16,7 +16,7 @@ DXPass 是**日服限定**的，可以在制卡机上制作的具有特殊功能
 
 安装 UsagiPass 需要你具有一定的动手能力，下面我们将逐步讲解如何安装 UsagiPass：
 
-1. 安装代理软件：UsagiPass 需要代理才能运行，如果你不清楚什么是代理，请点击下方推荐方式即可
+1. 安装代理软件，UsagiPass 需要代理才能运行，如果你不清楚什么是代理，请点击下方推荐方式即可：
     - 安卓：[**Clash（推荐）**](https://dxpass.turou.fun/proxies/clash.html)，[Sing-box](https://dxpass.turou.fun/proxies/singbox.html)
     - iOS：[**Shadowrocket（推荐）**](https://dxpass.turou.fun/proxies/rocket.html)，[Sing-box](https://dxpass.turou.fun/proxies/singbox.html)，[QuantX](https://dxpass.turou.fun/proxies/quantx.html)
 2. 启动代理软件：UsagiPass 需要代理才能运行，请确保你的代理已经运行在手机后台；

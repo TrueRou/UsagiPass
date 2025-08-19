@@ -17,7 +17,7 @@ outline: deep
         - Google Play：搜索 Sing-box 并下载
         - 加入 UsagiPass 用户群，在群公告处获取：363346002
     2. Profiles -> 新建图标 -> **Create Manually** -> Name: 随意，Type: Remote，URL: https://dxpass.turou.fun/UsagiPass.json -> Create
-3. **确保选择了 UsagiPass 配置，点击启动代理**
+3. **确保选择了 UsagiPass 配置，点击启动代理即可生效！**
 
 ::: tip
 也可以选择使用文件导入，Type 处选择 Local 即可。
