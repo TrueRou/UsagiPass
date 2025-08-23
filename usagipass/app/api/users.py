@@ -40,13 +40,10 @@ async def get_profile(user: User = Depends(verify_user), session: AsyncSession =
     # we don't wait for this task to finish, because it will take a long time
     asyncio.create_task(maimai.update_rating_passive(user.username))
     task_accounts = asyncio.create_task(session.exec(select(UserAccount).where(UserAccount.username == user.username)))
-    task_wechat_accounts = asyncio.create_task(session.exec(select(WechatAccount).join(UserAccount).where(UserAccount.username == user.username)))
     task_preference = asyncio.create_task(prepare_preference())
 
-    db_accounts, db_wechat_accounts, preferences = await asyncio.gather(task_accounts, task_wechat_accounts, task_preference)
+    db_accounts, preferences = await asyncio.gather(task_accounts, task_preference)
     accounts = {account.account_server: UserAccountPublic.model_validate(account) for account in db_accounts}
-    wechat_accounts = {wechat.account_name: WechatAccountPublic.model_validate(wechat) for wechat in db_wechat_accounts}
-    
     api_token = user.api_token or ""
     async with async_session_ctx() as scoped_session:
         scoped_user = await scoped_session.get(User, user.username)
@@ -62,7 +59,6 @@ async def get_profile(user: User = Depends(verify_user), session: AsyncSession =
         privilege=user.privilege,
         preferences=preferences,
         accounts=accounts,
-        wechat_accounts=wechat_accounts if wechat_accounts else None,
     )
     return user_profile
 

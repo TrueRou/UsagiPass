@@ -6,8 +6,7 @@ import CharaInfo from '@/components/CharaInfo.vue';
 import PlayerInfo from '@/components/PlayerInfo.vue';
 import CardBack from '@/components/CardBack.vue';
 import { useServerStore } from '@/stores/server';
-import { useUserStore } from '@/stores/user';
-import { computed, watch } from 'vue';
+import { watch } from 'vue';
 import type { Image, Preference } from '@/types';
 
 const props = defineProps<{
@@ -18,50 +17,8 @@ const props = defineProps<{
 }>()
 
 const serverStore = useServerStore();
-const userStore = useUserStore();
 
 const r = (image: Image) => import.meta.env.VITE_URL + "/images/" + image!.id;
-
-// 计算要显示的玩家名称
-const displayPlayerName = computed(() => {
-    // 自定义玩家昵称优先级最高
-    if (props.preferences.display_name) {
-        return props.preferences.display_name;
-    }
-    
-    // 根据设置选择查分器昵称或 WECHAT 昵称
-    if (props.preferences.player_name_source === 'wechat') {
-        // 如果用户有 WECHAT 账户，使用 WECHAT 账户的昵称
-        const wechatAccounts = userStore.userProfile?.wechat_accounts;
-        if (wechatAccounts && Object.keys(wechatAccounts).length > 0) {
-            const firstWechatAccount = Object.values(wechatAccounts)[0];
-            return firstWechatAccount.account_name;
-        }
-    }
-    
-    // 默认使用查分器昵称
-    return userStore.preferAccount?.nickname || '';
-});
-
-// 计算要显示的好友代码
-const displayFriendCode = computed(() => {
-    // 自定义好友代码优先级最高
-    if (props.preferences.friend_code) {
-        return props.preferences.friend_code;
-    }
-    
-    // 如果设置为使用 WECHAT 数据，优先使用 WECHAT 好友代码
-    if (props.preferences.player_name_source === 'wechat') {
-        const wechatAccounts = userStore.userProfile?.wechat_accounts;
-        if (wechatAccounts && Object.keys(wechatAccounts).length > 0) {
-            const firstWechatAccount = Object.values(wechatAccounts)[0];
-            return firstWechatAccount.friend_code.toString();
-        }
-    }
-    
-    // 默认返回空字符串（查分器通常不需要显示好友代码）
-    return '';
-});
 
 const applyPreferences = () => {
     props.preferences.character_name ||= props.preferences.character.name;
@@ -80,14 +37,13 @@ watch(() => props.preferences, applyPreferences, { immediate: true });
                     <DXRating class="w-1/2" :rating="Number(preferences.dx_rating) || 0" />
                 </div>
                 <div class="header-widget flex relative w-full flex-row-reverse">
-                    <PlayerInfo class="w-1/2" :username="displayPlayerName"
-                        :friend-code="displayFriendCode" />
+                    <PlayerInfo class="w-1/2" :username="preferences.display_name!"
+                        :friend-code="preferences.friend_code!" />
                 </div>
             </div>
             <div class="absolute flex flex-col left-0" style="bottom: 8%;">
                 <CharaInfo :chara="preferences.character_name!" :time="timeLimit || '12:00:00'"
-                    :date="$route.query.date as string"
-                    :show-date="preferences.show_date"
+                    :date="$route.query.date as string" :show-date="preferences.show_date"
                     :chara-info-color="preferences.chara_info_color" />
             </div>
             <div class="qr-widget absolute" v-if="maimaiCode">

@@ -55,6 +55,13 @@ async def bind_lxns(
     await session.commit()
 
 
+@router.post("/bind/wechat")
+async def bind_wechat(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: AsyncSession = Depends(require_session), user: User = Depends(verify_user)
+):
+    raise NotImplementedError()
+
+
 @router.post("/update/oauth")
 async def update_prober_oauth():
     try:

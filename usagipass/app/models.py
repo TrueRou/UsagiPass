@@ -89,24 +89,6 @@ class UserAccountPublic(SQLModel):
     player_rating: int
 
 
-class WechatAccount(SQLModel, table=True):
-    __tablename__ = "wechat_accounts"  # type: ignore
-
-    account_name: str = Field(primary_key=True, foreign_key="user_accounts.account_name")
-    friend_code: int
-    star: int = Field(default=0)
-    trophy: str | None = Field(default=None)
-    token: str | None = Field(default=None)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-
-
-class WechatAccountPublic(SQLModel):
-    account_name: str
-    friend_code: int
-    star: int
-    trophy: str | None = None
-
-
 class PreferenceBase(SQLModel):
     maimai_version: str | None = None
     simplified_code: str | None = None

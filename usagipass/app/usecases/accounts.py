@@ -3,7 +3,7 @@ from httpx import ConnectError, ReadTimeout
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from usagipass.app.database import httpx_client
-from usagipass.app.models import AccountServer, Image, ImagePublic, PreferencePublic, User, UserAccount, UserPreference, WechatAccount
+from usagipass.app.models import AccountServer, Image, ImagePublic, PreferencePublic, User, UserAccount, UserPreference
 from usagipass.app.settings import default_background, default_character, default_frame, default_passname
 from usagipass.app.usecases.crawler import fetch_rating_retry
 
@@ -91,34 +91,21 @@ async def merge_lxns(session: AsyncSession, user: User, personal_token: str) -> 
     return new_account
 
 
-async def merge_wechat(session: AsyncSession, user: User, cookies, player_data: dict) -> tuple[UserAccount, WechatAccount]:
-    """合并 WECHAT 账户和扩展信息"""
+async def merge_wechat(session: AsyncSession, user: User, cookies, player_data: dict) -> UserAccount:
     account_name = str(player_data["friend_code"])
-    
-    # 检查账户是否已被其他用户绑定
+
     account = await session.get(UserAccount, (account_name, AccountServer.WECHAT))
     if account and account.username != user.username:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"该 WECHAT 账号已被其他账号 {user.username} 绑定")
-    
-    # 创建或更新 UserAccount
+
     new_account = UserAccount(
         account_name=account_name,
         account_server=AccountServer.WECHAT,
-        account_password="",  # WECHAT 不需要密码
+        account_password="",
         username=user.username,
         nickname=player_data["name"],
+        player_rating=player_data["rating"],
     )
-    new_account.player_rating = player_data["rating"]
     await session.merge(new_account)
-    
-    # 创建或更新 WechatAccount
-    wechat_account = WechatAccount(
-        account_name=account_name,
-        friend_code=player_data["friend_code"],
-        star=player_data.get("star", 0),
-        trophy=player_data.get("trophy"),
-        token=player_data.get("token"),
-    )
-    await session.merge(wechat_account)
-    
-    return new_account, wechat_account
+
+    return new_account

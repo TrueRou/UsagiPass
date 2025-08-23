@@ -34,20 +34,12 @@ interface Preference {
     mask_type?: number;
     chara_info_color: string;
     show_date?: boolean;
-    player_name_source?: 'prober' | 'wechat';
 }
 
 interface UserAccount {
     account_name: string;
     nickname: string;
     player_rating: number;
-}
-
-interface WechatAccount {
-    account_name: string;
-    friend_code: number;
-    star: number;
-    trophy?: string;
 }
 
 interface UserProfile {
@@ -57,7 +49,6 @@ interface UserProfile {
     privilege: Privilege;
     preferences: Preference;
     accounts: Record<AccountServer, UserAccount>;
-    wechat_accounts?: Record<string, WechatAccount>;
 }
 
 interface CrawlerResult {
@@ -72,4 +63,4 @@ interface CrawlerResult {
 
 
 export { Privilege, AccountServer };
-export type { Kind, Preference, UserAccount, WechatAccount, UserProfile, CrawlerResult, Image };
+export type { Kind, Preference, UserAccount, UserProfile, CrawlerResult, Image };

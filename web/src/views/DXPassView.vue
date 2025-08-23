@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useUserStore } from '@/stores/user';
-import type { Preference } from '@/types';
+import { AccountServer, type Preference } from '@/types';
 import DXBaseView from './DXBaseView.vue';
 
 
@@ -11,8 +11,10 @@ const preferences = ref<Preference>(JSON.parse(JSON.stringify(userStore.userProf
 const applyPreferences = () => {
     preferences.value.display_name ||= userStore.preferAccount!.nickname;
     preferences.value.dx_rating ||= String(userStore.preferAccount!.player_rating);
-    preferences.value.friend_code ||= "000000000000000";
     preferences.value.simplified_code ||= userStore.simplifiedCode;
+    if (userStore.userProfile?.prefer_server === AccountServer.WECHAT) {
+        preferences.value.friend_code ||= userStore.preferAccount!.account_name;
+    }
 }
 
 watch(() => preferences, applyPreferences, { immediate: true });
