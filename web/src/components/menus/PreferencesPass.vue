@@ -103,14 +103,6 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
             <h1 class="font-bold text-white">卡面设置</h1>
         </div>
-        <div class="flex justify-between items-center w-full mt-2">
-            <div class="flex flex-col p-2">
-                <span>好友号码</span>
-                <span class="text-gray-600" style="font-size: 12px;">填写12位或15位的好友号码</span>
-            </div>
-            <div><input v-model="userProfile!.preferences.friend_code"></div>
-        </div>
-        <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>显示日期</span>
@@ -262,6 +254,14 @@ const bindBtn = (server: AccountServer) => {
             <div><input v-model="userProfile!.preferences.display_name"></div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+        <div class="flex justify-between items-center w-full mt-2">
+            <div class="flex flex-col p-2">
+                <span>好友号码</span>
+                <span class="text-gray-600" style="font-size: 12px;">填写 12 位至 15 位的好友号码</span>
+            </div>
+            <div><input v-model="userProfile!.preferences.friend_code"></div>
+        </div>
+        <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>DX分数</span>
@@ -281,7 +281,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>卡片号码</span>
-                <span class="text-gray-600" style="font-size: 12px;">自定义下方的20位号码</span>
+                <span class="text-gray-600" style="font-size: 12px;">自定义左下角的 20 位号码</span>
             </div>
             <div><input v-model="userProfile!.preferences.simplified_code"></div>
         </div>
@@ -289,7 +289,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>游戏版本</span>
-                <span class="text-gray-600" style="font-size: 12px;">自定义下方的游戏版本</span>
+                <span class="text-gray-600" style="font-size: 12px;">自定义右下角的游戏版本</span>
             </div>
             <div><input v-model="userProfile!.preferences.maimai_version"></div>
         </div>
@@ -318,7 +318,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>
-                    水鱼账户: <b>{{ userStore.userProfile!.accounts['1'] ? '已绑定' : '未绑定' }}
+                    水鱼账户：<b>{{ userStore.userProfile!.accounts['1'] ? '已绑定' : '未绑定' }}
                         {{ userStore.userProfile!.prefer_server == 1 ? '（优先使用）' : '' }}</b>
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile!.accounts['1']">
@@ -327,7 +327,7 @@ const bindBtn = (server: AccountServer) => {
             </div>
             <div class="flex items-center">
                 <component :is="bindBtn(AccountServer.DIVINGFISH)"></component>
-                <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mr-2"
+                <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 ml-2"
                     v-if="userStore.userProfile!.prefer_server != 1 && userStore.userProfile!.accounts['1']"
                     @click="userStore.patchPreferServer(1)">
                     优先
@@ -338,7 +338,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>
-                    落雪账户: <b>{{ userStore.userProfile!.accounts['2'] ? '已绑定' : '未绑定' }}
+                    落雪账户：<b>{{ userStore.userProfile!.accounts['2'] ? '已绑定' : '未绑定' }}
                         {{ userStore.userProfile!.prefer_server == 2 ? '（优先使用）' : '' }}</b>
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile!.accounts['2']">
@@ -348,7 +348,7 @@ const bindBtn = (server: AccountServer) => {
             <div class="flex items-center">
                 <div class="flex items-center">
                     <component :is="bindBtn(AccountServer.LXNS)"></component>
-                    <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mr-2"
+                    <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 ml-2"
                         v-if="userStore.userProfile!.prefer_server != 2 && userStore.userProfile!.accounts['2']"
                         @click="userStore.patchPreferServer(2)">
                         优先
@@ -360,16 +360,16 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>
-                    微信账户: <b>{{ userStore.userProfile!.accounts['3'] ? '已绑定' : '未绑定' }}
-                        {{ userStore.userProfile!.prefer_server == 2 ? '（优先使用）' : '' }}</b>
+                    微信账户：<b>{{ userStore.userProfile!.accounts['3'] ? '已绑定' : '未绑定' }}
+                        {{ userStore.userProfile!.prefer_server == 3 ? '（优先使用）' : '' }}</b>
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile!.accounts['3']">
-                    DXRating: {{ userStore.userProfile!.accounts['2']?.player_rating }}
+                    DXRating: {{ userStore.userProfile!.accounts['3']?.player_rating }}
                 </span>
             </div>
             <div class="flex items-center">
                 <div class="flex items-center">
-                    <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mr-2"
+                    <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
                         v-if="userStore.userProfile!.prefer_server != 3 && userStore.userProfile!.accounts['3']"
                         @click="userStore.patchPreferServer(3)">
                         优先
