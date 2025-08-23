@@ -37,7 +37,7 @@ watch(() => props.preferences, applyPreferences, { immediate: true });
                     <DXRating class="w-1/2" :rating="Number(preferences.dx_rating) || 0" />
                 </div>
                 <div class="header-widget flex relative w-full flex-row-reverse">
-                    <PlayerInfo class="w-1/2" :username="preferences.display_name!"
+                    <PlayerInfo :username="preferences.display_name!"
                         :friend-code="preferences.friend_code!" />
                 </div>
             </div>
