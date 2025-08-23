@@ -29,9 +29,14 @@ const displayPlayerName = computed(() => {
         return props.preferences.display_name;
     }
     
-    // 根据设置选择查分器昵称或机台昵称
-    if (props.preferences.player_name_source === 'wahlap' && userStore.preferAccount?.wahlap_name) {
-        return userStore.preferAccount.wahlap_name;
+    // 根据设置选择查分器昵称或 WECHAT 昵称
+    if (props.preferences.player_name_source === 'wechat') {
+        // 如果用户有 WECHAT 账户，使用 WECHAT 账户的昵称
+        const wechatAccounts = userStore.userProfile?.wechat_accounts;
+        if (wechatAccounts && Object.keys(wechatAccounts).length > 0) {
+            const firstWechatAccount = Object.values(wechatAccounts)[0];
+            return firstWechatAccount.account_name;
+        }
     }
     
     // 默认使用查分器昵称
@@ -45,8 +50,17 @@ const displayFriendCode = computed(() => {
         return props.preferences.friend_code;
     }
     
-    // 使用华立服务器返回的好友代码
-    return userStore.preferAccount?.wahlap_friend_code?.toString() || '';
+    // 如果设置为使用 WECHAT 数据，优先使用 WECHAT 好友代码
+    if (props.preferences.player_name_source === 'wechat') {
+        const wechatAccounts = userStore.userProfile?.wechat_accounts;
+        if (wechatAccounts && Object.keys(wechatAccounts).length > 0) {
+            const firstWechatAccount = Object.values(wechatAccounts)[0];
+            return firstWechatAccount.friend_code.toString();
+        }
+    }
+    
+    // 默认返回空字符串（查分器通常不需要显示好友代码）
+    return '';
 });
 
 const applyPreferences = () => {

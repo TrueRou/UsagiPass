@@ -11,15 +11,22 @@ from maimai_py import MaimaiClient
 from maimai_py.utils.sentinel import UNSET
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.pool import AsyncAdaptedQueuePool, QueuePool
+from sqlalchemy.pool import AsyncAdaptedQueuePool, QueuePool, StaticPool
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from usagipass.app import settings
 from usagipass.app.logging import Ansi, log
 
-engine = create_engine(settings.mysql_url, poolclass=QueuePool)
-async_engine = create_async_engine(settings.mysql_url.replace("mysql+pymysql", "mysql+aiomysql"), poolclass=AsyncAdaptedQueuePool)
+# Configure engine based on database type
+if settings.mysql_url.startswith("sqlite"):
+    # For SQLite, use StaticPool and specific configurations
+    engine = create_engine(settings.mysql_url.replace("+aiosqlite", ""), poolclass=StaticPool, connect_args={"check_same_thread": False})
+    async_engine = create_async_engine(settings.mysql_url, poolclass=StaticPool, connect_args={"check_same_thread": False})
+else:
+    # For MySQL and other databases
+    engine = create_engine(settings.mysql_url, poolclass=QueuePool)
+    async_engine = create_async_engine(settings.mysql_url.replace("mysql+pymysql", "mysql+aiomysql"), poolclass=AsyncAdaptedQueuePool)
 redis_backend = UNSET
 if settings.redis_url:
     redis_url = urlparse(settings.redis_url)

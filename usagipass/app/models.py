@@ -79,8 +79,6 @@ class UserAccount(SQLModel, table=True):
     bind_qq: str = Field(default="")
     player_rating: int = Field(default=10000)
     username: str = Field(index=True)
-    wahlap_name: str | None = Field(default=None)
-    wahlap_friend_code: int | None = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -89,8 +87,24 @@ class UserAccountPublic(SQLModel):
     account_name: str
     nickname: str
     player_rating: int
-    wahlap_name: str | None = None
-    wahlap_friend_code: int | None = None
+
+
+class WechatAccount(SQLModel, table=True):
+    __tablename__ = "wechat_accounts"  # type: ignore
+
+    account_name: str = Field(primary_key=True, foreign_key="user_accounts.account_name")
+    friend_code: int
+    star: int = Field(default=0)
+    trophy: str | None = Field(default=None)
+    token: str | None = Field(default=None)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class WechatAccountPublic(SQLModel):
+    account_name: str
+    friend_code: int
+    star: int
+    trophy: str | None = None
 
 
 class PreferenceBase(SQLModel):
