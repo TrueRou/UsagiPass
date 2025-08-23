@@ -360,7 +360,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>
-                    微信NET账户: <b>{{ userStore.userProfile!.accounts['3'] ? '已绑定' : '未绑定' }}
+                    微信账户: <b>{{ userStore.userProfile!.accounts['3'] ? '已绑定' : '未绑定' }}
                         {{ userStore.userProfile!.prefer_server == 2 ? '（优先使用）' : '' }}</b>
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile!.accounts['3']">
@@ -374,7 +374,6 @@ const bindBtn = (server: AccountServer) => {
                         @click="userStore.patchPreferServer(3)">
                         优先
                     </button>
-                    <component :is="bindBtn(AccountServer.WECHAT)"></component>
                 </div>
             </div>
         </div>

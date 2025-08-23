@@ -13,16 +13,13 @@ from usagipass.app.database import async_session_ctx, maimai_client
 from usagipass.app.logging import Ansi, log
 from usagipass.app.models import AccountServer, CrawlerResult, User, UserAccount
 from usagipass.app.settings import divingfish_developer_token, lxns_developer_token
+from usagipass.app.usecases import accounts
 
 
 @retry(stop=stop_after_attempt(3), reraise=True)
 async def fetch_wechat_retry(username: str, cookies: Cookies) -> MaimaiScores:
     async with async_session_ctx() as session:
-        stmt = select(UserAccount).where(UserAccount.username == username, UserAccount.account_server == AccountServer.WECHAT)
-        if wechat_account := (await session.exec(stmt)).first():
-            player = await maimai_client.players(PlayerIdentifier(credentials=cookies), WechatProvider())
-            wechat_account.player_rating = player.rating
-            wechat_account.nickname = player.name
+        await accounts.merge_wechat(session, username, cookies)
     return await maimai_client.scores(PlayerIdentifier(credentials=cookies), provider=WechatProvider())
 
 
