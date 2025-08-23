@@ -100,7 +100,6 @@ class PreferenceBase(SQLModel):
     mask_type: int = Field(default=0)
     chara_info_color: str = Field(default="#fee37c", sa_column_kwargs={"server_default": "#fee37c"})
     show_date: bool = Field(default=False)
-    player_name_source: str = Field(default="prober")
 
 
 class UserPreference(PreferenceBase, table=True):

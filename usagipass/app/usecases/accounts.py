@@ -1,5 +1,3 @@
-import typing
-
 from fastapi import HTTPException, status
 from httpx import ConnectError, ReadTimeout
 from sqlmodel.ext.asyncio.session import AsyncSession
