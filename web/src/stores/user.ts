@@ -6,9 +6,11 @@ import { type Router } from "vue-router"
 import { useImageStore } from "./image"
 import { useNotificationStore } from "./notification"
 import { AccountServer, type Kind, type UserProfile } from "@/types"
+import { useServerStore } from "./server"
 
 export const useUserStore = defineStore('user', () => {
     const imageStore = useImageStore();
+    const serverStore = useServerStore();
     const notificationStore = useNotificationStore();
 
     const token = ref(localStorage.getItem('token'));
@@ -90,7 +92,7 @@ export const useUserStore = defineStore('user', () => {
         try {
             await axiosInstance.value.patch('/users', { prefer_server: prefer_server });
             await refreshUser();
-            notificationStore.success("设置成功", `已将${prefer_server === 1 ? '水鱼' : '落雪'}设为优先数据源`);
+            notificationStore.success("设置成功", `已将 ${serverStore.serverNames[prefer_server]} 设为优先数据源`);
         } catch (error: any) {
             notificationStore.error("设置失败", error.response?.data?.detail || "未知错误");
         }

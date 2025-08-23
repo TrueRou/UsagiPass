@@ -326,12 +326,12 @@ const bindBtn = (server: AccountServer) => {
                 </span>
             </div>
             <div class="flex items-center">
+                <component :is="bindBtn(AccountServer.DIVINGFISH)"></component>
                 <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mr-2"
                     v-if="userStore.userProfile!.prefer_server != 1 && userStore.userProfile!.accounts['1']"
                     @click="userStore.patchPreferServer(1)">
                     优先
                 </button>
-                <component :is="bindBtn(AccountServer.DIVINGFISH)"></component>
             </div>
         </div>
         <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
@@ -347,12 +347,12 @@ const bindBtn = (server: AccountServer) => {
             </div>
             <div class="flex items-center">
                 <div class="flex items-center">
+                    <component :is="bindBtn(AccountServer.LXNS)"></component>
                     <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mr-2"
                         v-if="userStore.userProfile!.prefer_server != 2 && userStore.userProfile!.accounts['2']"
                         @click="userStore.patchPreferServer(2)">
                         优先
                     </button>
-                    <component :is="bindBtn(AccountServer.LXNS)"></component>
                 </div>
             </div>
         </div>
