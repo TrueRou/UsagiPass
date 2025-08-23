@@ -1,10 +1,12 @@
 import asyncio
 import time
 import traceback
+import typing
 from datetime import datetime
 
+from fastapi import HTTPException, status
 from httpx import Cookies
-from maimai_py import DivingFishProvider, LXNSProvider, MaimaiScores, Player, PlayerIdentifier, ScoreExtend, WechatProvider
+from maimai_py import DivingFishProvider, LXNSProvider, MaimaiScores, Player, PlayerIdentifier, ScoreExtend, WechatPlayer, WechatProvider
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from tenacity import retry, stop_after_attempt
@@ -13,14 +15,38 @@ from usagipass.app.database import async_session_ctx, maimai_client
 from usagipass.app.logging import Ansi, log
 from usagipass.app.models import AccountServer, CrawlerResult, User, UserAccount
 from usagipass.app.settings import divingfish_developer_token, lxns_developer_token
-from usagipass.app.usecases import accounts
+
+
+async def merge_wechat(username: str, cookies: Cookies) -> UserAccount:
+    async with async_session_ctx() as session:
+        player = typing.cast(WechatPlayer, await maimai_client.players(PlayerIdentifier(credentials=cookies), WechatProvider()))
+        account_name = str(player.friend_code)
+
+        account = await session.get(UserAccount, (account_name, AccountServer.WECHAT))
+        if account and account.username != username:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"该 WECHAT 账号已被其他账号 {username} 绑定")
+
+        new_account = UserAccount(
+            account_name=account_name,
+            account_server=AccountServer.WECHAT,
+            account_password="",
+            username=username,
+            nickname=player.name,
+            player_rating=player.rating,
+        )
+        await session.merge(new_account)
+
+        return new_account
 
 
 @retry(stop=stop_after_attempt(3), reraise=True)
 async def fetch_wechat_retry(username: str, cookies: Cookies) -> MaimaiScores:
-    async with async_session_ctx() as session:
-        await accounts.merge_wechat(session, username, cookies)
-    return await maimai_client.scores(PlayerIdentifier(credentials=cookies), provider=WechatProvider())
+    _, scores = await asyncio.gather(
+        merge_wechat(username, cookies),
+        maimai_client.scores(PlayerIdentifier(credentials=cookies), provider=WechatProvider()),
+    )
+
+    return scores
 
 
 @retry(stop=stop_after_attempt(3))

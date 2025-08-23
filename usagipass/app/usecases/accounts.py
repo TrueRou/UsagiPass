@@ -1,11 +1,10 @@
 import typing
 
 from fastapi import HTTPException, status
-from httpx import ConnectError, Cookies, ReadTimeout
-from maimai_py import PlayerIdentifier, WechatPlayer, WechatProvider
+from httpx import ConnectError, ReadTimeout
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from usagipass.app.database import httpx_client, maimai_client
+from usagipass.app.database import httpx_client
 from usagipass.app.models import AccountServer, Image, ImagePublic, PreferencePublic, User, UserAccount, UserPreference
 from usagipass.app.settings import default_background, default_character, default_frame, default_passname
 from usagipass.app.usecases.crawler import fetch_rating_retry
@@ -91,25 +90,4 @@ async def merge_lxns(session: AsyncSession, user: User, personal_token: str) -> 
     )
     new_account.player_rating = await fetch_rating_retry(new_account)
     await session.merge(new_account)
-    return new_account
-
-
-async def merge_wechat(session: AsyncSession, username: str, cookies: Cookies) -> UserAccount:
-    player = typing.cast(WechatPlayer, await maimai_client.players(PlayerIdentifier(credentials=cookies), WechatProvider()))
-    account_name = str(player.friend_code)
-
-    account = await session.get(UserAccount, (account_name, AccountServer.WECHAT))
-    if account and account.username != username:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"该 WECHAT 账号已被其他账号 {username} 绑定")
-
-    new_account = UserAccount(
-        account_name=account_name,
-        account_server=AccountServer.WECHAT,
-        account_password="",
-        username=username,
-        nickname=player.name,
-        player_rating=player.rating,
-    )
-    await session.merge(new_account)
-
     return new_account
