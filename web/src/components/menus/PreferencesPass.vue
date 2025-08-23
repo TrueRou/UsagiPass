@@ -377,7 +377,7 @@ const bindBtn = (server: AccountServer) => {
                 </div>
             </div>
         </div>
-        <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+        <!-- <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>
@@ -395,7 +395,7 @@ const bindBtn = (server: AccountServer) => {
                     </button>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">

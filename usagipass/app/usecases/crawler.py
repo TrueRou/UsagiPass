@@ -35,6 +35,7 @@ async def merge_wechat(username: str, cookies: Cookies) -> UserAccount:
             player_rating=player.rating,
         )
         await session.merge(new_account)
+        await session.commit()
 
         return new_account
 
