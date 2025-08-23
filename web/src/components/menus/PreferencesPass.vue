@@ -26,12 +26,12 @@ const openGallery = (kind: Kind) => {
 
 const copyToken = () => {
     if (!userStore.userProfile?.api_token) {
-        notificationStore.error('复制失败', 'Token不可用');
+        notificationStore.error('复制失败', 'Token 不可用');
         return;
     }
     navigator.clipboard.writeText(userStore.userProfile.api_token)
-        .then(() => notificationStore.success('复制成功', 'Token已复制到剪贴板'))
-        .catch(() => notificationStore.error('复制失败', '无法复制Token'))
+        .then(() => notificationStore.success('复制成功', 'Token 已复制到剪贴板'))
+        .catch(() => notificationStore.error('复制失败', '无法复制 Token'))
 }
 
 const bindBtn = (server: AccountServer) => {
@@ -57,7 +57,7 @@ const bindBtn = (server: AccountServer) => {
 
                 <div class="flex flex-col p-2">
                     <span><a href="https://github.com/TrueRou">兔肉</a></span>
-                    <span class="text-gray-600" style="font-size: 12px;">本项目已在Github开源</span>
+                    <span class="text-gray-600" style="font-size: 12px;">本项目已在 Github 开源</span>
                 </div>
             </div>
             <div class="flex items-center">
@@ -245,19 +245,19 @@ const bindBtn = (server: AccountServer) => {
                     <p class="text-gray-600" style="font-size: 12px;">人物预览</p>
                 </div>
                 <div class="flex flex-col flex-1 items-center justify-between">
-                    <p class="text-gray-600" style="font-size: 12px;">PASS预览</p>
+                    <p class="text-gray-600" style="font-size: 12px;">通行证预览</p>
                 </div>
             </div>
         </div>
     </div>
     <div class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full mt-2">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">
-            <h1 class="font-bold text-white">覆盖设置</h1>
+            <h1 class="font-bold text-white">自定义设置</h1>
         </div>
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>玩家昵称</span>
-                <span class="text-gray-600" style="font-size: 12px;">覆盖查分器返回的玩家昵称</span>
+                <span class="text-gray-600" style="font-size: 12px;">自定义显示的玩家昵称</span>
             </div>
             <div><input v-model="userProfile!.preferences.display_name"></div>
         </div>
@@ -265,7 +265,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>DX分数</span>
-                <span class="text-gray-600" style="font-size: 12px;">覆盖查分器返回的DX分数</span>
+                <span class="text-gray-600" style="font-size: 12px;">自定义显示的 DX 分数</span>
             </div>
             <div><input v-model="userProfile!.preferences.dx_rating"></div>
         </div>
@@ -273,7 +273,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>人物名称</span>
-                <span class="text-gray-600" style="font-size: 12px;">覆盖卡面左下方的人物名称</span>
+                <span class="text-gray-600" style="font-size: 12px;">自定义左下方的人物名称</span>
             </div>
             <div><input v-model="userProfile!.preferences.character_name"></div>
         </div>
@@ -281,7 +281,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>卡片号码</span>
-                <span class="text-gray-600" style="font-size: 12px;">覆盖卡面下方的20位号码</span>
+                <span class="text-gray-600" style="font-size: 12px;">自定义下方的20位号码</span>
             </div>
             <div><input v-model="userProfile!.preferences.simplified_code"></div>
         </div>
@@ -289,7 +289,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>游戏版本</span>
-                <span class="text-gray-600" style="font-size: 12px;">覆盖卡面下方的游戏版本</span>
+                <span class="text-gray-600" style="font-size: 12px;">自定义下方的游戏版本</span>
             </div>
             <div><input v-model="userProfile!.preferences.maimai_version"></div>
         </div>
@@ -297,7 +297,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>角色框颜色</span>
-                <span class="text-gray-600" style="font-size: 12px;">覆盖卡面左下方的角色框颜色</span>
+                <span class="text-gray-600" style="font-size: 12px;">自定义左下方的角色框颜色</span>
             </div>
             <div class="flex items-center">
                 <a class="bg-blue-500 text-white font-bold h-[32px] w-[32px] p-2 rounded hover:bg-blue-600 text-sm cursor-pointer -mr-1"
@@ -319,7 +319,7 @@ const bindBtn = (server: AccountServer) => {
             <div class="flex flex-col p-2">
                 <span>
                     水鱼账户: <b>{{ userStore.userProfile!.accounts['1'] ? '已绑定' : '未绑定' }}
-                        {{ userStore.userProfile!.prefer_server == 1 ? '(优先使用)' : '' }}</b>
+                        {{ userStore.userProfile!.prefer_server == 1 ? '（优先使用）' : '' }}</b>
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile!.accounts['1']">
                     DXRating: {{ userStore.userProfile!.accounts['1']?.player_rating }}
@@ -339,7 +339,7 @@ const bindBtn = (server: AccountServer) => {
             <div class="flex flex-col p-2">
                 <span>
                     落雪账户: <b>{{ userStore.userProfile!.accounts['2'] ? '已绑定' : '未绑定' }}
-                        {{ userStore.userProfile!.prefer_server == 2 ? '(优先使用)' : '' }}</b>
+                        {{ userStore.userProfile!.prefer_server == 2 ? '（优先使用）' : '' }}</b>
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile!.accounts['2']">
                     DXRating: {{ userStore.userProfile!.accounts['2']?.player_rating }}
@@ -360,7 +360,28 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>
-                    联动账户: <b>可绑定</b>
+                    微信账户: <b>{{ userStore.userProfile!.accounts['3'] ? '已绑定' : '未绑定' }}
+                        {{ userStore.userProfile!.prefer_server == 2 ? '（优先使用）' : '' }}</b>
+                </span>
+                <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile!.accounts['3']">
+                    DXRating: {{ userStore.userProfile!.accounts['2']?.player_rating }}
+                </span>
+            </div>
+            <div class="flex items-center">
+                <div class="flex items-center">
+                    <button class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 mr-2"
+                        v-if="userStore.userProfile!.prefer_server != 3 && userStore.userProfile!.accounts['3']"
+                        @click="userStore.patchPreferServer(3)">
+                        优先
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="w-full border-t border-gray-300 mt-1 mb-1"></div>
+        <div class="flex justify-between items-center w-full">
+            <div class="flex flex-col p-2">
+                <span>
+                    联动账户：<b>可绑定</b>
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile?.api_token">
                     联动 Token 已生成
@@ -384,7 +405,7 @@ const bindBtn = (server: AccountServer) => {
             <input class="hidden" ref="image-picker" type="file" accept="image/jpeg,image/png,image/webp" />
             <div class="flex flex-col p-2">
                 <span>上传背景</span>
-                <span class="text-gray-600" style="font-size: 12px;">上传自定义背景图片 (768 * 1052)</span>
+                <span class="text-gray-600" style="font-size: 12px;">上传自定义背景图片（768 * 1052）</span>
             </div>
             <div>
                 <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
@@ -397,7 +418,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>上传边框</span>
-                <span class="text-gray-600" style="font-size: 12px;">上传自定义边框图片 (768 * 1052)</span>
+                <span class="text-gray-600" style="font-size: 12px;">上传自定义边框图片（768 * 1052）</span>
             </div>
             <div>
                 <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
@@ -410,7 +431,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>上传人物</span>
-                <span class="text-gray-600" style="font-size: 12px;">上传自定义人物图片 (768 * 1052)</span>
+                <span class="text-gray-600" style="font-size: 12px;">上传自定义人物图片（768 * 1052）</span>
             </div>
             <div>
                 <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
@@ -423,7 +444,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>上传PASS</span>
-                <span class="text-gray-600" style="font-size: 12px;">上传自定义PASS图片 (338 * 112)</span>
+                <span class="text-gray-600" style="font-size: 12px;">上传自定义通行证图片（338 * 112）</span>
             </div>
             <div>
                 <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
