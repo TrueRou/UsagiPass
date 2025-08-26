@@ -68,7 +68,8 @@ async def merge_divingfish(session: AsyncSession, user: User, account_name: str,
         nickname=profile["nickname"],
         bind_qq=profile["bind_qq"],
     )
-    new_account.player_rating = await fetch_rating_retry(new_account)
+    if to_rating := await fetch_rating_retry(new_account):
+        new_account.player_rating = to_rating
     await session.merge(new_account)
     return new_account
 
@@ -86,6 +87,7 @@ async def merge_lxns(session: AsyncSession, user: User, personal_token: str) -> 
         username=user.username,
         nickname=profile["name"],
     )
-    new_account.player_rating = await fetch_rating_retry(new_account)
+    if to_rating := await fetch_rating_retry(new_account):
+        new_account.player_rating = to_rating
     await session.merge(new_account)
     return new_account

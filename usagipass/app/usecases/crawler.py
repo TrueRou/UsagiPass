@@ -51,7 +51,7 @@ async def fetch_wechat_retry(username: str, cookies: Cookies) -> MaimaiScores:
 
 
 @retry(stop=stop_after_attempt(3))
-async def fetch_rating_retry(account: UserAccount) -> int:
+async def fetch_rating_retry(account: UserAccount) -> int | None:
     ident, provider = None, None
     if account.account_server == AccountServer.DIVING_FISH:
         ident = PlayerIdentifier(username=account.account_name)
@@ -59,9 +59,9 @@ async def fetch_rating_retry(account: UserAccount) -> int:
     elif account.account_server == AccountServer.LXNS:
         ident = PlayerIdentifier(friend_code=int(account.account_name))
         provider = LXNSProvider(lxns_developer_token)
-    assert ident and provider, "Invalid account server"
-    player: Player = await maimai_client.players(ident, provider)
-    return player.rating
+    if ident and provider:
+        player: Player = await maimai_client.players(ident, provider)
+        return player.rating
 
 
 @retry(stop=stop_after_attempt(3))
@@ -93,7 +93,8 @@ async def update_rating(account: UserAccount, result: CrawlerResult) -> CrawlerR
         account = await scoped_session.get(UserAccount, (account.account_name, account.account_server)) or account
         result.from_rating = account.player_rating
         try:
-            result.to_rating = await fetch_rating_retry(account)
+            if to_rating := await fetch_rating_retry(account):
+                result.to_rating = to_rating
             log(f"{account.username}({account.account_server.name} {account.account_name}) {result.from_rating} -> {result.to_rating})", Ansi.GREEN)
         except Exception as e:
             result.to_rating = result.from_rating
