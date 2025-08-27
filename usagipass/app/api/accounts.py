@@ -103,7 +103,10 @@ async def get_friends(
     # 获取用户的微信账户信息
     wechat_account = await accounts.get_user_account(session, user.username, AccountServer.WECHAT)
     if not wechat_account:
-        raise HTTPException(status_code=400, detail="未绑定微信账户，请先更新查分器以绑定微信账户")
+        raise HTTPException(
+            status_code=400, 
+            detail="未绑定微信账户，请先点击「更新查分器」按钮绑定微信账户后重试"
+        )
     
     try:
         # 在实际实现中，这里需要使用存储的 cookies 来调用 maimai.py 的 get_friends 功能
