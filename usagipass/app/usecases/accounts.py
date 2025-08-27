@@ -91,3 +91,15 @@ async def merge_lxns(session: AsyncSession, user: User, personal_token: str) -> 
         new_account.player_rating = to_rating
     await session.merge(new_account)
     return new_account
+
+
+async def get_user_account(session: AsyncSession, username: str, server: AccountServer) -> UserAccount | None:
+    """获取用户指定服务器的账户信息"""
+    from sqlmodel import select
+    
+    result = await session.exec(
+        select(UserAccount)
+        .where(UserAccount.username == username)
+        .where(UserAccount.account_server == server)
+    )
+    return result.first()

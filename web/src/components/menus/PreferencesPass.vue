@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/user';
 import { AccountServer, type Kind } from '@/types';
 import { ref, useTemplateRef } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
+import BattleFriendsDialog from '@/components/dialogs/BattleFriendsDialog.vue';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -15,6 +16,7 @@ const notificationStore = useNotificationStore();
 
 const imagePicker = useTemplateRef('image-picker');
 const userProfile = ref(userStore.userProfile);
+const showBattleFriendsDialog = ref(false);
 
 const r = (resource_id: string) => import.meta.env.VITE_URL + "/images/" + resource_id;
 const openPicker = (kind: Kind) => userStore.openImagePicker(kind, imagePicker.value!);
@@ -43,6 +45,14 @@ const bindBtn = (server: AccountServer) => {
             {isBinded ? '改绑' : '绑定'}
         </RouterLink>
     );
+};
+
+const openBattleFriendsDialog = () => {
+    showBattleFriendsDialog.value = true;
+};
+
+const closeBattleFriendsDialog = () => {
+    showBattleFriendsDialog.value = false;
 };
 </script>
 <template>
@@ -91,6 +101,12 @@ const bindBtn = (server: AccountServer) => {
                     class="bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-2 px-2 rounded hover:from-pink-600 hover:to-blue-600 text-nowrap"
                     @click="userStore.updateProber">
                     更新查分器
+                </button>
+                <button
+                    class="ml-2 bg-purple-500 text-white font-bold py-2 px-2 rounded hover:bg-purple-600 text-nowrap"
+                    @click="openBattleFriendsDialog"
+                    :disabled="!userStore.userProfile!.accounts['3']">
+                    对战好友
                 </button>
                 <a class="ml-2 bg-red-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-red-600 text-sm cursor-pointer"
                     @click="userStore.logout(true)">
@@ -460,6 +476,12 @@ const bindBtn = (server: AccountServer) => {
             保存
         </button>
     </div>
+    
+    <!-- Battle Friends Dialog -->
+    <BattleFriendsDialog 
+        :show="showBattleFriendsDialog"
+        @close="closeBattleFriendsDialog"
+    />
 </template>
 <style scoped>
 input {
