@@ -127,6 +127,12 @@ async def crawl_async(cookies: Cookies, user: User, session: AsyncSession) -> li
     wechat_results[1].elapsed_time = time.time() - begin
     crawler_results = [wechat_results[1]]
     if wechat_results[1].success:
-        uploads = await asyncio.gather(*[asyncio.create_task(upload_server(account, wechat_results[0])) for account in accounts])
+        uploads = await asyncio.gather(
+            *[
+                asyncio.create_task(upload_server(account, wechat_results[0]))
+                for account in accounts
+                if account.account_server in [AccountServer.DIVING_FISH, AccountServer.LXNS]
+            ]
+        )
         crawler_results.extend(uploads)
     return crawler_results
