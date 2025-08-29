@@ -70,7 +70,7 @@ if (!Object.keys(imageStore.images!).includes(props.kind)) {
                         v-else>
                         {{ image.name }}
                     </div>
-                    <img :src="r(image.id)" class="w-full h-48 object-contain rounded-lg">
+                    <img :src="r(image.id)" class="w-full h-48 object-contain rounded-lg" loading="lazy">
                     <button
                         class="absolute top-0 right-0 bg-black bg-opacity-50 text-white p-1 rounded-bl-lg text-xs max-w-full z-10"
                         @click="imageStore.deleteImage(image)" v-if="image.uploaded_by">
