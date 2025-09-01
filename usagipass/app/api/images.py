@@ -7,14 +7,15 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from PIL.Image import Image as PILImage
 from PIL.Image import Resampling
-from sqlmodel import col, select
+from sqlmodel import col, or_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from usagipass.app.database import require_session, session_ctx
 from usagipass.app.models import Image, ImagePublic, User, image_kinds, sega_prefixs
+from usagipass.app.usecases import authorize
 from usagipass.app.usecases.authorize import verify_user
 
-router = APIRouter(prefix="/images", tags=["images"])
+router = APIRouter(tags=["images"])
 data_folder = Path.cwd() / ".data"
 images_folder = Path.cwd() / ".data" / "images"
 thumbnail_folder = Path.cwd() / ".data" / "thumbnails"
@@ -40,7 +41,20 @@ def _remove_sega_prefix(name: str) -> str:
     return name
 
 
-@router.post("", response_model=ImagePublic, status_code=status.HTTP_201_CREATED)
+@router.get("/bits", response_model=list[ImagePublic])
+async def get_images(
+    user: User | None = Depends(authorize.verify_user_optional),
+    session: AsyncSession = Depends(require_session),
+):
+    clause = (
+        select(Image).where(Image.uploaded_by == None).order_by(col(Image.uploaded_at).desc())
+        if user is None
+        else select(Image).where(or_(Image.uploaded_by == None, Image.uploaded_by == user.username)).order_by(col(Image.uploaded_at).desc())
+    )
+    return await session.exec(clause)
+
+
+@router.post("/bits", response_model=ImagePublic, status_code=status.HTTP_201_CREATED)
 def upload_image(
     name: str,
     kind: str,
@@ -67,13 +81,18 @@ def upload_image(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="图片宽度或高度不规范")
 
 
-@router.get("/{image_id}")
+@router.get("/bits/standard")
+async def get_kinds():
+    return image_kinds
+
+
+@router.get("/images/{image_id}")
 async def get_image(image: Image = Depends(require_image)):
     image_path = images_folder / f"{image.id}.webp"
     return FileResponse(image_path, media_type="image/webp")
 
 
-@router.delete("/{image_id}")
+@router.delete("/images/{image_id}")
 async def delete_image(
     user: User = Depends(verify_user),
     session: AsyncSession = Depends(require_session),
@@ -88,7 +107,7 @@ async def delete_image(
     return {"message": "图片已删除"}
 
 
-@router.patch("/{image_id}")
+@router.patch("/images/{image_id}")
 async def patch_image(
     name: str,
     user: User = Depends(verify_user),
@@ -102,7 +121,7 @@ async def patch_image(
     return {"message": "图片已重命名"}
 
 
-@router.get("/{image_id}/related", response_model=list[ImagePublic])
+@router.get("/images/{image_id}/related", response_model=list[ImagePublic])
 async def get_images_related(session: AsyncSession = Depends(require_session), image: Image = Depends(require_image)):
     if image.sega_name:
         suffix = _remove_sega_prefix(image.sega_name)
@@ -110,7 +129,7 @@ async def get_images_related(session: AsyncSession = Depends(require_session), i
     return []
 
 
-@router.get("/{image_id}/thumbnail")
+@router.get("/images/{image_id}/thumbnail")
 def get_image_thumbnail(image_id: uuid.UUID):
     # we don't verify the image here, due to performance reasons
     thumbnail_path = thumbnail_folder / f"{image_id}.webp"

@@ -16,7 +16,7 @@ export const useServerStore = defineStore('server', () => {
 
     async function refreshKind() {
         try {
-            const response = (await axiosInstance.value.get('/kinds'))
+            const response = (await axiosInstance.value.get('/bits/standard'))
             serverKinds.value = response.data
         } catch (error) {
             notificationStore.error("服务器错误", "无法刷新图片类型信息，请联系开发者");

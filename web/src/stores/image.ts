@@ -30,7 +30,7 @@ export const useImageStore = defineStore('image', () => {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            await userStore.axiosInstance.post(`/images?name=${name}&kind=${kind}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            await userStore.axiosInstance.post(`/bits?name=${name}&kind=${kind}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             await refreshImages();
             router.back();
         } catch (error: any) {
