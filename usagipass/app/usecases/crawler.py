@@ -59,6 +59,8 @@ async def fetch_rating_retry(account: UserAccount) -> int | None:
     elif account.account_server == AccountServer.LXNS:
         ident = PlayerIdentifier(friend_code=int(account.account_name))
         provider = LXNSProvider(lxns_developer_token)
+    elif account.account_server == AccountServer.WECHAT:
+        return account.player_rating
     if ident and provider:
         player: Player = await maimai_client.players(ident, provider)
         return player.rating
