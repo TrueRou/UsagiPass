@@ -60,9 +60,9 @@ async def update_prober_oauth():
     try:
         resp = await httpx_client.get("https://tgk-wcaime.wahlap.com/wc_auth/oauth/authorize/maimai-dx")
     except (ConnectError, ReadTimeout):
-        raise HTTPException(status_code=503, detail="无法连接到华立 OAuth 服务", headers={"WWW-Authenticate": "Bearer"})
+        raise HTTPException(status_code=503, detail="无法连接到微信 OAuth 服务", headers={"WWW-Authenticate": "Bearer"})
     if not resp.headers.get("location"):
-        raise HTTPException(status_code=500, detail="华立 OAuth 服务返回的响应不正确", headers={"WWW-Authenticate": "Bearer"})
+        raise HTTPException(status_code=500, detail="微信 OAuth 服务返回的响应不正确", headers={"WWW-Authenticate": "Bearer"})
     # example: https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx1fcecfcbd16803b1&redirect_uri=https%3A%2F%2Ftgk-wcaime.wahlap.com%2Fwc_auth%2Foauth%2Fcallback%2Fmaimai-dx%3Fr%3DINesnJ5e%26t%3D214115533&response_type=code&scope=snsapi_base&state=5E7AB78BF1B35471B7BF8DD69E6B50F4361818FA6E01FC#wechat_redirect
     return {"url": resp.headers["location"].replace("redirect_uri=https", "redirect_uri=http")}
 
@@ -88,6 +88,6 @@ async def update_prober_callback(
             resp = await httpx_client.get(resp.next_request.url, headers=headers)
             results = await crawler.crawl_async(resp.cookies, user, session)
             return results
-        raise HTTPException(status_code=400, detail="华立 OAuth 已过期或无效", headers={"WWW-Authenticate": "Bearer"})
+        raise HTTPException(status_code=400, detail="微信 OAuth 已过期或无效", headers={"WWW-Authenticate": "Bearer"})
     except (ConnectError, ReadTimeout):
         raise HTTPException(status_code=503, detail="无法连接到华立服务器", headers={"WWW-Authenticate": "Bearer"})
