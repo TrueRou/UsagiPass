@@ -6,6 +6,7 @@ import CharaInfo from '@/components/CharaInfo.vue';
 import PlayerInfo from '@/components/PlayerInfo.vue';
 import CardBack from '@/components/CardBack.vue';
 import { useServerStore } from '@/stores/server';
+import { useMaimaiVersionStore } from '@/stores/maimaiVersion';
 import { watch } from 'vue';
 import type { Image, Preference } from '@/types';
 
@@ -17,12 +18,13 @@ const props = defineProps<{
 }>()
 
 const serverStore = useServerStore();
+const maimaiVersionStore = useMaimaiVersionStore();
 
 const r = (image: Image) => import.meta.env.VITE_URL + "/images/" + image!.id;
 
 const applyPreferences = () => {
     props.preferences.character_name ||= props.preferences.character.name;
-    props.preferences.maimai_version ||= serverStore.maimaiVersion;
+    props.preferences.maimai_version ||= maimaiVersionStore.getCurrentVersion();
 }
 
 watch(() => props.preferences, applyPreferences, { immediate: true });
