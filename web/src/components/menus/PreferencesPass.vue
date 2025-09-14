@@ -318,8 +318,10 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>
-                    水鱼账户：<b>{{ userStore.userProfile!.accounts['1'] ? '已绑定' : '未绑定' }}
-                        {{ userStore.userProfile!.prefer_server == 1 ? '（优先使用）' : '' }}</b>
+                    水鱼账户：
+                    <b>
+                        {{ userStore.userProfile!.accounts['1'] ? '已绑定' : '未绑定' }}<span v-if="userStore.userProfile?.prefer_server === 1">（优先使用）</span>
+                    </b>
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile!.accounts['1']">
                     DXRating: {{ userStore.userProfile!.accounts['1']?.player_rating }}
@@ -338,8 +340,10 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>
-                    落雪账户：<b>{{ userStore.userProfile!.accounts['2'] ? '已绑定' : '未绑定' }}
-                        {{ userStore.userProfile!.prefer_server == 2 ? '（优先使用）' : '' }}</b>
+                    落雪账户：
+                    <b>
+                        {{ userStore.userProfile!.accounts['2'] ? '已绑定' : '未绑定' }}<span v-if="userStore.userProfile?.prefer_server === 2">（优先使用）</span>
+                    </b>
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile!.accounts['2']">
                     DXRating: {{ userStore.userProfile!.accounts['2']?.player_rating }}
@@ -360,8 +364,10 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full">
             <div class="flex flex-col p-2">
                 <span>
-                    微信账户：<b>{{ userStore.userProfile!.accounts['3'] ? '已绑定' : '未绑定' }}
-                        {{ userStore.userProfile!.prefer_server == 3 ? '（优先使用）' : '' }}</b>
+                    微信账户：
+                    <b>
+                        {{ userStore.userProfile!.accounts['3'] ? '已绑定' : '未绑定' }}<span v-if="userStore.userProfile?.prefer_server === 3">（优先使用）</span>
+                    </b>
                 </span>
                 <span class="text-gray-600" style="font-size: 12px;" v-if="userStore.userProfile!.accounts['3']">
                     DXRating: {{ userStore.userProfile!.accounts['3']?.player_rating }}
