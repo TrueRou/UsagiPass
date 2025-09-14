@@ -3,12 +3,12 @@ import { defineStore } from "pinia";
 // 国框舞萌 DX 版本配置
 const maimaiVersions = [
     {
-        version: "[maimaiDX]CN1.51-D",
-        releaseTime: "2025-07-16T10:00:00+08:00"
+        version: "[maimaiDX]CN1.51-E",
+        releaseTime: "2025-08-20T10:00:00+08:00"
     },
     {
-        version: "[maimaiDX]CN1.51-E", 
-        releaseTime: "2025-08-20T10:00:00+08:00"
+        version: "[maimaiDX]CN1.51-F", 
+        releaseTime: "2025-09-24T10:00:00+08:00"
     }
 ];
 
