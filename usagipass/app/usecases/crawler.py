@@ -24,7 +24,7 @@ async def merge_wechat(username: str, cookies: Cookies) -> UserAccount:
 
         account = await session.get(UserAccount, (account_name, AccountServer.WECHAT))
         if account and account.username != username:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"该 WECHAT 账号已被其他账号 {username} 绑定")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"当前微信对应的舞萌DX账号已被其他账号 {username} 绑定")
 
         new_account = UserAccount(
             account_name=account_name,

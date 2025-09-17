@@ -62,7 +62,7 @@ onMounted(async () => {
         statusText.value = '同步过程中遇到错误';
         progress.value = 100;
         let message = error.response?.data?.detail || error.message;
-        if (error.response?.status == 422) message = "请从微信页面中打开UsagiPass并重试";
+        if (error.response?.status == 422) message = "请从微信页面中打开 UsagiPass 并重试";
         notificationStore.error("更新失败", message);
         router.push({ name: 'home' });
     }
@@ -136,10 +136,10 @@ const progressBarColor = computed(() => {
     </template>
     <template v-if="progress >= 100">
         <div class="flex justify-end w-full mt-2 mr-2">
-            <RouterLink class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
-                :to="{ name: 'home' }">
+            <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600"
+                @click="router.go(-2)">
                 回到首页
-            </RouterLink>
+            </button>
         </div>
     </template>
 </template>
