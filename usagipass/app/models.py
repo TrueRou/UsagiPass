@@ -99,7 +99,7 @@ class PreferenceBase(SQLModel):
     qr_size: int = Field(default=15)
     mask_type: int = Field(default=0)
     chara_info_color: str = Field(default="#fee37c", sa_column_kwargs={"server_default": "#fee37c"})
-    show_date: bool = Field(default=False)
+    show_date: bool = Field(default=True)
 
 
 class UserPreference(PreferenceBase, table=True):

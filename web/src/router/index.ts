@@ -89,13 +89,18 @@ router.beforeEach(async (to, from, next) => {
     if (!userStore.isSignedIn) {
         // Handle routes requiring authentication
         if (to.meta.requireAuth || to.meta.requiresAdmin) {
-            notificationStore.error("访问受限", "请先登录")
+            if (userStore.isSignedOut) {
+                notificationStore.success("登出成功", "您已成功登出")
+                userStore.isSignedOut = false;
+            } else {
+                notificationStore.warning("访问受限", "请先登录")
+            }
             return next({ name: 'login' })
         }
     } else {
         // User is signed in
         if (to.name === 'login' && from.name !== 'login') {
-            notificationStore.error("正在跳转", "您已登录, 即将回到上一页面")
+            notificationStore.success("正在跳转", "您已登录, 即将回到上一页面")
             return next(from)
         }
 

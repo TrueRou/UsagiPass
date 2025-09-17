@@ -94,10 +94,10 @@ const bindBtn = (server: AccountServer) => {
                     @click="userStore.updateProber">
                     更新查分器
                 </button>
-                <a class="ml-2 bg-red-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-red-600 text-sm cursor-pointer"
+                <button class="ml-2 bg-red-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-red-600 text-sm cursor-pointer flex items-center justify-center"
                     @click="userStore.logout(true)">
-                    <img class="pl-1.5 pt-1" src="../../assets/misc/logout.svg">
-                </a>
+                    <img class="align-middle" src="../../assets/misc/logout.svg">
+                </button>
             </div>
         </div>
     </div>
@@ -259,7 +259,7 @@ const bindBtn = (server: AccountServer) => {
         <div class="flex justify-between items-center w-full mt-2">
             <div class="flex flex-col p-2">
                 <span>好友号码</span>
-                <span class="text-gray-600" style="font-size: 12px;">填写 12 位至 15 位的好友号码</span>
+                <span class="text-gray-600" style="font-size: 12px;">自定义 12 位至 15 位的数字</span>
             </div>
             <div><input v-model="userProfile!.preferences.friend_code"></div>
         </div>
