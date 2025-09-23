@@ -32,6 +32,11 @@ const router = createRouter({
                     component: () => import('../components/menus/Login.vue'),
                 },
                 {
+                    path: 'signup',
+                    name: 'signup',
+                    component: () => import('../components/menus/Signup.vue'),
+                },
+                {
                     path: 'preferences/pass',
                     name: 'preferencesPass',
                     meta: { requireAuth: true, requireImages: true },
@@ -90,11 +95,11 @@ router.beforeEach(async (to, from, next) => {
         // Handle routes requiring authentication
         if (to.meta.requireAuth || to.meta.requiresAdmin) {
             notificationStore.error("访问受限", "请先登录")
-            return next({ name: 'login' })
+            return next({ name: 'signup' })
         }
     } else {
         // User is signed in
-        if (to.name === 'login' && from.name !== 'login') {
+        if ((to.name === 'login' || to.name === 'signup') && from.name !== 'login' && from.name !== 'signup') {
             notificationStore.error("正在跳转", "您已登录, 即将回到上一页面")
             return next(from)
         }

@@ -28,7 +28,21 @@ export const useUserStore = defineStore('user', () => {
     }));
     const preferAccount = computed(() => userProfile.value?.accounts[userProfile.value.prefer_server]);
 
+    // 检查用户是否同意协议
+    function checkTermsAccepted(): boolean {
+        const termsAccepted = sessionStorage.getItem('usagipass-terms-accepted');
+        if (termsAccepted !== 'true') {
+            notificationStore.warning("注意", "您必须同意相关协议才能继续");
+            return false;
+        }
+        return true;
+    }
+
     async function login(target: string, username: string, password: string) {
+        if (!checkTermsAccepted()) {
+            return false;
+        }
+        
         try {
             const data = await axiosInstance.value.post(`/accounts/token/${target}`, new URLSearchParams({
                 username,
@@ -99,8 +113,13 @@ export const useUserStore = defineStore('user', () => {
     }
 
     const updateProber = async () => {
+        // 检查用户是否同意协议
+        if (!checkTermsAccepted()) {
+            return;
+        }
+        
         if (navigator.userAgent.toLowerCase().indexOf('micromessenger') == -1) {
-            notificationStore.error("更新失败", "无法获取玩家信息，请在微信环境中更新查分器");
+            notificationStore.error("登录失败", "无法获取玩家信息，请在微信环境中登录或更新成绩");
             return;
         }
         try {
