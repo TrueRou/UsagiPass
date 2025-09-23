@@ -62,7 +62,7 @@ onMounted(async () => {
         statusText.value = '同步过程中遇到错误';
         progress.value = 100;
         let message = error.response?.data?.detail || error.message;
-        if (error.response?.status == 422) message = "请从微信页面中打开UsagiPass并重试";
+        if (error.response?.status == 422) message = "请从微信页面中打开 UsagiPass 并重试";
         notificationStore.error("更新失败", message);
         router.push({ name: 'home' });
     }
@@ -75,8 +75,9 @@ const progressBarColor = computed(() => {
 });
 </script>
 <template>
-    <h1 class="mt-2 text-2xl font-bold">更新查分器</h1>
-    <h2 class="mt-1 mb-3 text-sm text-gray-700">将当前微信登录玩家的游戏数据同步至水鱼 / 落雪查分器</h2>
+    <h1 class="mt-2 text-2xl font-bold">同步游戏成绩</h1>
+    <h2 class="mt-1 mb-3 text-sm text-gray-700">将当前微信的舞萌账号游戏成绩同步至 UsagiPass <br>绑定查分器账号后也将上传数据至查分器
+    </h2>
     <div
         class="flex flex-col items-center rounded border-solid border-2 shadow-lg border-black p-2 w-full bg-white mb-2">
         <div class="flex items-center justify-center bg-blue-400 w-full rounded h-8">

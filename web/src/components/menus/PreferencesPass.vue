@@ -92,7 +92,7 @@ const bindBtn = (server: AccountServer) => {
                 <button
                     class="bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-2 px-2 rounded hover:from-pink-600 hover:to-blue-600 text-nowrap"
                     @click="userStore.updateProber">
-                    更新查分器
+                    更新数据
                 </button>
                 <a class="ml-2 bg-red-500 text-white font-bold py-1 px-1 h-[40px] w-[40px] rounded hover:bg-red-600 text-sm cursor-pointer"
                     @click="userStore.logout(true)">
