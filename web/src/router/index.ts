@@ -89,12 +89,7 @@ router.beforeEach(async (to, from, next) => {
     if (!userStore.isSignedIn) {
         // Handle routes requiring authentication
         if (to.meta.requireAuth || to.meta.requiresAdmin) {
-            if (userStore.isSignedOut) {
-                notificationStore.success("登出成功", "您已成功登出")
-                userStore.isSignedOut = false;
-            } else {
-                notificationStore.warning("访问受限", "请先登录")
-            }
+            notificationStore.warning("访问受限", "请先登录")
             return next({ name: 'login' })
         }
     } else {

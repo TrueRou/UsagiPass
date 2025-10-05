@@ -12,8 +12,9 @@ const viteDocs = import.meta.env.VITE_DOCS
 <template>
     <div class="text-xs text-gray-500 text-center mt-2">
         {{ prefix }}
-        <a :href="`${viteDocs}/terms-of-use.html`" target="_blank" class="text-blue-500 hover:underline">用户条款</a>
+        <a :href="`${viteDocs}/terms-of-use.html`" target="_blank" class="text-blue-500 hover:underline">服务条款</a>
         和
         <a :href="`${viteDocs}/privacy-policy.html`" target="_blank" class="text-blue-500 hover:underline">隐私政策</a>
+        的内容
     </div>
 </template>
