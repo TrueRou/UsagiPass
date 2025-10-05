@@ -19,7 +19,6 @@ export const useUserStore = defineStore('user', () => {
     const isSignedIn = ref(false);
     const userProfile = ref<UserProfile | null>(null);
     const cropperImage = ref<string | null>(null);
-    const isSignedOut = ref(false);
 
     const simplifiedCode = computed(() => maimaiCode.value.slice(8, 28).match(/.{1,4}/g)?.join(' '));
     const axiosInstance = computed(() => axios.create({
@@ -38,7 +37,6 @@ export const useUserStore = defineStore('user', () => {
             localStorage.setItem('token', data.data.access_token);
             token.value = data.data.access_token;
             await refreshUser();
-            isSignedOut.value = false; // 重置登出标志
             // 如果之前获取过图片列表，刷新列表
             if (imageStore.images) await imageStore.refreshImages();
             notificationStore.success("登录成功", `欢迎回来，${preferAccount.value?.nickname}`);
@@ -54,8 +52,8 @@ export const useUserStore = defineStore('user', () => {
         token.value = null;
         isSignedIn.value = false;
         userProfile.value = null;
-        isSignedOut.value = true;
-        if (refresh) router.go(0);
+        notificationStore.success("登出成功", "您已成功登出");
+        router.push({ name: 'login' });
     }
 
     async function bind(server: AccountServer, username: string, password: string) {
@@ -145,7 +143,6 @@ export const useUserStore = defineStore('user', () => {
         axiosInstance,
         token,
         isSignedIn,
-        isSignedOut,
         userProfile,
         cropperImage,
         maimaiCode,
