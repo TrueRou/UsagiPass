@@ -21,20 +21,28 @@ export default defineNuxtPlugin((_nuxtApp) => {
             if (import.meta.client) {
                 const loadingIndicator = useLoadingIndicator()
                 loadingIndicator.finish()
+
+                if (rawData.code === 200 && (context.options as any).showSuccessToast) {
+                    const { addNotification } = useNotificationsStore()
+
+                    addNotification({
+                        type: 'success',
+                        message: (context.options as any).successMessage || '操作成功',
+                    })
+                }
             }
         },
         onResponseError(context) {
             if (import.meta.client) {
                 const leporidResp = context.response._data
 
-                if (leporidResp.code && leporidResp.code !== 200) {
-                    const { addNotification } = useNotificationsStore()
-                    addNotification({
-                        type: 'error',
-                        message: leporidResp.message,
-                    })
-                    Promise.reject(leporidResp) // reject the promise
-                }
+                const { addNotification } = useNotificationsStore()
+
+                addNotification({
+                    type: 'error',
+                    message: leporidResp.message || context.response.statusText,
+                })
+                Promise.reject(leporidResp) // reject the promise
             }
         },
     })

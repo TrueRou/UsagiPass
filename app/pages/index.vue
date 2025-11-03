@@ -16,10 +16,24 @@ const simplifiedCode = computed(() => {
 })
 
 const playerRating = computed(() => {
-    // handle dynamic rating display
-    if (profile.value?.preference.dxRating)
-        return profile.value.preference.dxRating
-    return undefined
+    // 覆盖优先级：动态评分（不为 0 的话） > 用户偏好设置
+    if (profile.value?.preference.dynamicRating && profile.value?.player?.rating)
+        return String(profile.value?.player?.rating)
+    return profile.value?.preference.dxRating
+})
+
+const playerName = computed(() => {
+    // 覆盖优先级：用户偏好设置 > 被动获取用户名
+    if (profile.value?.preference.displayName)
+        return profile.value?.preference.displayName
+    return profile.value?.player?.name
+})
+
+const friendCode = computed(() => {
+    // 覆盖优先级：用户偏好设置 > 被动获取好友代码
+    if (profile.value?.preference.friendCode)
+        return profile.value?.preference.friendCode
+    return profile.value?.player?.friendCode
 })
 </script>
 
@@ -35,8 +49,8 @@ const playerRating = computed(() => {
                     <div class="relative space-y-2 w-full">
                         <WidgetDxRating class="pt-4 w-[40%]" :rating="playerRating" />
                         <WidgetPlayerInfo
-                            :username="profile.preference.displayName || undefined"
-                            :friend-code="profile.preference.friendCode || undefined" player-info-color="#ffffff"
+                            :username="playerName"
+                            :friend-code="friendCode" :player-info-color="profile.preference.playerInfoColor"
                         />
                     </div>
                 </div>

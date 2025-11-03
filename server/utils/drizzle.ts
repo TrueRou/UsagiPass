@@ -20,4 +20,5 @@ export type UserRating = typeof schema.userRating.$inferSelect
 export interface UserProfile {
     preference: UserPreference
     accounts: UserAccount[]
+    player: UserRating | null
 }

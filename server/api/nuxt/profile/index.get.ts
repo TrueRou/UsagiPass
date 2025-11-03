@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
 
     // 查询用户偏好设置
     const preference = await db.query.userPreference.findFirst({
-        where: eq(tables.userPreference.user_id, userId),
+        where: eq(tables.userPreference.userId, userId),
     })
 
     // 如果用户偏好设置不存在，创建默认的偏好设置
@@ -23,13 +23,19 @@ export default defineEventHandler(async (event) => {
     }
 
     // 查询用户账号列表
-    const accounts = await db.query.userAccount.findMany({
-        where: eq(tables.userAccount.user_id, userId),
+    const userAccounts = await db.query.userAccount.findMany({
+        where: eq(tables.userAccount.userId, userId),
+    })
+
+    // 查询用户评分信息
+    const userRating = await db.query.userRating.findFirst({
+        where: eq(tables.userRating.userId, userId),
     })
 
     const profile: UserProfile = {
         preference: userPreference,
-        accounts,
+        accounts: userAccounts,
+        player: userRating || null,
     }
 
     return {

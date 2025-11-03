@@ -11,11 +11,12 @@ const { data: serversData, pending: serversPending } = await useLeporid<Server[]
 type PreferenceForm = Omit<UserPreference, 'user_id'>
 type EditableAccount = Pick<
     UserAccount,
-    'id' | 'server_id' | 'credentials' | 'enabled'
+    'id' | 'serverId' | 'credentials' | 'enabled'
 > & { _key: string }
 
 function createPreferenceForm(preference?: UserPreference): PreferenceForm {
     return {
+        userId: preference?.userId ?? '',
         maimaiVersion: preference?.maimaiVersion ?? '',
         simplifiedCode: preference?.simplifiedCode ?? '',
         characterName: preference?.characterName ?? '',
@@ -24,6 +25,7 @@ function createPreferenceForm(preference?: UserPreference): PreferenceForm {
         dxRating: preference?.dxRating ?? '',
         qrSize: preference?.qrSize ?? 15,
         maskType: preference?.maskType ?? 0,
+        playerInfoColor: preference?.playerInfoColor ?? '#ffffff',
         charaInfoColor: preference?.charaInfoColor ?? '#fee37c',
         dynamicRating: preference?.dynamicRating ?? true,
         showDate: preference?.showDate ?? true,
@@ -63,7 +65,7 @@ function createEditableAccount(account?: UserAccount): EditableAccount {
     return {
         _key: account?.id ? `existing-${account.id}` : nextAccountKey(),
         id: account?.id ?? -1,
-        server_id: account?.server_id ?? servers.value[0]?.id ?? 0,
+        serverId: account?.serverId ?? servers.value[0]?.id ?? 0,
         credentials: account?.credentials ?? '',
         enabled: account?.enabled ?? true,
     }
@@ -91,8 +93,8 @@ watch(
         if (!list.length)
             return
         accounts.value.forEach((account) => {
-            if (!account.server_id) {
-                account.server_id = list[0]!.id
+            if (!account.serverId) {
+                account.serverId = list[0]!.id
             }
         })
     },
@@ -179,7 +181,7 @@ const saving = ref(false)
 const disableAddAccount = computed(() => servers.value.length === 0)
 const hasInvalidAccount = computed(() =>
     accounts.value.some(
-        account => !account.server_id || !account.credentials.trim(),
+        account => !account.serverId || !account.credentials.trim(),
     ),
 )
 const isInitialLoading = computed(
@@ -209,7 +211,7 @@ async function handleSave() {
             preference: { ...preferenceForm },
             accounts: accounts.value.map(account => ({
                 id: account.id,
-                server_id: account.server_id,
+                server_id: account.serverId,
                 credentials: account.credentials,
                 enabled: account.enabled,
             })),
@@ -351,6 +353,17 @@ async function handleSave() {
                                     </label>
                                     <input
                                         v-model="preferenceForm.charaInfoColor" class="input input-bordered w-full md:w-[20rem]"
+                                        type="color"
+                                    >
+                                </div>
+                                <div class="form-control preference-field">
+                                    <label class="label preference-field-label">
+                                        <span class="label-text">{{
+                                            t("fields.playerInfoColor.label")
+                                        }}</span>
+                                    </label>
+                                    <input
+                                        v-model="preferenceForm.playerInfoColor" class="input input-bordered w-full md:w-[20rem]"
                                         type="color"
                                     >
                                 </div>
@@ -497,13 +510,13 @@ async function handleSave() {
                                     <div>
                                         <p class="text-base font-semibold">
                                             {{
-                                                serverMap.get(account.server_id)?.name
+                                                serverMap.get(account.serverId)?.name
                                                     || t("accounts.fallback-name")
                                             }}
                                         </p>
                                         <p class="text-xs text-base-content/60">
                                             {{
-                                                serverMap.get(account.server_id)?.description
+                                                serverMap.get(account.serverId)?.description
                                                     || t("accounts.fallback-desc")
                                             }}
                                         </p>
@@ -533,14 +546,14 @@ async function handleSave() {
                                             }}</span>
                                         </label>
                                         <select
-                                            v-model.number="account.server_id" class="select select-bordered"
+                                            v-model.number="account.serverId" class="select select-bordered"
                                             :disabled="servers.length === 0"
                                         >
                                             <option v-for="server in servers" :key="server.id" :value="server.id">
                                                 {{ server.name }}
                                             </option>
                                         </select>
-                                        <label v-if="attemptedSubmit && !account.server_id" class="label">
+                                        <label v-if="attemptedSubmit && !account.serverId" class="label">
                                             <span class="label-text-alt text-xs text-error">{{
                                                 t("errors.account.server")
                                             }}</span>
@@ -553,18 +566,18 @@ async function handleSave() {
                                                 {{ t("fields.account.credentials") }}
                                                 <span
                                                     v-if="
-                                                        serverMap.get(account.server_id)?.credentials_field
+                                                        serverMap.get(account.serverId)?.credentialsField
                                                     " class="text-xs text-base-content/60"
                                                 >
                                                     ({{
-                                                        serverMap.get(account.server_id)?.credentials_field
+                                                        serverMap.get(account.serverId)?.credentialsField
                                                     }})
                                                 </span>
                                             </span>
                                         </label>
                                         <input
                                             v-model="account.credentials" class="input input-bordered" type="text"
-                                            :placeholder="serverMap.get(account.server_id)?.credentials_field
+                                            :placeholder="serverMap.get(account.serverId)?.credentialsField
                                                 || ''
                                             "
                                         >
@@ -577,20 +590,20 @@ async function handleSave() {
                                 </div>
 
                                 <div
-                                    v-if="serverMap.get(account.server_id)"
+                                    v-if="serverMap.get(account.serverId)"
                                     class="alert bg-base-200 text-base-content/80"
                                 >
                                     <div>
                                         <h4 class="text-sm font-semibold">
-                                            {{ serverMap.get(account.server_id)?.tips_title }}
+                                            {{ serverMap.get(account.serverId)?.tipsTitle }}
                                         </h4>
                                         <p class="text-xs leading-relaxed">
-                                            {{ serverMap.get(account.server_id)?.tips_desc }}
+                                            {{ serverMap.get(account.serverId)?.tipsDesc }}
                                         </p>
                                         <a
-                                            v-if="serverMap.get(account.server_id)?.tips_url"
+                                            v-if="serverMap.get(account.serverId)?.tipsUrl"
                                             class="link link-primary text-xs"
-                                            :href="serverMap.get(account.server_id)?.tips_url" target="_blank"
+                                            :href="serverMap.get(account.serverId)?.tipsUrl" target="_blank"
                                             rel="noopener"
                                         >
                                             {{ t("sections.accounts.tips-link") }}
@@ -675,6 +688,8 @@ en-GB:
       unit: px
     charaInfoColor:
       label: Color of Character Info
+    playerInfoColor:
+      label: Color of Player Info
     dynamicRating:
       label: Dynamic Dx Rating
       helper: Will be displayed latest Dx Rating when scores is updated if Enabled
@@ -769,6 +784,8 @@ zh-CN:
       unit: px
     charaInfoColor:
       label: 角色信息颜色
+    playerInfoColor:
+      label: 玩家信息颜色
     dynamicRating:
       label: 自动更新Rating
       helper: 开启后会在数据更新时同步展示。

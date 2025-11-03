@@ -31,6 +31,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
                 removeNotification(id)
             }, newNotification.duration)
         }
+
+        return id
     }
 
     const clearAll = () => {

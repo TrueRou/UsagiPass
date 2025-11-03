@@ -37,6 +37,7 @@ export default defineNuxtConfig({
     runtimeConfig: {
         databaseUrl: 'postgresql://postgres:password@localhost:5432/usagipass',
         leporidApi: 'http://43.139.192.17:3000',
+        otogeApi: 'http://43.139.192.17:3100',
         leporidCookieName: 'lep_session',
         leporidDefaultImage: {
             characterId: '2e7046aa-ddc2-40fb-bf5d-5236ffca50f9',
