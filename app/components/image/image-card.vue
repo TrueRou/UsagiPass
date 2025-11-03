@@ -100,7 +100,7 @@ const representativeLabels = computed(() => {
 
             <!-- 中间 图片本身 -->
             <div class="w-full overflow-hidden">
-                <img :src="imageUrl" :alt="image.name" class="w-full object-cover" loading="lazy">
+                <img :src="imageUrl" :alt="image.name" class="w-full object-cover">
             </div>
 
             <!-- 右上 选中标记 -->

@@ -50,8 +50,6 @@ const cropBox = computed(() => {
     return { width, height }
 })
 
-const suggestedLabels = computed(() => props.suggestedLabels ?? [])
-
 watch(() => props.open, (value) => {
     if (value) {
         reset()
@@ -108,12 +106,6 @@ function addTag() {
     tagDraft.value = ''
 }
 
-function applySuggested(label: string) {
-    if (!metadata.labels.includes(label)) {
-        metadata.labels.push(label)
-    }
-}
-
 function removeTag(label: string) {
     metadata.labels = metadata.labels.filter(item => item !== label)
 }
@@ -134,7 +126,7 @@ function reset() {
     metadata.name = ''
     metadata.description = ''
     metadata.visibility = defaultVisibility
-    metadata.labels = []
+    metadata.labels = props.suggestedLabels ?? []
     tagDraft.value = ''
     cleanupPreview()
     if (fileInput.value) {
@@ -189,7 +181,7 @@ async function submit() {
             </form>
             <h3 class="font-bold text-xl mb-6 flex items-center gap-3">
                 <span>{{ t('title') }}</span>
-                <span v-if="aspect" class="badge badge-outline">{{ aspect.name }}</span>
+                <span v-if="aspect" class="badge badge-accent">{{ aspect.name }}</span>
             </h3>
             <div class="grid gap-8 lg:grid-cols-[2fr,1fr]">
                 <div class="space-y-4">
@@ -264,17 +256,7 @@ async function submit() {
                         </select>
                     </div>
                     <div>
-                        <label class="label flex justify-between items-center">
-                            <span class="label-text">{{ t('labels') }}</span>
-                            <div class="flex gap-2">
-                                <button
-                                    v-for="suggest in suggestedLabels" :key="suggest" class="btn btn-xs btn-outline"
-                                    type="button" @click="applySuggested(suggest)"
-                                >
-                                    {{ suggest }}
-                                </button>
-                            </div>
-                        </label>
+                        <label class="label label-text">{{ t('labels') }}</label>
                         <div class="flex gap-2 mb-2">
                             <input
                                 v-model="tagDraft" type="text" class="input input-bordered input-sm flex-1"
@@ -285,7 +267,7 @@ async function submit() {
                             </button>
                         </div>
                         <div class="flex flex-wrap gap-2">
-                            <div v-for="label in metadata.labels" :key="label" class="badge badge-outline gap-2">
+                            <div v-for="label in metadata.labels" :key="label" class="badge badge-lg badge-outline gap-2">
                                 <span>{{ label }}</span>
                                 <button type="button" class="btn btn-xs btn-ghost" @click="removeTag(label)">
                                     ✕

@@ -425,7 +425,7 @@ async function handleSave() {
                                 >
                                     <div class="flex items-start gap-3">
                                         <div
-                                            class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border border-base-200 bg-base-100"
+                                            class="flex w-16 items-center justify-center overflow-hidden rounded-lg border border-base-200 bg-base-100"
                                         >
                                             <img
                                                 v-if="item.src" :src="item.src" :alt="t(`images.${item.key}.label`)"
@@ -444,7 +444,7 @@ async function handleSave() {
                                             </p>
                                             <div class="flex flex-wrap gap-2 pt-1">
                                                 <button
-                                                    class="btn btn-sm" type="button"
+                                                    class="btn btn-sm btn-primary" type="button"
                                                     @click="openImageSelector(item.key)"
                                                 >
                                                     {{

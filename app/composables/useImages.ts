@@ -8,6 +8,7 @@ interface ListOptions {
     pageNumber?: number
     filters?: string[] | null
     pageSize?: number
+    keyword?: string
 }
 
 interface UploadResult {
@@ -66,6 +67,10 @@ export function useImages(options: UseImagesOptions) {
                 page_number: pageNumber.value,
                 page_size: pageSize.value,
                 labels: Array.from(new Set(activeFilters.value ?? [])),
+            }
+
+            if (listOptions.keyword) {
+                query.keyword = listOptions.keyword
             }
 
             const response = await $leporid<ImageSearchResponse | { data: ImageSearchResponse }>('/api/images', {

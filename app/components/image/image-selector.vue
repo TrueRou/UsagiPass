@@ -25,6 +25,7 @@ const {
     pageNumber,
     totalRow,
     totalPage,
+    activeFilters,
     representativeLabels,
     updateImage,
     deleteImage,
@@ -62,22 +63,21 @@ function updateSelection(image: ImageResponse) {
     selectedImage.value = image
 }
 
-function clearSearch() {
-    searchKeyword.value = ''
+async function confirmSearch() {
+    await list({ filters: activeSecondary.value, keyword: searchKeyword.value })
 }
 
 async function prevPage() {
     if (pageNumber.value <= 1)
         return
-    await list({ pageNumber: pageNumber.value - 1, filters: activeSecondary.value })
+    await list({ pageNumber: pageNumber.value - 1, filters: activeSecondary.value, keyword: searchKeyword.value })
     selectedImage.value = null
 }
 
 async function nextPage() {
     if (pageNumber.value >= totalPage.value)
         return
-    console.warn('next page: ', pageNumber.value + 1)
-    await list({ pageNumber: pageNumber.value + 1, filters: activeSecondary.value })
+    await list({ pageNumber: pageNumber.value + 1, filters: activeSecondary.value, keyword: searchKeyword.value })
     selectedImage.value = null
 }
 
@@ -87,7 +87,7 @@ async function jumpToPage(event: Event) {
     if (!Number.isFinite(value))
         return
     const page = Math.min(Math.max(value, 1), totalPage.value)
-    await list({ pageNumber: page, filters: activeSecondary.value })
+    await list({ pageNumber: page, filters: activeSecondary.value, keyword: searchKeyword.value })
     selectedImage.value = null
 }
 
@@ -144,13 +144,14 @@ watch(() => props.open, async (isOpen) => {
         await list({ pageNumber: 1, filters: activeSecondary.value })
     }
     else {
+        searchKeyword.value = ''
         selectedImage.value = null
         activeSecondary.value = []
     }
 }, { immediate: true })
 
-watch([activeSecondary, searchKeyword], async () => {
-    await list({ filters: activeSecondary.value })
+watch([activeSecondary], async () => {
+    await list({ filters: activeSecondary.value, keyword: searchKeyword.value })
 })
 </script>
 
@@ -180,22 +181,25 @@ watch([activeSecondary, searchKeyword], async () => {
 
                 <section class="space-y-4">
                     <div class="flex flex-wrap gap-3 items-center">
-                        <form
-                            class="join filter" role="radiogroup" aria-label="Secondary filter" @submit.prevent
-                            @reset.prevent
-                        >
-                            <input
-                                v-for="val in representativeLabels" :key="val" v-model="activeSecondary" type="checkbox"
-                                name="secondary-filter" class="btn btn-sm join-item" :value="val" :aria-label="val"
-                            >
-                        </form>
+                        <div class="flex gap-1 overflow-hidden">
+                            <form class="flex overflow-auto gap-1" @submit.prevent>
+                                <input
+                                    v-for="val in representativeLabels" :key="val" v-model="activeSecondary" type="checkbox"
+                                    name="secondary-filter" class="btn" :value="val" :aria-label="val"
+                                >
+                            </form>
+                            <button class="btn btn-square" type="button" @click="activeSecondary = []">
+                                x
+                            </button>
+                        </div>
+
                         <div class="join w-full">
                             <input
                                 v-model="searchKeyword" type="search" class="input input-bordered join-item flex-1"
                                 :placeholder="t('search-placeholder')"
                             >
-                            <button class="btn join-item" type="button" @click="clearSearch">
-                                {{ t('clear') }}
+                            <button class="btn btn-neutral join-item" type="button" @click="confirmSearch">
+                                {{ t('search') }}
                             </button>
                         </div>
                     </div>
@@ -229,20 +233,20 @@ watch([activeSecondary, searchKeyword], async () => {
                     </div>
                 </section>
 
-                <section class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div class="text-sm text-base-content/70">
+                <section class="flex gap-4 items-center justify-between">
+                    <div class="text-xs md:text-sm text-base-content/70">
                         {{ t('pagination-status', { page: pageNumber, totalPage, totalRow }) }}
                     </div>
                     <div class="join">
-                        <button class="btn join-item" type="button" :disabled="pageNumber <= 1" @click="prevPage">
+                        <button class="btn btn-sm md:btn-md join-item" type="button" :disabled="pageNumber <= 1" @click="prevPage">
                             {{ t('pagination-prev') }}
                         </button>
                         <input
-                            class="input input-bordered join-item w-16 text-center" type="number" :value="pageNumber"
+                            class="input input-bordered join-item input-sm md:input-md w-10 md:w-12 text-center" :value="pageNumber"
                             min="1" :max="totalPage" @change="jumpToPage($event)"
                         >
                         <button
-                            class="btn join-item" type="button" :disabled="pageNumber >= totalPage"
+                            class="btn btn-sm md:btn-md join-item" type="button" :disabled="pageNumber >= totalPage"
                             @click="nextPage"
                         >
                             {{ t('pagination-next') }}
@@ -252,8 +256,8 @@ watch([activeSecondary, searchKeyword], async () => {
             </div>
 
             <div class="modal-action">
-                <button class="btn" type="button" @click="close">
-                    {{ t('actions.cancel') }}
+                <button class="btn btn-accent" type="button" @click="openUploader = true">
+                    {{ t('actions.upload') }}
                 </button>
                 <button
                     class="btn btn-primary" type="button" :disabled="!selectedImage || pending"
@@ -268,7 +272,7 @@ watch([activeSecondary, searchKeyword], async () => {
 
     <ImageUploader
         v-if="open" :open="openUploader" :aspect="aspect" :aspect-id="props.aspectId"
-        :suggested-labels="representativeLabels" :upload="uploadImage" @update:open="val => openUploader = val"
+        :suggested-labels="[...activeFilters]" :upload="uploadImage" @update:open="val => openUploader = val"
         @uploaded="handleUploaded"
     />
 
@@ -301,12 +305,12 @@ en-GB:
     confirm: Use this image
     delete: Delete
   search-placeholder: Search by name
-  clear: Clear
+  search: Search
   empty: No images match your filters yet.
   custom-placeholder: Upload your own image
   pagination-status: "Page {page} of {totalPage}, total {total} images"
-  pagination-prev: Previous
-  pagination-next: Next
+  pagination-prev: "<"
+  pagination-next: ">"
   delete-title: Delete image
   delete-message: "Are you sure you want to delete “{name}”?"
 
@@ -319,12 +323,12 @@ zh-CN:
     confirm: 使用此图片
     delete: 删除
   search-placeholder: 按名称搜索
-  clear: 清空
+  search: 搜索
   empty: 暂无符合条件的图片
   custom-placeholder: 上传你的专属图片
   pagination-status: "第 {page} / {totalPage} 页，共 {totalRow} 张图片"
-  pagination-prev: 上一页
-  pagination-next: 下一页
+  pagination-prev: "<"
+  pagination-next: ">"
   delete-title: 删除图片
   delete-message: "确定要删除“{name}”吗？"
 </i18n>
