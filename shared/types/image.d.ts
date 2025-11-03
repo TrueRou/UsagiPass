@@ -27,10 +27,13 @@ export interface ImageResponse {
  * 图片搜索响应
  */
 export interface ImageSearchResponse {
-    page_number: number
-    page_size: number
-    total: number
-    records: ImageResponse[]
+    labels: string[]
+    images: {
+        page_number: number
+        page_size: number
+        total: number
+        records: ImageResponse[]
+    }
 }
 
 /**

@@ -160,10 +160,6 @@ const imageAspectId = computed(() =>
     imageTarget.value ? imageMap[imageTarget.value].aspect : '',
 )
 
-watch(imageAspectId, (newAspect) => {
-    console.warn('Image aspect changed:', newAspect)
-})
-
 const imageCardItems = computed(() =>
     Object.keys(imageMap).map(key => key as ImageMapKey).map((key) => {
         const field = imageMap[key].fieldKey

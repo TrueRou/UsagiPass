@@ -1,12 +1,12 @@
 interface UseImagesOptions {
     aspectId: string
     pageSize?: number
-    initialLabel?: string | null
+    initialFilters?: string[] | null
 }
 
 interface ListOptions {
     pageNumber?: number
-    label?: string | null
+    filters?: string[] | null
     pageSize?: number
 }
 
@@ -31,7 +31,8 @@ export function useImages(options: UseImagesOptions) {
     const pageNumber = ref(1)
     const pageSize = ref(options.pageSize ?? 20)
     const total = ref(0)
-    const activeLabel = ref<string | null>(options.initialLabel ?? null)
+    const activeFilters = ref<string[] | null>(options.initialFilters ?? null)
+    const availableLabels = ref<string[]>([])
     const currentAspectId = ref(options.aspectId)
 
     const fetchAspect = async () => {
@@ -55,15 +56,15 @@ export function useImages(options: UseImagesOptions) {
             if (listOptions.pageSize !== undefined) {
                 pageSize.value = listOptions.pageSize
             }
-            if (listOptions.label !== undefined) {
-                activeLabel.value = listOptions.label
+            if (listOptions.filters !== undefined) {
+                activeFilters.value = [...listOptions.filters ?? [], ...options.initialFilters ?? []]
             }
 
-            const query: Record<string, string | number | undefined> = {
+            const query: Record<string, any> = {
                 aspect_id: currentAspectId.value,
                 page_number: pageNumber.value,
                 page_size: pageSize.value,
-                label: activeLabel.value ?? undefined,
+                labels: Array.from(new Set(activeFilters.value ?? [])),
             }
 
             const response = await $leporid<ImageSearchResponse | { data: ImageSearchResponse }>('/api/images', {
@@ -71,10 +72,11 @@ export function useImages(options: UseImagesOptions) {
                 query,
             })
             const payload = unwrapPayload<ImageSearchResponse>(response)
-            images.value = payload.records ?? []
-            pageNumber.value = payload.page_number ?? pageNumber.value
-            pageSize.value = payload.page_size ?? pageSize.value
-            total.value = payload.total ?? 0
+            images.value = payload.images.records ?? []
+            pageNumber.value = payload.images.page_number ?? pageNumber.value
+            pageSize.value = payload.images.page_size ?? pageSize.value
+            total.value = payload.images.total ?? 0
+            availableLabels.value = payload.labels ?? []
 
             return {
                 images: images.value,
@@ -123,21 +125,13 @@ export function useImages(options: UseImagesOptions) {
         return { image: created }
     }
 
-    const availableLabels = computed(() => {
-        const labelSet = new Set<string>()
-        images.value.forEach((image) => {
-            image.labels?.forEach(label => labelSet.add(label))
-        })
-        return Array.from(labelSet)
-    })
-
     const customImages = computed(() => images.value.filter(image => image.visibility === 'PRIVATE'))
 
     const setAspectId = (aspectId: string) => {
         if (currentAspectId.value !== aspectId) {
             currentAspectId.value = aspectId
             aspect.value = null
-            activeLabel.value = null
+            activeFilters.value = options.initialFilters ?? null
         }
     }
 
@@ -150,7 +144,7 @@ export function useImages(options: UseImagesOptions) {
         pageNumber,
         pageSize,
         total,
-        activeLabel,
+        activeFilters,
         list,
         refresh,
         updateImage,

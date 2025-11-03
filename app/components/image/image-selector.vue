@@ -1,13 +1,8 @@
 <script setup lang="ts">
-interface PrimaryFilterOption {
-    label: string
-    value: string | null
-}
-
 const props = defineProps<{
     open: boolean
     aspectId: string
-    primaryFilters?: PrimaryFilterOption[]
+    initialFilters?: string[]
     pageSize?: number
     title?: string
     confirmLabel?: string
@@ -38,12 +33,8 @@ const {
 } = useImages({ aspectId: props.aspectId, pageSize: props.pageSize })
 
 const initialized = ref(false)
-const activePrimary = ref<string | null>(null)
-const activeSecondary = ref<string>('all')
-const searchState = reactive({
-    all: '',
-    custom: '',
-})
+const activeSecondary = ref<string[]>([])
+const searchKeyword = ref('')
 const selectedImage = ref<ImageResponse | null>(null)
 const openUploader = ref(false)
 const deleteTarget = ref<ImageResponse | null>(null)
@@ -52,64 +43,9 @@ const pending = ref(false)
 const title = computed(() => props.title ?? t('title-default'))
 const confirmButtonText = computed(() => props.confirmLabel ?? t('actions.confirm'))
 
-const primaryOptions = computed<PrimaryFilterOption[]>(() => {
-    const base: PrimaryFilterOption[] = [
-        { label: t('primary-all'), value: null },
-    ]
-    if (props.primaryFilters?.length) {
-        return base.concat(props.primaryFilters)
-    }
-    return base
-})
-
-const secondaryTags = computed(() => {
-    const tags = availableLabels.value
-        .filter(label => label && label.toLowerCase() !== 'all' && label.toLowerCase() !== 'custom')
-        .map(label => ({ value: label, label }))
-    return [
-        { value: 'all', label: t('secondary-all') },
-        { value: 'custom', label: t('secondary-custom') },
-        ...tags,
-    ]
-})
-
-const searchInput = computed({
-    get() {
-        return activeSecondary.value === 'custom' ? searchState.custom : searchState.all
-    },
-    set(value: string) {
-        if (activeSecondary.value === 'custom') {
-            searchState.custom = value
-        }
-        else {
-            searchState.all = value
-        }
-    },
-})
-
 const totalPages = computed(() => {
     const size = pageSize.value || 1
     return Math.max(1, Math.ceil((total.value || 0) / size))
-})
-
-const displayedImages = computed(() => {
-    let listData = images.value
-    if (activeSecondary.value === 'custom') {
-        listData = listData.filter(item => item.visibility === 'PRIVATE')
-    }
-    else if (activeSecondary.value !== 'all') {
-        listData = listData.filter(item => item.labels?.includes(activeSecondary.value))
-    }
-
-    const keyword = (activeSecondary.value === 'custom' ? searchState.custom : searchState.all).trim().toLowerCase()
-    if (keyword) {
-        listData = listData.filter((item) => {
-            const name = item.name?.toLowerCase() ?? ''
-            const labels = (item.labels ?? []).join(' ').toLowerCase()
-            return name.includes(keyword) || labels.includes(keyword)
-        })
-    }
-    return listData
 })
 
 const imageKey = (image: ImageResponse) => image.id
@@ -128,29 +64,12 @@ function close() {
     emit('update:open', false)
 }
 
-async function selectPrimary(value: string | null) {
-    activePrimary.value = value
-    activeSecondary.value = 'all'
-    searchState.all = ''
-    searchState.custom = ''
-    await list({ pageNumber: 1, label: value })
-}
-
-function selectSecondary(value: string) {
-    activeSecondary.value = value
-}
-
 function updateSelection(image: ImageResponse) {
     selectedImage.value = image
 }
 
 function clearSearch() {
-    if (activeSecondary.value === 'custom') {
-        searchState.custom = ''
-    }
-    else {
-        searchState.all = ''
-    }
+    searchKeyword.value = ''
 }
 
 async function prevPage() {
@@ -246,15 +165,11 @@ watch(() => props.open, async (value) => {
 })
 
 watch(() => props.aspectId, async (newAspect, oldAspect) => {
-    console.warn('Aspect changed:', { newAspect, oldAspect })
     if (newAspect === oldAspect)
         return
     setAspectId(newAspect)
     initialized.value = false
-    activePrimary.value = null
-    activeSecondary.value = 'all'
-    searchState.all = ''
-    searchState.custom = ''
+    activeSecondary.value = []
     await fetchAspect()
     await list({ pageNumber: 1 })
 }, { immediate: true })
@@ -285,39 +200,24 @@ watch(() => props.aspectId, async (newAspect, oldAspect) => {
                 </header>
 
                 <section class="space-y-4">
-                    <div class="tabs tabs-boxed w-full overflow-x-auto">
-                        <a
-                            v-for="option in primaryOptions" :key="option.value ?? 'all'" role="tab"
-                            class="tab whitespace-nowrap" :class="{ 'tab-active': option.value === activePrimary }"
-                            @click.prevent="selectPrimary(option.value)"
-                        >
-                            {{ option.label }}
-                        </a>
-                    </div>
                     <div class="flex flex-wrap gap-3 items-center">
                         <form
                             class="join filter" role="radiogroup" aria-label="Secondary filter" @submit.prevent
                             @reset.prevent
                         >
                             <input
-                                v-for="tag in secondaryTags" :key="tag.value" type="radio" name="secondary-filter"
-                                class="btn btn-sm join-item" :value="tag.label" :aria-label="tag.label"
-                                :checked="activeSecondary === tag.value" @change="selectSecondary(tag.value)"
+                                v-for="val in availableLabels" :key="val" v-model="activeSecondary" type="checkbox"
+                                name="secondary-filter" class="btn btn-sm join-item" :value="val" :aria-label="val"
                             >
                         </form>
-                        <div
-                            v-if="activeSecondary === 'all' || activeSecondary === 'custom'"
-                            class="flex-1 min-w-[220px]"
-                        >
-                            <div class="join w-full">
-                                <input
-                                    v-model="searchInput" type="search" class="input input-bordered join-item flex-1"
-                                    :placeholder="t(activeSecondary === 'custom' ? 'search-custom-placeholder' : 'search-placeholder')"
-                                >
-                                <button class="btn join-item" type="button" @click="clearSearch">
-                                    {{ t('clear') }}
-                                </button>
-                            </div>
+                        <div class="join w-full">
+                            <input
+                                v-model="searchKeyword" type="search" class="input input-bordered join-item flex-1"
+                                :placeholder="t('search-placeholder')"
+                            >
+                            <button class="btn join-item" type="button" @click="clearSearch">
+                                {{ t('clear') }}
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -328,7 +228,7 @@ watch(() => props.aspectId, async (newAspect, oldAspect) => {
                     </div>
                     <div v-else>
                         <div
-                            v-if="displayedImages.length === 0 && activeSecondary !== 'custom'"
+                            v-if="images.length === 0"
                             class="rounded-lg border border-dashed p-10 text-center space-y-4"
                         >
                             <p class="text-base-content/60">
@@ -339,18 +239,8 @@ watch(() => props.aspectId, async (newAspect, oldAspect) => {
                             </button>
                         </div>
                         <div v-else class="grid grid-cols-3 gap-4 md:grid-cols-4 xl:grid-cols-5">
-                            <div
-                                v-if="activeSecondary === 'custom'"
-                                class="card border-dashed border-2 flex items-center justify-center cursor-pointer hover:border-primary"
-                                @click="openUploader = true"
-                            >
-                                <div class="card-body items-center text-center">
-                                    <span class="text-4xl">＋</span>
-                                    <p>{{ t('custom-placeholder') }}</p>
-                                </div>
-                            </div>
                             <ImageCard
-                                v-for="image in displayedImages" :key="imageKey(image)" :image="image"
+                                v-for="image in images" :key="imageKey(image)" :image="image"
                                 :image-url="imageUrl(image)" :aspect="aspect" :selected="isSelected(image)"
                                 :disabled="pending" @select="updateSelection" @rename="handleRename"
                                 @delete="confirmDelete"
@@ -430,11 +320,7 @@ en-GB:
     cancel: Cancel
     confirm: Use this image
     delete: Delete
-  primary-all: All categories
-  secondary-all: All
-  secondary-custom: Custom
-  search-placeholder: Search by name or label
-  search-custom-placeholder: Search your private uploads
+  search-placeholder: Search by name
   clear: Clear
   empty: No images match your filters yet.
   custom-placeholder: Upload your own image
@@ -452,11 +338,7 @@ zh-CN:
     cancel: 取消
     confirm: 使用此图片
     delete: 删除
-  primary-all: 全部分类
-  secondary-all: 全部
-  secondary-custom: 自定义
-  search-placeholder: 按名称或标签搜索
-  search-custom-placeholder: 搜索你的私有图片
+  search-placeholder: 按名称搜索
   clear: 清空
   empty: 暂无符合条件的图片
   custom-placeholder: 上传你的专属图片
