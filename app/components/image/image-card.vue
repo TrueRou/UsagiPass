@@ -4,8 +4,8 @@ import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
     image: ImageResponse
+    hidedLabels?: string[]
     imageUrl: string
-    aspect: ImageAspect | null
     selected: boolean
     disabled?: boolean
 }>()
@@ -16,7 +16,8 @@ const emit = defineEmits<{
     (event: 'delete', image: ImageResponse): void
 }>()
 
-const { t, d } = useI18n()
+const { t } = useI18n()
+const { user } = useAuthStore()
 
 const isEditing = ref(false)
 const editableName = ref(props.image.name)
@@ -27,16 +28,9 @@ watch(() => props.image.name, (name) => {
     }
 })
 
-const aspectStyle = computed(() => {
-    if (!props.aspect) {
-        return {
-            aspectRatio: '4 / 3',
-        }
-    }
-    return {
-        aspectRatio: `${props.aspect.ratioWidthUnit} / ${props.aspect.ratioHeightUnit}`,
-    }
-})
+function canModifyImage(image: ImageResponse) {
+    return user && image.user_id === user.id
+}
 
 function handleSelect() {
     if (props.disabled)
@@ -44,14 +38,12 @@ function handleSelect() {
     emit('select', props.image)
 }
 
-function toggleEdit() {
-    if (isEditing.value) {
-        submitRename()
+function beginEdit() {
+    if (!canModifyImage(props.image)) {
+        return
     }
-    else {
-        isEditing.value = true
-        editableName.value = props.image.name
-    }
+    isEditing.value = true
+    editableName.value = props.image.name
 }
 
 function submitRename() {
@@ -74,16 +66,9 @@ function emitDelete() {
     emit('delete', props.image)
 }
 
-function formatDate(value: string) {
-    if (!value)
-        return ''
-    try {
-        return d(new Date(value), 'short')
-    }
-    catch {
-        return value
-    }
-}
+const representativeLabels = computed(() => {
+    return props.image.labels.filter(label => !props.hidedLabels?.includes(label))
+})
 </script>
 
 <template>
@@ -94,51 +79,49 @@ function formatDate(value: string) {
         }" @click="handleSelect"
     >
         <div class="relative">
-            <div class="w-full overflow-hidden" :style="aspectStyle">
-                <img :src="imageUrl" :alt="image.name" class="w-full object-cover" loading="lazy">
-            </div>
-            <div v-if="selected" class="badge badge-primary gap-2 absolute top-3 right-3">
-                <span>{{ t('selected') }}</span>
-            </div>
-            <div class="absolute bottom-3 right-3 flex gap-2">
-                <button class="btn btn-ghost btn-xs" :title="t('rename')" @click.stop="toggleEdit">
-                    <span v-if="!isEditing">✏️</span>
-                    <span v-else>✅</span>
-                </button>
-                <button class="btn btn-ghost btn-xs text-error" :title="t('delete')" @click.stop="emitDelete">
-                    🗑️
-                </button>
-            </div>
-        </div>
-        <div class="card-body space-y-3">
-            <div>
-                <div v-if="!isEditing" class="font-semibold truncate">
+            <!-- 左上 图片名称 -->
+            <div class="absolute top-1 left-1">
+                <div v-if="!isEditing" class="badge lg:badge-lg" @click.stop="beginEdit">
                     {{ image.name }}
                 </div>
-                <div v-else class="flex gap-2">
+                <div v-else class="flex gap-2 flex-col bg-black/50 p-2 rounded">
                     <input
-                        v-model="editableName" type="text" class="input input-sm input-bordered flex-1"
+                        v-model="editableName" type="text" class="input input-xs"
                         :placeholder="t('rename-placeholder')"
                     >
-                    <button class="btn btn-sm btn-primary" :disabled="!editableName.trim()" @click.stop="submitRename">
+                    <button class="btn btn-xs btn-primary" :disabled="!editableName.trim()" @click.stop="submitRename">
                         {{ t('save') }}
                     </button>
-                    <button class="btn btn-sm" @click.stop="cancelEdit">
+                    <button class="btn btn-xs" @click.stop="cancelEdit">
                         {{ t('cancel') }}
                     </button>
                 </div>
-                <p v-if="image.description" class="text-sm text-base-content/70 truncate">
-                    {{ image.description }}
-                </p>
             </div>
-            <div class="flex flex-wrap gap-2">
-                <span v-for="label in image.labels" :key="label" class="badge badge-outline">
+
+            <!-- 中间 图片本身 -->
+            <div class="w-full overflow-hidden">
+                <img :src="imageUrl" :alt="image.name" class="w-full object-cover" loading="lazy">
+            </div>
+
+            <!-- 右上 选中标记 -->
+            <template v-if="selected && !isEditing">
+                <div class="absolute top-1 right-1 badge lg:badge-lg badge-primary">
+                    {{ t('selected') }}
+                </div>
+            </template>
+
+            <!-- 右下 操作按钮 -->
+            <div v-if="canModifyImage(image)" class="absolute bottom-1 right-1">
+                <button class="bg-red-500/80 text-white p-1 rounded-full hover:bg-red-600" @click.stop="emitDelete">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+            </div>
+
+            <!-- 左下 标签 -->
+            <div class="absolute bottom-1 left-1 flex flex-col gap-1">
+                <span v-for="label in representativeLabels" :key="label" class="badge badge-soft badge-xs sm:badge-sm">
                     {{ label }}
                 </span>
-            </div>
-            <div class="text-xs text-base-content/60 flex items-center gap-2">
-                <span class="badge badge-neutral badge-sm uppercase">{{ image.visibility }}</span>
-                <span>{{ formatDate(image.updated_at) }}</span>
             </div>
         </div>
     </div>

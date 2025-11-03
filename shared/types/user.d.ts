@@ -25,7 +25,7 @@ export interface UserLoginRequest {
  */
 export interface UserResponse {
     /** 用户 ID */
-    id: number
+    id: string
     /** 用户名 */
     username: string
     /** 邮箱 */

@@ -31,7 +31,8 @@ export interface ImageSearchResponse {
     images: {
         page_number: number
         page_size: number
-        total: number
+        total_page: number
+        total_row: number
         records: ImageResponse[]
     }
 }

@@ -30,7 +30,8 @@ export function useImages(options: UseImagesOptions) {
     const error = ref<Error | null>(null)
     const pageNumber = ref(1)
     const pageSize = ref(options.pageSize ?? 20)
-    const total = ref(0)
+    const totalPage = ref(0)
+    const totalRow = ref(0)
     const activeFilters = ref<string[] | null>(options.initialFilters ?? null)
     const availableLabels = ref<string[]>([])
     const currentAspectId = ref(options.aspectId)
@@ -75,12 +76,13 @@ export function useImages(options: UseImagesOptions) {
             images.value = payload.images.records ?? []
             pageNumber.value = payload.images.page_number ?? pageNumber.value
             pageSize.value = payload.images.page_size ?? pageSize.value
-            total.value = payload.images.total ?? 0
+            totalPage.value = payload.images.total_page ?? 0
+            totalRow.value = payload.images.total_row ?? 0
             availableLabels.value = payload.labels ?? []
 
             return {
                 images: images.value,
-                total: total.value,
+                total: totalRow.value,
             }
         }
         catch (err) {
@@ -135,6 +137,12 @@ export function useImages(options: UseImagesOptions) {
         }
     }
 
+    const representativeLabels = computed(() => {
+        const allLabels = [...availableLabels.value, ...activeFilters.value ?? []]
+        const filteredLabels = allLabels.filter(label => !options.initialFilters?.includes(label))
+        return Array.from(new Set(filteredLabels))
+    })
+
     return {
         aspect,
         fetchAspect,
@@ -143,7 +151,8 @@ export function useImages(options: UseImagesOptions) {
         error,
         pageNumber,
         pageSize,
-        total,
+        totalRow,
+        totalPage,
         activeFilters,
         list,
         refresh,
@@ -151,6 +160,7 @@ export function useImages(options: UseImagesOptions) {
         deleteImage,
         uploadImage,
         availableLabels,
+        representativeLabels,
         customImages,
         setAspectId,
     }

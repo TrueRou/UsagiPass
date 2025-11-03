@@ -23,16 +23,15 @@ const {
     loading,
     list,
     pageNumber,
-    pageSize,
-    total,
-    availableLabels,
+    totalRow,
+    totalPage,
+    representativeLabels,
     updateImage,
     deleteImage,
     uploadImage,
     setAspectId,
-} = useImages({ aspectId: props.aspectId, pageSize: props.pageSize })
+} = useImages({ aspectId: props.aspectId, pageSize: props.pageSize, initialFilters: props.initialFilters })
 
-const initialized = ref(false)
 const activeSecondary = ref<string[]>([])
 const searchKeyword = ref('')
 const selectedImage = ref<ImageResponse | null>(null)
@@ -42,11 +41,6 @@ const pending = ref(false)
 
 const title = computed(() => props.title ?? t('title-default'))
 const confirmButtonText = computed(() => props.confirmLabel ?? t('actions.confirm'))
-
-const totalPages = computed(() => {
-    const size = pageSize.value || 1
-    return Math.max(1, Math.ceil((total.value || 0) / size))
-})
 
 const imageKey = (image: ImageResponse) => image.id
 
@@ -75,13 +69,16 @@ function clearSearch() {
 async function prevPage() {
     if (pageNumber.value <= 1)
         return
-    await list({ pageNumber: pageNumber.value - 1 })
+    await list({ pageNumber: pageNumber.value - 1, filters: activeSecondary.value })
+    selectedImage.value = null
 }
 
 async function nextPage() {
-    if (pageNumber.value >= totalPages.value)
+    if (pageNumber.value >= totalPage.value)
         return
-    await list({ pageNumber: pageNumber.value + 1 })
+    console.warn('next page: ', pageNumber.value + 1)
+    await list({ pageNumber: pageNumber.value + 1, filters: activeSecondary.value })
+    selectedImage.value = null
 }
 
 async function jumpToPage(event: Event) {
@@ -89,8 +86,9 @@ async function jumpToPage(event: Event) {
     const value = Number.parseInt(target.value, 10)
     if (!Number.isFinite(value))
         return
-    const page = Math.min(Math.max(value, 1), totalPages.value)
-    await list({ pageNumber: page })
+    const page = Math.min(Math.max(value, 1), totalPage.value)
+    await list({ pageNumber: page, filters: activeSecondary.value })
+    selectedImage.value = null
 }
 
 function confirmSelection() {
@@ -139,40 +137,21 @@ function handleUploaded(image: ImageResponse) {
     selectedImage.value = image
 }
 
-watch(images, (newImages) => {
-    if (!selectedImage.value)
-        return
-    const fresh = newImages.find(item => item.id === selectedImage.value!.id)
-    if (fresh) {
-        selectedImage.value = fresh
-    }
-})
-
-watch(() => props.open, async (value) => {
-    if (!value) {
-        selectedImage.value = null
-        return
-    }
-    setAspectId(props.aspectId)
-    if (!initialized.value) {
+watch(() => props.open, async (isOpen) => {
+    if (isOpen) {
+        setAspectId(props.aspectId)
         await fetchAspect()
-        await list({ pageNumber: 1 })
-        initialized.value = true
+        await list({ pageNumber: 1, filters: activeSecondary.value })
     }
     else {
-        await list()
+        selectedImage.value = null
+        activeSecondary.value = []
     }
-})
-
-watch(() => props.aspectId, async (newAspect, oldAspect) => {
-    if (newAspect === oldAspect)
-        return
-    setAspectId(newAspect)
-    initialized.value = false
-    activeSecondary.value = []
-    await fetchAspect()
-    await list({ pageNumber: 1 })
 }, { immediate: true })
+
+watch([activeSecondary, searchKeyword], async () => {
+    await list({ filters: activeSecondary.value })
+})
 </script>
 
 <template>
@@ -206,7 +185,7 @@ watch(() => props.aspectId, async (newAspect, oldAspect) => {
                             @reset.prevent
                         >
                             <input
-                                v-for="val in availableLabels" :key="val" v-model="activeSecondary" type="checkbox"
+                                v-for="val in representativeLabels" :key="val" v-model="activeSecondary" type="checkbox"
                                 name="secondary-filter" class="btn btn-sm join-item" :value="val" :aria-label="val"
                             >
                         </form>
@@ -238,11 +217,12 @@ watch(() => props.aspectId, async (newAspect, oldAspect) => {
                                 {{ t('actions.upload') }}
                             </button>
                         </div>
-                        <div v-else class="grid grid-cols-3 gap-4 md:grid-cols-4 xl:grid-cols-5">
+                        <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
                             <ImageCard
                                 v-for="image in images" :key="imageKey(image)" :image="image"
-                                :image-url="imageUrl(image)" :aspect="aspect" :selected="isSelected(image)"
-                                :disabled="pending" @select="updateSelection" @rename="handleRename"
+                                :image-url="imageUrl(image)" :selected="isSelected(image)"
+                                :disabled="pending" :hided-labels="initialFilters" @select="updateSelection"
+                                @rename="handleRename"
                                 @delete="confirmDelete"
                             />
                         </div>
@@ -251,7 +231,7 @@ watch(() => props.aspectId, async (newAspect, oldAspect) => {
 
                 <section class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div class="text-sm text-base-content/70">
-                        {{ t('pagination-status', { page: pageNumber, totalPages, total }) }}
+                        {{ t('pagination-status', { page: pageNumber, totalPage, totalRow }) }}
                     </div>
                     <div class="join">
                         <button class="btn join-item" type="button" :disabled="pageNumber <= 1" @click="prevPage">
@@ -259,10 +239,10 @@ watch(() => props.aspectId, async (newAspect, oldAspect) => {
                         </button>
                         <input
                             class="input input-bordered join-item w-16 text-center" type="number" :value="pageNumber"
-                            min="1" :max="totalPages" @change="jumpToPage($event)"
+                            min="1" :max="totalPage" @change="jumpToPage($event)"
                         >
                         <button
-                            class="btn join-item" type="button" :disabled="pageNumber >= totalPages"
+                            class="btn join-item" type="button" :disabled="pageNumber >= totalPage"
                             @click="nextPage"
                         >
                             {{ t('pagination-next') }}
@@ -288,7 +268,7 @@ watch(() => props.aspectId, async (newAspect, oldAspect) => {
 
     <ImageUploader
         v-if="open" :open="openUploader" :aspect="aspect" :aspect-id="props.aspectId"
-        :suggested-labels="availableLabels" :upload="uploadImage" @update:open="val => openUploader = val"
+        :suggested-labels="representativeLabels" :upload="uploadImage" @update:open="val => openUploader = val"
         @uploaded="handleUploaded"
     />
 
@@ -324,7 +304,7 @@ en-GB:
   clear: Clear
   empty: No images match your filters yet.
   custom-placeholder: Upload your own image
-  pagination-status: "Page {page} of {totalPages}, total {total} images"
+  pagination-status: "Page {page} of {totalPage}, total {total} images"
   pagination-prev: Previous
   pagination-next: Next
   delete-title: Delete image
@@ -342,7 +322,7 @@ zh-CN:
   clear: 清空
   empty: 暂无符合条件的图片
   custom-placeholder: 上传你的专属图片
-  pagination-status: "第 {page} / {totalPages} 页，共 {total} 张图片"
+  pagination-status: "第 {page} / {totalPage} 页，共 {totalRow} 张图片"
   pagination-prev: 上一页
   pagination-next: 下一页
   delete-title: 删除图片

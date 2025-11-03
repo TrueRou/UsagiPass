@@ -243,7 +243,7 @@ async function handleSave() {
     <div class="min-h-screen bg-base-200">
         <ImageSelector
             v-if="imageTarget" :open="selectorOpen" :aspect-id="imageAspectId" :title="selectorTitle"
-            :confirm-label="selectorConfirmLabel" :primary-filters="[{ label: 'cur', value: imageTarget }]" @update:open="handleSelectorVisibility"
+            :confirm-label="selectorConfirmLabel" :initial-filters="[imageTarget]" @update:open="handleSelectorVisibility"
             @select="handleImageSelect"
         />
         <div class="mx-auto w-full max-w-6xl px-4 py-8 lg:py-10">
