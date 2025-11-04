@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     if (body.preference) {
         await db.insert(tables.userPreference).values({
             ...body.preference,
-            user_id: userId,
+            userId,
         }).onConflictDoUpdate({
             target: tables.userPreference.userId,
             set: {
@@ -31,13 +31,13 @@ export default defineEventHandler(async (event) => {
             const existingAccount = account.id != null ? existingMap.get(account.id) : undefined
             if (existingAccount) {
                 await db.update(tables.userAccount)
-                    .set({ ...account, updated_at: new Date() })
+                    .set({ ...account, updatedAt: new Date() })
                     .where(eq(tables.userAccount.id, existingAccount.id))
             }
             else {
                 await db.insert(tables.userAccount).values({
                     ...account,
-                    user_id: userId,
+                    userId,
                 })
             }
         }

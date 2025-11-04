@@ -12,12 +12,12 @@ export default defineEventHandler(async (event) => {
     let userPreference = preference
     if (!userPreference) {
         const [newPreference] = await db.insert(tables.userPreference).values({
-            user_id: userId,
-            characterId: config.leporidDefaultImage.characterId,
-            maskId: config.leporidDefaultImage.maskId,
-            backgroundId: config.leporidDefaultImage.backgroundId,
-            frameId: config.leporidDefaultImage.frameId,
-            passnameId: config.leporidDefaultImage.passnameId,
+            userId,
+            characterId: config.leporid.defaultImage.characterId,
+            maskId: config.leporid.defaultImage.maskId,
+            backgroundId: config.leporid.defaultImage.backgroundId,
+            frameId: config.leporid.defaultImage.frameId,
+            passnameId: config.leporid.defaultImage.passnameId,
         }).returning()
         userPreference = newPreference
     }

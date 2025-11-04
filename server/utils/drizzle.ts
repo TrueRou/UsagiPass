@@ -6,10 +6,8 @@ export { and, eq, or, sql } from 'drizzle-orm'
 
 export const tables = schema
 
-const config = useRuntimeConfig()
-
 export function useDrizzle() {
-    return drizzle(config.databaseUrl || '', { schema })
+    return drizzle(useRuntimeConfig().usagipass.databaseURL || '', { schema })
 }
 
 export type Server = typeof schema.server.$inferSelect

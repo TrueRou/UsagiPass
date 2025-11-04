@@ -14,7 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { img } = useUtils()
+const { imgPreview } = useUtils()
 
 const {
     aspect,
@@ -45,7 +45,7 @@ const confirmButtonText = computed(() => props.confirmLabel ?? t('actions.confir
 
 const imageKey = (image: ImageResponse) => image.id
 
-const imageUrl = (image: ImageResponse) => img(image.id)
+const imageUrl = (image: ImageResponse) => imgPreview(image.id)
 
 function isSelected(image: ImageResponse) {
     if (!selectedImage.value)

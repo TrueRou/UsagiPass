@@ -5,6 +5,6 @@ export default defineConfig({
     schema: './server/database/schema.ts',
     out: './server/database/migrations',
     dbCredentials: {
-        url: process.env.NUXT_DATABASE_URL || 'postgresql://postgres:password@localhost:5432/usagipass',
+        url: process.env.NUXT_APP_DATABASE_URL || 'postgresql://postgres:password@localhost:5432/usagipass',
     },
 })

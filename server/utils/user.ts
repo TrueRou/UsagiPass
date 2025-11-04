@@ -1,7 +1,7 @@
 import type { H3Event } from 'h3'
 
 export async function useUser(event: H3Event): Promise<UserResponse> {
-    const cookieName = useRuntimeConfig().leporidCookieName
+    const cookieName = useRuntimeConfig().leporid.cookieName
     const leporidCookie = getCookie(event, cookieName)
 
     try {

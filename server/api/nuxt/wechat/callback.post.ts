@@ -3,7 +3,6 @@ import { ServerCredentialsStrategy } from '~~/server/database/schema'
 export default defineEventHandler(async (event) => {
     const userId = (await useUser(event)).id
     const db = useDrizzle()
-    const config = useRuntimeConfig()
 
     const body = ((await readBody<{
         code?: string
@@ -60,7 +59,7 @@ export default defineEventHandler(async (event) => {
         code: number
         message: string
         data?: { data: any }
-    }>(`${config.otogeApi}/maimai/wechat/identifiers`, {
+    }>(`/api/otoge/maimai/wechat/identifiers`, {
         method: 'GET',
         query: {
             code: body.code,
@@ -91,7 +90,7 @@ export default defineEventHandler(async (event) => {
         code: number
         message: string
         data?: { data: any }
-    }>(`${config.otogeApi}/maimai/updates_chain`, {
+    }>(`/api/otoge/maimai/updates_chain`, {
         method: 'POST',
         body: {
             source: {
@@ -115,7 +114,7 @@ export default defineEventHandler(async (event) => {
         code: number
         message: string
         data?: { data: any }
-    }>(`${config.otogeApi}/maimai/updates_chain`, {
+    }>(`/api/otoge/maimai/updates_chain`, {
         method: 'GET',
         query: {
             _t: identifierResponse.data.data.credentials._t,

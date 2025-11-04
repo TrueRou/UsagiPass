@@ -4,7 +4,11 @@ export function useUtils() {
     const config = useRuntimeConfig()
 
     const img = (path: string) => {
-        return joinURL(config.public.imageCdn as string, `${path}`)
+        return joinURL(config.public.imageURL as string, `${path}`)
+    }
+
+    const imgPreview = (path: string) => {
+        return joinURL(config.public.imagePreviewURL as string, `${path}`)
     }
 
     const toDBC = (str: string) => {
@@ -24,5 +28,5 @@ export function useUtils() {
         return result
     }
 
-    return { img, toDBC }
+    return { img, imgPreview, toDBC }
 }
