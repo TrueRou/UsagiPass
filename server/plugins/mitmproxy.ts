@@ -100,5 +100,5 @@ export default defineNitroPlugin((_nitroApp) => {
         }
     })
 
-    proxy.listen({ port: 8081 })
+    proxy.listen({ port: config.mitmproxy.listenPort, host: config.mitmproxy.listenHost })
 })

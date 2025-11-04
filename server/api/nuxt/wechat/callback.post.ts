@@ -47,13 +47,6 @@ export default defineEventHandler(async (event) => {
             ),
         )
 
-    if (!accounts.length) {
-        throw createError({
-            statusCode: 400,
-            statusMessage: '请先在偏好设置中添加至少一个开启的查分器账号',
-        })
-    }
-
     // 获取微信服务号玩家标识
     const identifierResponse = await $fetch<{
         code: number
@@ -76,37 +69,38 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // 构造链式更新的 target 请求体
-    const targetBody = accounts.reduce((dict, val) => {
-        const target = dict[val.serverIdentifier] = {} as UpdatesChainTargetBody[string]
-        if (val.credentialsStrategy === ServerCredentialsStrategy.PLAIN) {
-            target[val.credentialsField as ServerCredentialsField] = val.credentials
-        }
-        return dict
-    }, ({} as UpdatesChainTargetBody))
+    // 有绑定账号则发起链式更新请求
+    if (accounts.length !== 0) {
+        const targetBody = accounts.reduce((dict, val) => {
+            const target = dict[val.serverIdentifier] = {} as UpdatesChainTargetBody[string]
+            if (val.credentialsStrategy === ServerCredentialsStrategy.PLAIN) {
+                target[val.credentialsField as ServerCredentialsField] = val.credentials
+            }
+            return dict
+        }, ({} as UpdatesChainTargetBody))
 
-    // 发起链式更新请求
-    const updateResponse = await $fetch<{
-        code: number
-        message: string
-        data?: { data: any }
-    }>(`/api/otoge/maimai/updates_chain`, {
-        method: 'POST',
-        body: {
-            source: {
-                wechat: {
-                    credentials: identifierResponse.data.data.credentials,
+        const updateResponse = await $fetch<{
+            code: number
+            message: string
+            data?: { data: any }
+        }>(`/api/otoge/maimai/updates_chain`, {
+            method: 'POST',
+            body: {
+                source: {
+                    wechat: {
+                        credentials: identifierResponse.data.data.credentials,
+                    },
                 },
+                target: targetBody,
             },
-            target: targetBody,
-        },
-    })
-
-    if (updateResponse.code !== 200 || !updateResponse.data) {
-        throw createError({
-            statusCode: 500,
-            message: '查分器更新请求失败',
         })
+
+        if (updateResponse.code !== 200 || !updateResponse.data) {
+            throw createError({
+                statusCode: 500,
+                message: '查分器更新请求失败',
+            })
+        }
     }
 
     // 发起获取玩家信息请求
@@ -129,6 +123,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    // 保存玩家评级信息
     await db.insert(tables.userRating).values({
         userId,
         rating: playerResponse.data.data.rating,
@@ -145,6 +140,6 @@ export default defineEventHandler(async (event) => {
     return {
         code: 200,
         message: '请求成功',
-        data: updateResponse.data.data,
+        data: {},
     }
 })
