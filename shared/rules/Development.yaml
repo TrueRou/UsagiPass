@@ -1,0 +1,21 @@
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+
+proxies:
+  - name: UsagiPass
+    server: 127.0.0.1
+    port: 9100
+    type: http
+
+# 对于更新查分器功能，我们需要中间人接管 tgk-wcaime.wahlap.com 的80端口，而正常放行 443 端口
+# 所以在调试中 AND 规则是必要的，因为单独使用 DOMAIN 规则会导致 443 端口也被代理
+# 但是 AND 规则只在 ClashMeta 核心下生效，所以在生产环境为了兼容性，我们单独使用 DOMAIN 规则，并且进行分流
+# 生产环境由 V2Ray 负责分流，将 80 端口流量转发到中间人，443 端口流量直连
+
+rules:
+  - DOMAIN-SUFFIX,sys-all.cn,UsagiPass
+  - DOMAIN-SUFFIX,sys-allnet.cn,UsagiPass
+  - AND,((DOMAIN,tgk-wcaime.wahlap.com),(DST-PORT,80)),UsagiPass
+  - MATCH,DIRECT
