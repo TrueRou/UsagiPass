@@ -1,19 +1,19 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'require-login' })
 
-const route = useRoute()
-const dateLimit = route.query.date as string | undefined
-const timeLimit = route.query.time as string | undefined
-const maimaiMaid = route.query.maid as string | undefined
+const dateLimit = ref<string | undefined>(undefined)
+const timeLimit = ref<string | undefined>(undefined)
+const maimaiMaid = ref<string | undefined>(undefined)
+
+onMounted(() => {
+    const route = useRoute()
+    dateLimit.value = route.query.date as string | undefined
+    timeLimit.value = route.query.time as string | undefined
+    maimaiMaid.value = route.query.maid as string | undefined
+})
 
 const { data: profile } = await useLeporid<UserProfile>('/api/nuxt/profile')
 const { img } = useUtils()
-
-const simplifiedCode = computed(() => {
-    if (maimaiMaid)
-        return maimaiMaid.slice(8, 28).match(/.{1,4}/g)?.join(' ')
-    return ''
-})
 
 const playerRating = computed(() => {
     // 覆盖优先级：动态评分（不为 0 的话） > 用户偏好设置
@@ -34,6 +34,22 @@ const friendCode = computed(() => {
     if (profile.value?.preference.friendCode)
         return profile.value?.preference.friendCode
     return profile.value?.player?.friendCode
+})
+
+const simplifiedCode = computed(() => {
+    // 覆盖优先级：用户偏好设置 > 页面参数
+    if (profile.value?.preference.simplifiedCode)
+        return profile.value?.preference.simplifiedCode
+    if (maimaiMaid.value)
+        return maimaiMaid.value?.slice(8, 28).match(/.{1,4}/g)?.join(' ')
+    return undefined
+})
+
+const maimaiVersion = computed(() => {
+    // 覆盖优先级：用户偏好设置 > 机台最新版本（TODO）
+    if (profile.value?.preference.maimaiVersion)
+        return profile.value?.preference.maimaiVersion
+    return '[maimaiDX]CN1.51-F'
 })
 </script>
 
@@ -56,8 +72,8 @@ const friendCode = computed(() => {
                 </div>
 
                 <WidgetCharaInfo
-                    :chara-name="profile.preference.characterName || undefined" :time="timeLimit"
-                    :date="dateLimit" :show-date="profile.preference.showDate"
+                    :chara-name="profile.preference.characterName || undefined" :time-limit="timeLimit"
+                    :date-limit="dateLimit" :show-date="profile.preference.showDate"
                     :chara-info-color="profile.preference.charaInfoColor" class="bottom-[18%] absolute"
                 />
 
@@ -67,10 +83,10 @@ const friendCode = computed(() => {
                 >
                     <div class="footer-widget flex justify-between py-1 rounded-2xl bg-gray-800 text-white opacity-85">
                         <p class="footer-text font-sega">
-                            {{ profile.preference.simplifiedCode || simplifiedCode }}
+                            {{ simplifiedCode }}
                         </p>
                         <p class="footer-text font-sega">
-                            {{ profile.preference.maimaiVersion || '[maimaiDX]CN1.51-F' }}
+                            {{ maimaiVersion }}
                         </p>
                     </div>
                     <NuxtLink to="/preference">

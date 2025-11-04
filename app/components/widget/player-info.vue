@@ -11,8 +11,8 @@ const props = defineProps<{
         v-if="props.username" class="rounded-s-md ms-auto w-fit text-black"
         :style="{ 'background-color': playerInfoColor }"
     >
-        <div class="p-1 space-x-1 text-end">
-            <p class="inline font-bold font-sega align-middle" style="font-size: max(12pt, 1.8vh);">
+        <div class="p-1 space-x-1">
+            <p class="inline font-bold font-sega align-middle adapt-text-lg">
                 {{ props.username }}
             </p>
             <img class="inline align-middle" style="height: 3.5vh;" src="../../assets/icons/misc/deluxe.png">
@@ -24,7 +24,7 @@ const props = defineProps<{
             >
                 フレンド<br>コ一ド
             </div>
-            <p class="inline align-middle ml-0.5 font-extrabold font-sega" style="font-size: max(10pt, 1.8vh);">
+            <p class="inline align-middle ml-0.5 font-extrabold font-sega adapt-text-md">
                 {{
                     props.friendCode
                 }}
@@ -32,3 +32,15 @@ const props = defineProps<{
         </div>
     </div>
 </template>
+
+<style scoped>
+.adapt-text-md {
+    font-size: clamp(1.6dvh, 2.2dvw, 2vmin);
+    line-height: 120%;
+}
+
+.adapt-text-lg {
+    font-size: clamp(2dvh, 2.8dvw, 2.6vmin);
+    line-height: 120%;
+}
+</style>

@@ -1,0 +1,99 @@
+{
+    "log": {
+        "level": "info",
+        "timestamp": true
+    },
+    "dns": {
+        "servers": [
+            {
+                "tag": "dns_resolver",
+                "address": "local",
+                "detour": "direct"
+            }
+        ],
+        "rules": [
+            {
+                "outbound": "any",
+                "server": "dns_resolver"
+            }
+        ],
+        "final": "dns_resolver",
+        "strategy": "prefer_ipv4"
+    },
+    "inbounds": [
+        {
+            "type": "tun",
+            "tag": "tun-in",
+            "mtu": 1400,
+            "auto_route": true,
+            "strict_route": true,
+            "stack": "mixed",
+            "sniff": true,
+            "address": [
+                "172.18.0.1/30",
+                "fdfe:dcba:9876::1/126"
+            ]
+        }
+    ],
+    "outbounds": [
+        {
+            "type": "shadowsocks",
+            "tag": "UsagiPass",
+            "server": "up.turou.fun",
+            "server_port": 16789,
+            "method": "chacha20-ietf-poly1305",
+            "password": "o5bZUHHvbFLy3eXkzi2M",
+            "network": "tcp",
+            "tcp_fast_open": false
+        },
+        {
+            "type": "direct",
+            "tag": "direct"
+        },
+        {
+            "type": "block",
+            "tag": "block"
+        },
+        {
+            "type": "dns",
+            "tag": "dns-out"
+        }
+    ],
+    "route": {
+        "rules": [
+            {
+                "protocol": "dns",
+                "outbound": "dns-out"
+            },
+            {
+                "domain": [
+                    "wq.sys-all.cn",
+                    "wq.sys-allnet.cn",
+                    "tgk-wcaime.wahlap.com"
+                ],
+                "ip_cidr": [
+                    "152.136.21.46/32",
+                    "42.193.74.107/32",
+                    "129.28.248.89/32",
+                    "43.137.91.207/32",
+                    "81.71.193.236/32",
+                    "43.145.45.124/32"
+                ],
+                "outbound": "UsagiPass"
+            },
+            {
+                "ip_is_private": true,
+                "outbound": "direct"
+            }
+        ],
+        "final": "direct",
+        "auto_detect_interface": true,
+        "override_android_vpn": true
+    },
+    "experimental": {
+        "cache_file": {
+            "enabled": true,
+            "path": "cache.db"
+        }
+    }
+}

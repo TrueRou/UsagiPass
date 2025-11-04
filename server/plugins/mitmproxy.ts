@@ -54,7 +54,7 @@ export default defineNitroPlugin((_nitroApp) => {
         // example: http://wq.sys-all.cn/qrcode/req/MAID241020A01.html?l=1730217600&t=E8889E
         else if (SYSALL_HOSTS.has(host) && urlPart.startsWith('/qrcode/req')) {
             const maid = urlPart.substring(urlPart.indexOf('/qrcode/req/'), urlPart.indexOf('.html')).replace('/qrcode/req/', '')
-            const timestamp = Number(new URL(urlPart).searchParams.get('l') ?? '0')
+            const timestamp = Number(new URL(urlPart, `http://${host}`).searchParams.get('l') ?? '0')
             const { time, date } = buildTokyoDate(timestamp)
 
             const redirectUrl = new URL(config.usagipass.baseURL || 'https://up.turou.fun')
@@ -69,7 +69,7 @@ export default defineNitroPlugin((_nitroApp) => {
         // redirect wahlap oauth requests to the UsagiPass frontend
         // example: http://tgk-wcaime.wahlap.com/wc_auth/oauth/callback/maimai-dx?r=c9N1mMeLT&t=241114354&code=071EIC0003YUbTf5X31EIC0p&state=24F0976C60BD9796310AD933AFEF39FFCD7C0E64E9571E69A5AE5
         else if (WAHLAP_HOSTS.has(host) && urlPart.startsWith('/wc_auth/oauth/callback/maimai-dx')) {
-            const urlParams = new URL(urlPart).searchParams
+            const urlParams = new URL(urlPart, `http://${host}`).searchParams
 
             const redirectBaseUrl = new URL(config.usagipass.baseURL || 'https://up.turou.fun')
             const redirectUrl = new URL('/wechat/callback', redirectBaseUrl)

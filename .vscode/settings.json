@@ -34,7 +34,6 @@
         "markdown",
         "json",
         "jsonc",
-        "yaml",
         "toml",
         "xml",
         "gql",
