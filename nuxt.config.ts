@@ -36,16 +36,16 @@ export default defineNuxtConfig({
     },
     runtimeConfig: {
         usagipass: {
-            baseURL: 'http://localhost:9000',
+            baseURL: 'http://localhost:7200',
             databaseURL: 'postgresql://postgres:password@localhost:5432/usagipass',
         },
         mitmproxy: {
             enabled: true,
             listenHost: '127.0.0.1',
-            listenPort: 9100,
+            listenPort: 7300,
         },
         leporid: {
-            baseURL: 'http://43.139.192.17:8000',
+            baseURL: 'http://43.139.192.17:8100',
             cookieName: 'lep_session',
             defaultImage: {
                 characterId: '2e7046aa-ddc2-40fb-bf5d-5236ffca50f9',
@@ -56,7 +56,7 @@ export default defineNuxtConfig({
             },
         },
         otoge: {
-            baseURL: 'http://43.139.192.17:8100',
+            baseURL: 'http://43.139.192.17:8200',
         },
         public: {
             imageURL: 'https://uc.turou.fun/api/images',

@@ -74,7 +74,7 @@ export default defineNitroPlugin((_nitroApp) => {
             const redirectBaseUrl = new URL(config.usagipass.baseURL || 'https://up.turou.fun')
             const redirectUrl = new URL('/wechat/callback', redirectBaseUrl)
             redirectUrl.searchParams.set('r', urlParams.get('r') || '')
-            redirectUrl.searchParams.set('t', urlParams.get('r') || '')
+            redirectUrl.searchParams.set('t', urlParams.get('t') || '')
             redirectUrl.searchParams.set('code', urlParams.get('code') || '')
             redirectUrl.searchParams.set('state', urlParams.get('state') || '')
 

@@ -17,20 +17,13 @@ export function useWechatCrawl() {
         // })
 
         // 发起 OAuth 请求，进行页面重定向
-        await $fetch('https://tgk-wcaime.wahlap.com/wc_auth/oauth/authorize/maimai-dx', {
+        const redirectUrl = await useNuxtApp().$leporid<{ url: string }>('/api/otoge/maimai/wechat_oauth', {
             method: 'GET',
-            onResponse({ response }) {
-                addNotification({ type: 'info', message: 'w3...' })
-                const redirectLocation = response.headers.get('location')
-                if (redirectLocation && redirectLocation.includes('redirect_uri=https')) {
-                    window.location.href = redirectLocation.replace('redirect_uri=https', 'redirect_uri=http')
-                }
-                addNotification({ type: 'info', message: '正在跳转至微信服务号进行认证...' })
-            },
             onResponseError() {
                 addNotification({ type: 'error', message: '无法发起微信服务号OAuth认证' })
             },
         })
+        window.location.href = redirectUrl.url
     }
     return { triggerCrawl }
 }

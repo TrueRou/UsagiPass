@@ -7,9 +7,11 @@ export const useAuthStore = defineStore('auth', () => {
             user.value = await useNuxtApp().$leporid<UserResponse>('/api/users/me')
             isAuthenticated.value = !!user.value
         }
-        catch {
-            user.value = null
-            isAuthenticated.value = false
+        catch (e: any) {
+            if (e.statusCode === 401) {
+                user.value = null
+                isAuthenticated.value = false
+            }
         }
     }
 

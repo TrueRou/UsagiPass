@@ -6,7 +6,7 @@ log-level: info
 proxies:
   - name: UsagiPass
     server: 127.0.0.1
-    port: 9100
+    port: 7300
     type: http
 
 # 对于更新查分器功能，我们需要中间人接管 tgk-wcaime.wahlap.com 的80端口，而正常放行 443 端口

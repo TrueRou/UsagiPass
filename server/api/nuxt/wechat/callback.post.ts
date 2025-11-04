@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
     const identifierResponse = await $fetch<{
         code: number
         message: string
-        data?: { data: any }
+        data?: { credentials: any }
     }>(`/api/otoge/maimai/wechat/identifiers`, {
         method: 'GET',
         query: {
@@ -82,13 +82,13 @@ export default defineEventHandler(async (event) => {
         const updateResponse = await $fetch<{
             code: number
             message: string
-            data?: { data: any }
+            data?: any
         }>(`/api/otoge/maimai/updates_chain`, {
             method: 'POST',
             body: {
                 source: {
                     wechat: {
-                        credentials: identifierResponse.data.data.credentials,
+                        credentials: identifierResponse.data.credentials,
                     },
                 },
                 target: targetBody,
@@ -107,12 +107,12 @@ export default defineEventHandler(async (event) => {
     const playerResponse = await $fetch<{
         code: number
         message: string
-        data?: { data: any }
-    }>(`/api/otoge/maimai/updates_chain`, {
+        data?: { name: string, rating: number }
+    }>(`/api/otoge/maimai/wechat/players`, {
         method: 'GET',
         query: {
-            _t: identifierResponse.data.data.credentials._t,
-            userId: identifierResponse.data.data.credentials.userId,
+            _t: identifierResponse.data.credentials._t,
+            userId: identifierResponse.data.credentials.userId,
         },
     })
 
@@ -126,13 +126,13 @@ export default defineEventHandler(async (event) => {
     // 保存玩家评级信息
     await db.insert(tables.userRating).values({
         userId,
-        rating: playerResponse.data.data.rating,
-        name: playerResponse.data.data.name,
+        rating: playerResponse.data.rating,
+        name: playerResponse.data.name,
     }).onConflictDoUpdate({
         target: tables.userRating.userId,
         set: {
-            rating: playerResponse.data.data.rating,
-            name: playerResponse.data.data.name,
+            rating: playerResponse.data.rating,
+            name: playerResponse.data.name,
             updatedAt: new Date(),
         },
     })
