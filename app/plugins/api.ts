@@ -22,27 +22,22 @@ export default defineNuxtPlugin((_nuxtApp) => {
                 const loadingIndicator = useLoadingIndicator()
                 loadingIndicator.finish()
 
+                const { addNotification } = useNotificationsStore()
                 if (rawData.code === 200 && (context.options as any).showSuccessToast) {
-                    const { addNotification } = useNotificationsStore()
-
                     addNotification({
                         type: 'success',
                         message: (context.options as any).successMessage || '操作成功',
                     })
                 }
-            }
-        },
-        onResponseError(context) {
-            if (import.meta.client) {
-                const leporidResp = context.response._data
 
-                const { addNotification } = useNotificationsStore()
-
-                addNotification({
-                    type: 'error',
-                    message: leporidResp.message || context.response.statusText,
-                })
-                Promise.reject(leporidResp) // reject the promise
+                if (rawData.code !== 200) {
+                    const message = rawData.message || context.response.statusText
+                    addNotification({
+                        type: 'error',
+                        message,
+                    })
+                    throw new Error(message)
+                }
             }
         },
     })

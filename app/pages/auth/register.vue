@@ -2,11 +2,11 @@
 import { z } from 'zod'
 
 const { t } = useI18n()
-const authStore = useAuthStore()
+const { loggedIn, fetch: fetchUser } = useUserSession()
 
 // Redirect if already logged in
 watchEffect(() => {
-    if (authStore.isAuthenticated) {
+    if (loggedIn.value) {
         navigateTo('/')
     }
 })
@@ -53,14 +53,14 @@ async function handleRegister() {
         successMessage: t('register-success'),
     })
 
-    await useNuxtApp().$leporid('/api/auth/login', {
+    await useNuxtApp().$leporid('/api/nuxt/auth/login', {
         method: 'POST',
         body: form,
         showSuccessToast: true,
         successMessage: t('login-success'),
     })
 
-    await authStore.fetch()
+    await fetchUser()
     await navigateTo('/')
 }
 

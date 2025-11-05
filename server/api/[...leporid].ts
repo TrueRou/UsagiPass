@@ -1,10 +1,43 @@
 import { joinURL } from 'ufo'
 
 export default defineEventHandler(async (event) => {
+    const session = await getUserSession(event)
     const proxyUrl = useRuntimeConfig().leporid.baseURL
 
     const path = event.path.replace(/^\/api\//, '')
     const target = joinURL(proxyUrl, path)
+    const headers: Record<string, string> = {}
 
-    return proxyRequest(event, target)
+    if (session.secure) {
+        // 如果过期了，尝试刷新令牌
+        if (session.secure.expiresAt < Date.now()) {
+            await $fetch<UserTokenCreateResponse>('/api/auth/token', {
+                method: 'POST',
+                ignoreResponseError: true,
+                query: {
+                    grant_type: 'refresh_token',
+                    refresh_token: session.secure.refreshToken,
+                },
+                async onResponse({ response }) {
+                    if (response.status === 200) {
+                        await setUserSession(event, {
+                            user: session.user,
+                            secure: {
+                                accessToken: response._data.access_token,
+                                refreshToken: response._data.refresh_token,
+                                expiresAt: Date.now() + (response._data.expires_in * 1000),
+                            },
+                        })
+                    }
+                    else if (response.status === 401) {
+                        await clearUserSession(event)
+                    }
+                },
+            })
+        }
+        // 使用访问令牌进行代理请求
+        headers.Authorization = `Bearer ${session.secure.accessToken}`
+    }
+
+    return proxyRequest(event, target, { headers })
 })

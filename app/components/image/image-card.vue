@@ -17,7 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { user } = useAuthStore()
+const { user } = useUserSession()
 
 const isEditing = ref(false)
 const editableName = ref(props.image.name)
@@ -29,7 +29,7 @@ watch(() => props.image.name, (name) => {
 })
 
 function canModifyImage(image: ImageResponse) {
-    return user && image.user_id === user.id
+    return image.user_id === user.value?.id
 }
 
 function handleSelect() {

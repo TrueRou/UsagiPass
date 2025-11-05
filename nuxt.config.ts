@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
     devtools: { enabled: true },
-    modules: ['@pinia/nuxt', '@nuxtjs/i18n', '@nuxt/eslint'],
+    modules: ['@pinia/nuxt', '@nuxtjs/i18n', '@nuxt/eslint', 'nuxt-auth-utils'],
     css: ['~/assets/css/main.css'],
     vite: {
         plugins: [
@@ -46,7 +46,6 @@ export default defineNuxtConfig({
         },
         leporid: {
             baseURL: 'http://43.139.192.17:8100',
-            cookieName: 'lep_session',
             defaultImage: {
                 characterId: '2e7046aa-ddc2-40fb-bf5d-5236ffca50f9',
                 maskId: '421943e9-2221-45f1-8f76-5a1ca012028e',

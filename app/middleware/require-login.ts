@@ -1,8 +1,8 @@
 export default defineNuxtRouteMiddleware(async (_to, _from) => {
-    const authStore = useAuthStore()
+    const { loggedIn } = useUserSession()
     const nuxtApp = useNuxtApp()
 
-    if (authStore.isAuthenticated === false) {
+    if (loggedIn.value === false) {
         if (import.meta.client) {
             const { addNotification } = useNotificationsStore()
             addNotification({
