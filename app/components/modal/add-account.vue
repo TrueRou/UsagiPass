@@ -28,21 +28,21 @@ const { t } = useI18n()
         <div class="modal-box space-y-4">
             <div class="space-y-1">
                 <h3 class="text-lg font-semibold">
-                    {{ t('accounts.add-modal.title') }}
+                    {{ t('title') }}
                 </h3>
                 <p class="text-sm text-base-content/70">
-                    {{ t('accounts.add-modal.description') }}
+                    {{ t('description') }}
                 </p>
             </div>
 
             <div class="space-y-4">
-                <div class="form-control">
+                <div class="form-control flex flex-col">
                     <label class="label">
-                        <span class="label-text">{{ t('fields.account.server') }}</span>
+                        <span class="label-text">{{ t('fields.server.label') }}</span>
                     </label>
                     <select
                         v-model="selectedServer" class="select select-bordered"
-                        :disabled="props.servers.length === 0"
+                        :disabled="props.servers.length === 0" :placeholder="t('fields.server.placeholder')"
                     >
                         <option v-for="server in props.servers" :key="server.id" :value="server">
                             {{ server.name }}
@@ -50,15 +50,15 @@ const { t } = useI18n()
                     </select>
                 </div>
 
-                <div class="form-control">
+                <div class="form-control flex flex-col">
                     <label class="label">
                         <span class="label-text">
-                            {{ t('fields.account.credentials') }}
+                            {{ t('fields.credentials.label') }}
                         </span>
                     </label>
                     <input
                         v-model="credentialsModel" class="input input-bordered" type="text"
-                        :placeholder="selectedServer?.credentialsField || ''"
+                        :placeholder="selectedServer?.credentialsName || t('fields.credentials.placeholder')"
                     >
                 </div>
             </div>
@@ -80,7 +80,7 @@ const { t } = useI18n()
                         :href="serverMap.get(selectedServer.id)!.tipsUrl" target="_blank"
                         rel="noopener"
                     >
-                        {{ t("sections.accounts.tips-link") }}
+                        {{ t("tips-link") }}
                     </a>
                 </div>
             </div>

@@ -7,7 +7,8 @@ CREATE TABLE "tbl_server" (
 	"tips_desc" text NOT NULL,
 	"tips_url" text NOT NULL,
 	"credentials_strategy" text NOT NULL,
-	"credentials_field" text NOT NULL
+	"credentials_field" text NOT NULL,
+	"credentials_name" text DEFAULT '' NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "tbl_account" (

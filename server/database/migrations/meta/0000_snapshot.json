@@ -1,5 +1,5 @@
 {
-  "id": "789e60c2-22e6-44fd-925b-4e81cb35bafe",
+  "id": "b57ed3c6-9d9b-4950-ad19-8ccdf49c4d7c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -61,6 +61,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "credentials_name": {
+          "name": "credentials_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
         }
       },
       "indexes": {},

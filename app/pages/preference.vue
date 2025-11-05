@@ -123,6 +123,7 @@ async function handleSave() {
 <template>
     <div class="min-h-screen bg-base-200">
         <ImageSelector
+            v-if="selectorTarget"
             :open="selectorOpen" aspect-id="id-1-ff" :title="selectorTarget ? t(`images.${selectorTarget}.title`) : t('images.title-default')"
             :confirm-label="t('actions.use-image')" :initial-filters="selectorTarget ? [selectorTarget] : []" @update:open="handleSelectorVisibility"
             @select="handleImageSelect"
@@ -137,7 +138,7 @@ async function handleSave() {
                 <p>{{ t("loading.initial") }}</p>
             </div>
 
-            <form v-else-if="profileData && serversData" class="space-y-8" @submit.prevent="handleSave">
+            <form v-else-if="profileData && serversData" class="space-y-4" @submit.prevent="handleSave">
                 <!-- 偏好设置标题 -->
                 <div class="divider my-2">
                     {{ t("sections.preference") }}
@@ -146,7 +147,7 @@ async function handleSave() {
                 <!-- 偏好设置表单 -->
                 <div class="grid gap-4 md:grid-cols-2">
                     <!-- 玩家名称 -->
-                    <div class="form-control flex flex-col gap-2 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
                                 {{ t("fields.displayName.label") }}
@@ -164,7 +165,7 @@ async function handleSave() {
                     </div>
 
                     <!-- 卡面标签 -->
-                    <div class="form-control flex flex-col gap-2 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
                                 {{ t("fields.simplifiedCode.label") }}
@@ -182,7 +183,7 @@ async function handleSave() {
                     </div>
 
                     <!-- 好友代码 -->
-                    <div class="form-control flex flex-col gap-2 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
                                 {{ t("fields.friendCode.label") }}
@@ -200,7 +201,7 @@ async function handleSave() {
                     </div>
 
                     <!-- 游戏版本 -->
-                    <div class="form-control flex flex-col gap-2 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
                                 {{ t("fields.maimaiVersion.label") }}
@@ -218,7 +219,7 @@ async function handleSave() {
                     </div>
 
                     <!-- 玩家评分 -->
-                    <div class="form-control flex flex-col gap-2 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
                                 {{ t("fields.dxRating.label") }}
@@ -236,7 +237,7 @@ async function handleSave() {
                     </div>
 
                     <!-- 立绘名称 -->
-                    <div class="form-control flex flex-col gap-2 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
                                 {{ t("fields.characterName.label") }}
@@ -248,13 +249,13 @@ async function handleSave() {
                         <div class="flex items-center gap-3">
                             <input
                                 v-model="profileData.preference.characterName" class="input input-bordered flex-1"
-                                type="text"
+                                type="text" :placeholder="t('fields.characterName.placeholder')"
                             >
                         </div>
                     </div>
 
                     <!-- 角色立绘区颜色 -->
-                    <div class="form-control flex flex-col gap-2 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
                                 {{ t("fields.charaInfoColor.label") }}
@@ -272,7 +273,7 @@ async function handleSave() {
                     </div>
 
                     <!-- 玩家信息区颜色 -->
-                    <div class="form-control flex flex-col gap-2 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
                                 {{ t("fields.playerInfoColor.label") }}
@@ -290,7 +291,7 @@ async function handleSave() {
                     </div>
 
                     <!-- 二维码尺寸 -->
-                    <div class="form-control flex flex-col gap-2 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex flex-col gap-2 rounded-lg px-4 py-3">
                         <label>
                             <p class="font-medium text-sm">
                                 {{ t("fields.qrSize.label") }}
@@ -320,7 +321,7 @@ async function handleSave() {
                 <!-- 显示设置表单 -->
                 <div class="grid gap-4 md:grid-cols-2">
                     <!-- 显示玩家名称 -->
-                    <div class="form-control flex items-center justify-between gap-4 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-3">
                         <div>
                             <p class="font-medium text-sm">
                                 {{ t("fields.showDisplayName.label") }}
@@ -336,7 +337,7 @@ async function handleSave() {
                     </div>
 
                     <!-- 显示好友代码 -->
-                    <div class="form-control flex items-center justify-between gap-4 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-3">
                         <div>
                             <p class="font-medium text-sm">
                                 {{ t("fields.showFriendCode.label") }}
@@ -352,7 +353,7 @@ async function handleSave() {
                     </div>
 
                     <!-- 显示玩家评分 -->
-                    <div class="form-control flex items-center justify-between gap-4 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-3">
                         <div>
                             <p class="font-medium text-sm">
                                 {{ t("fields.showDxRating.label") }}
@@ -368,7 +369,7 @@ async function handleSave() {
                     </div>
 
                     <!-- 显示日期 -->
-                    <div class="form-control flex items-center justify-between gap-4 rounded-lg bg-base-100 px-4 py-3">
+                    <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-3">
                         <div>
                             <p class="font-medium text-sm">
                                 {{ t("fields.showDate.label") }}
@@ -391,9 +392,9 @@ async function handleSave() {
 
                 <!-- 图片设置表单 -->
                 <div class="grid gap-4 md:grid-cols-2">
-                    <div v-for="item in imageCardItems" :key="item.key" class="rounded-xl bg-base-100 p-4">
+                    <div v-for="item in imageCardItems" :key="item.key" class="rounded-xl p-4">
                         <div class="flex items-start gap-3">
-                            <div class="flex w-16 items-center justify-center overflow-hidden rounded-lg border border-base-200 bg-base-100">
+                            <div class="flex w-16 items-center justify-center overflow-hidden rounded-lg border border-base-200">
                                 <img v-if="item.src" :src="item.src" :alt="t(`images.${item.key}.label`)" class="h-full w-full object-cover" loading="lazy">
                                 <span v-else class="text-xs text-base-content/40">{{ t("preview.empty") }}</span>
                             </div>
@@ -420,23 +421,13 @@ async function handleSave() {
                 </div>
 
                 <!-- 账号设置表单 -->
-                <div class="bg-base-100 card-body space-y-2">
-                    <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                        <div>
-                            <h2 class="card-title text-xl">
-                                {{ t("sections.accounts.title") }}
-                            </h2>
-                            <p class="text-sm text-base-content/70">
-                                {{ t("sections.accounts.subtitle") }}
-                            </p>
-                        </div>
-                        <button
-                            class="btn btn-outline" type="button"
-                            @click="openAddAccount"
-                        >
-                            {{ t("actions.add-account") }}
-                        </button>
-                    </div>
+                <div class="flex flex-col flex-auto gap-4">
+                    <button
+                        class="btn btn-outline" type="button"
+                        @click="openAddAccount"
+                    >
+                        {{ t("actions.add-account") }}
+                    </button>
 
                     <div
                         v-if="profileData.accounts.length === 0"
@@ -494,13 +485,10 @@ en-GB:
   loading:
     initial: Loading Profile...
   sections:
-    preference:
-      title: Preference
-      images: Image Resources
-    accounts:
-      title: Account
-      subtitle: When updating the prober, all accounts will be updated
-      tips-link: Look for Tips
+    preference: Preference Settings
+    display: Display Settings
+    images: Image Settings
+    accounts: Account Settings
   fields:
     displayName:
       label: Player Name
@@ -600,10 +588,7 @@ zh-CN:
     preference: 偏好设置
     display: 显示设置
     images: 图片设置
-    accounts:
-      title: 账号管理
-      subtitle: 更新查分器时，将同步更新所有绑定账号
-      tips-link: 查看使用说明
+    accounts: 账号设置
   fields:
     displayName:
       label: 玩家名称

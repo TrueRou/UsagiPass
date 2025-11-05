@@ -59,10 +59,12 @@ UsagiPass 利用中间人代理（MITM）技术修改华立服务器的流量：
 
 - 在 项目根目录 下创建 `.env` 文件, 可以根据 `.env.example` 模板文件进行配置。
 - 执行 `pnpm install` 安装所需依赖。
-- 执行 `npx drizzle-kit push` 初始化数据库。
+- 执行 `pnpm db:push` 初始化数据库。
 - 执行 `pnpm dev` 启动开发服务器。
 
-> 更新项目: `git pull && pnpm install && npx drizzle-kit push && pnpm dev`
+> 更新项目: `git pull && pnpm install && pnpm db:push && pnpm dev`
+
+> 第一次部署时，可以执行 `pnpm db:seed` 来插入一些初始数据（联动服务器定义）。
 
 ## 🤔 常见问题
 

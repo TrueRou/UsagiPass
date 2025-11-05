@@ -14,6 +14,7 @@ export const server = pgTable('tbl_server', {
     tipsUrl: text('tips_url').notNull(),
     credentialsStrategy: text('credentials_strategy').notNull(),
     credentialsField: text('credentials_field').notNull(),
+    credentialsName: text('credentials_name').notNull().default(''),
 })
 
 export const userPreference = pgTable('tbl_preference', {

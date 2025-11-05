@@ -10,6 +10,8 @@
         "preview": "nuxt preview",
         "postinstall": "nuxt prepare",
         "db:generate": "drizzle-kit generate",
+        "db:push": "drizzle-kit push",
+        "db:seed": "npx tsx --env-file=.env server/database/seed.ts",
         "lint": "eslint",
         "lint:fix": "eslint --fix"
     },
