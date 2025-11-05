@@ -48,24 +48,6 @@ UsagiPass 利用中间人代理（MITM）技术修改华立服务器的流量：
 2. 重定向时携带原网页中的查询参数（SGWCMAID），在前端以 JS 方式绘制二维码；
 3. 支持更新查分器功能，原理类似 [Bakapiano 方案](https://github.com/bakapiano/maimaidx-prober-proxy-updater)，在适当时机转发 tgk-wcaime.wahlap.com 地址。
 
-## 🛠️ 开发者部署
-
-### 前置环境
-
-- node.js with pnpm
-- PostgreSQL 15.0+
-
-### 部署方式
-
-- 在 项目根目录 下创建 `.env` 文件, 可以根据 `.env.example` 模板文件进行配置。
-- 执行 `pnpm install` 安装所需依赖。
-- 执行 `pnpm db:push` 初始化数据库。
-- 执行 `pnpm dev` 启动开发服务器。
-
-> 更新项目: `git pull && pnpm install && pnpm db:push && pnpm dev`
-
-> 第一次部署时，可以执行 `pnpm db:seed` 来插入一些初始数据（联动服务器定义）。
-
 ## 🤔 常见问题
 
 **Q：我不清楚 UsagiPass 的某某功能如何使用**
@@ -85,6 +67,32 @@ A：可以在 B 站搜索相关关键词，这类视频还是挺多的，请尽�
 如果觉得 UsagiPass 好用的话，不妨给我们的仓库点一个 ⭐！
 
 我们也开放了爱发电入口，如果你愿意[赞助 UsagiPass](https://afdian.com/a/turou)，我们会在特别感谢中提到你的名字。
+
+## 🛠️ 开发者部署
+
+### 前置环境
+
+- node.js with pnpm
+- PostgreSQL 15.0+
+
+### 部署方式
+
+- 在 项目根目录 下创建 `.env` 文件, 可以根据 `.env.example` 模板文件进行配置。
+- 执行 `pnpm install` 安装所需依赖。
+- 执行 `pnpm db:push` 初始化数据库。
+- 执行 `pnpm dev` 启动开发服务器。
+
+> 更新项目: `git pull && pnpm install && pnpm db:push && pnpm dev`
+
+> 第一次部署时，可以执行 `pnpm db:seed` 来插入一些初始数据（联动服务器定义）。
+
+### 关于代理
+
+UsagiPass更新查分器功能需要配合中间人代理（MITM）使用，在开发环境下，需要使用支持 ClashMeta 规则的代理软件。
+
+在 `pnpm dev` 启动后，默认监听 HTTP 代理 `http://localhost:7300`。
+
+将 `shared/rules/Developement.yaml` 导入支持 ClashMeta 规则的代理软件后，启动系统代理即可。
 
 ## 📱 联系我们
 

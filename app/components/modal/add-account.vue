@@ -42,8 +42,11 @@ const { t } = useI18n()
                     </label>
                     <select
                         v-model="selectedServer" class="select select-bordered"
-                        :disabled="props.servers.length === 0" :placeholder="t('fields.server.placeholder')"
+                        :disabled="props.servers.length === 0" required
                     >
+                        <option :value="null" disabled selected>
+                            {{ t('fields.server.placeholder') }}
+                        </option>
                         <option v-for="server in props.servers" :key="server.id" :value="server">
                             {{ server.name }}
                         </option>
@@ -71,7 +74,7 @@ const { t } = useI18n()
                     <h4 class="text-sm font-semibold">
                         {{ serverMap.get(selectedServer.id)!.tipsTitle }}
                     </h4>
-                    <p class="text-xs leading-relaxed">
+                    <p class="text-xs leading-relaxed whitespace-pre-wrap">
                         {{ serverMap.get(selectedServer.id)!.tipsDesc }}
                     </p>
                     <a
@@ -102,3 +105,9 @@ const { t } = useI18n()
         </button>
     </div>
 </template>
+
+<style scoped>
+option[disabled] {
+  display: none;
+}
+</style>

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { uuidv4 } from 'zod'
-
 definePageMeta({ middleware: 'require-login' })
 
 const { t } = useI18n()
@@ -82,7 +80,7 @@ function handleAddAccountVisibility(value: boolean) {
 function handleAddAccount(server: Server, credentials: string) {
     if (profileData.value) {
         profileData.value.accounts.push({
-            id: String(uuidv4()),
+            id: String(crypto.randomUUID()),
             userId: profileData.value.preference.userId,
             serverId: server.id,
             credentials,

@@ -93,7 +93,10 @@ export default defineEventHandler(async (event) => {
             body: {
                 source: {
                     wechat: {
-                        credentials: identifierResponse.data.credentials,
+                        credentials: {
+                            _t: identifierResponse.data.credentials._t,
+                            userId: identifierResponse.data.credentials.userId,
+                        },
                     },
                 },
                 target: targetBody,
@@ -115,7 +118,7 @@ export default defineEventHandler(async (event) => {
     const playerResponse = await $fetch<{
         code: number
         message: string
-        data?: { name: string, rating: number }
+        data?: { name: string, rating: number, friend_code: string }
     }>(`/api/otoge/maimai/wechat/players`, {
         method: 'GET',
         ignoreResponseError: true,
@@ -136,11 +139,13 @@ export default defineEventHandler(async (event) => {
     // 保存玩家评级信息
     await db.insert(tables.userRating).values({
         userId: session.user.id,
+        friendCode: playerResponse.data.friend_code,
         rating: playerResponse.data.rating,
         name: playerResponse.data.name,
     }).onConflictDoUpdate({
         target: tables.userRating.userId,
         set: {
+            friendCode: playerResponse.data.friend_code,
             rating: playerResponse.data.rating,
             name: playerResponse.data.name,
             updatedAt: new Date(),

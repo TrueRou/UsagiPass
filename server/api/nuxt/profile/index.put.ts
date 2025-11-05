@@ -31,13 +31,15 @@ export default defineEventHandler(async (event) => {
             const existingAccount = account.id != null ? existingMap.get(account.id) : undefined
             if (existingAccount) {
                 await db.update(tables.userAccount)
-                    .set({ ...account, updatedAt: new Date() })
+                    .set({ ...account, createdAt: new Date(account.createdAt), updatedAt: new Date() })
                     .where(eq(tables.userAccount.id, existingAccount.id))
             }
             else {
                 await db.insert(tables.userAccount).values({
                     ...account,
                     userId: session.user.id,
+                    updatedAt: new Date(),
+                    createdAt: new Date(),
                 })
             }
         }
