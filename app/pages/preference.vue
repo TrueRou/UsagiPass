@@ -113,8 +113,15 @@ async function handleSave() {
         })
     }
     finally {
-        isSaving.value = false
+        setTimeout(() => isSaving.value = false, 500) // 保证最短等待 500 毫秒
     }
+}
+
+function goToPrev() {
+    watch(() => isSaving.value, (newVal, oldVal) => {
+        if (oldVal === true && newVal === false)
+            useRouter().go(-1)
+    })
 }
 </script>
 
@@ -468,7 +475,7 @@ async function handleSave() {
                 </div>
 
                 <footer class="flex justify-end">
-                    <button class="btn btn-primary w-full md:w-auto" type="submit" :disabled="isSaving">
+                    <button class="btn btn-primary w-full md:w-auto" type="submit" :disabled="isSaving" @click.stop="goToPrev()">
                         <span v-if="isSaving" class="loading loading-spinner" />
                         <span>{{ t("actions.save") }}</span>
                     </button>

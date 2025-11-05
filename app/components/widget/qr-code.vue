@@ -4,7 +4,7 @@ import QRCode from 'qrcode'
 
 const props = defineProps<{
     content?: string | null
-    size: number
+    size: string | number
 }>()
 
 const qrcodeOpts = {
@@ -28,7 +28,7 @@ watchEffect(() => {
 </script>
 
 <template>
-    <div v-if="size !== -1" class="p-0.5 rounded bg-white">
+    <div v-if="Number(size) !== -1" class="p-0.5 rounded bg-white">
         <img ref="qr-image" class="w-full h-full" :style="{ width: `${size}vh` }">
     </div>
 </template>

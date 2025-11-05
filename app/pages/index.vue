@@ -87,6 +87,8 @@ const maimaiVersion = computed(() => {
                     :chara-info-color="profile.preference.charaInfoColor" class="bottom-[18%] absolute"
                 />
 
+                <WidgetQrCode v-if="maimaiMaid" class="absolute right-0 bottom-[6%]" :content="maimaiMaid" :size="profile.preference.qrSize" />
+
                 <div
                     id="c-footer" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
                     :style="{ '--b-bottom': `url(${img(profile.preference.frameId)})` }"
