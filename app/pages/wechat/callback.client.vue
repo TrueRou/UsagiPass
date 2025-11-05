@@ -5,7 +5,10 @@ const route = useRoute()
 const { addNotification, removeNotification } = useNotificationsStore()
 
 async function handleCallback() {
-    await navigateTo('/')
+    // 恢复上下文并跳转回首页
+    const context: { date: string, time: string, maid: string } = JSON.parse(localStorage.getItem('context') || '{}')
+    localStorage.removeItem('context')
+    await navigateTo({ path: '/', query: context })
 
     const notificationId = addNotification({
         type: 'info',

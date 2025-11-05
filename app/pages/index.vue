@@ -91,7 +91,7 @@ const maimaiVersion = computed(() => {
                     id="c-footer" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
                     :style="{ '--b-bottom': `url(${img(profile.preference.frameId)})` }"
                 >
-                    <button class="cursor-pointer" @click="triggerCrawl">
+                    <button class="cursor-pointer" @click="triggerCrawl({ date: dateLimit || '', time: timeLimit || '', maid: maimaiMaid || '' })">
                         <div class="p-1 rounded-full bg-white dark:bg-gray-800" aria-label="rocket" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" style="width: 2.8vmin;" viewBox="-4 -4 32 32"

@@ -1,5 +1,5 @@
 export function useWechatCrawl() {
-    const triggerCrawl = async () => {
+    const triggerCrawl = async (context: { date: string, time: string, maid: string }) => {
         const { addNotification } = useNotificationsStore()
 
         // 检查 UA 确保是在微信内打开
@@ -23,6 +23,9 @@ export function useWechatCrawl() {
                 addNotification({ type: 'error', message: '无法发起微信服务号OAuth认证' })
             },
         })
+
+        // 储存当前上下文然后跳转
+        localStorage.setItem('context', JSON.stringify(context))
         window.location.href = redirectUrl.url
     }
     return { triggerCrawl }
