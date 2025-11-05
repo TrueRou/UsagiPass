@@ -111,3 +111,32 @@ option[disabled] {
   display: none;
 }
 </style>
+
+<i18n lang="yaml">
+zh-CN:
+    title: 添加账号
+    description: 添加用于更新查分器的账号
+    fields:
+        server:
+            label: 查分器
+            placeholder: 选择一个支持的查分器
+        credentials:
+            label: 凭证
+            placeholder: 输入查分器的凭证(例如个人秘钥)
+    actions:
+        cancel: 取消
+        add-account: 添加账号
+en-GB:
+    title: Add Account
+    description: Add account which for update your scores to provider data.
+    fields:
+        server:
+            label: Server Provider
+            placeholder: Select an server which supported
+        credentials:
+            label: Credentials
+            placeholder: Enter Server Credentials
+    actions:
+        cancel: Cancel
+        add-account: Add Account
+</i18n>
