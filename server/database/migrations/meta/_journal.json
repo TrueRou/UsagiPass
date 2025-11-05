@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1761667796884,
-      "tag": "0000_sweet_ikaris",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1762193935177,
-      "tag": "0001_daffy_demogoblin",
+      "when": 1762329884975,
+      "tag": "0000_talented_skaar",
       "breakpoints": true
     }
   ]

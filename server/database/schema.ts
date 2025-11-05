@@ -28,7 +28,9 @@ export const userPreference = pgTable('tbl_preference', {
     maskType: integer('mask_type').notNull().default(0),
     playerInfoColor: text('player_info_color').notNull().default('#ffffff'),
     charaInfoColor: text('chara_info_color').notNull().default('#fee37c'),
-    dynamicRating: boolean('dynamic_rating').notNull().default(true),
+    showDxRating: boolean('show_dx_rating').notNull().default(true),
+    showDisplayName: boolean('show_display_name').notNull().default(true),
+    showFriendCode: boolean('show_friend_code').notNull().default(true),
     showDate: boolean('show_date').notNull().default(true),
     characterId: text('character_id').notNull(),
     maskId: text('mask_id').notNull(),
@@ -46,7 +48,7 @@ export const userRating = pgTable('tbl_rating', {
 })
 
 export const userAccount = pgTable('tbl_account', {
-    id: serial('id').primaryKey(),
+    id: uuid('id').primaryKey(),
     userId: uuid('user_id').notNull(),
     serverId: integer('server_id').notNull().references(() => server.id),
     credentials: text('credentials').notNull(),

@@ -17,24 +17,33 @@ const { img } = useUtils()
 const { triggerCrawl } = useWechatCrawl()
 
 const playerRating = computed(() => {
-    // 覆盖优先级：动态评分（不为 0 的话） > 用户偏好设置
-    if (profile.value?.preference.dynamicRating && profile.value?.player?.rating)
+    // 覆盖优先级：用户偏好设置 > 被动获取好友代码
+    if (profile.value?.preference.showDxRating) {
+        if (profile.value?.preference.dxRating)
+            return profile.value?.preference.dxRating
         return String(profile.value?.player?.rating)
-    return profile.value?.preference.dxRating
+    }
+    return undefined
 })
 
 const playerName = computed(() => {
     // 覆盖优先级：用户偏好设置 > 被动获取用户名
-    if (profile.value?.preference.displayName)
-        return profile.value?.preference.displayName
-    return profile.value?.player?.name
+    if (profile.value?.preference.showDisplayName) {
+        if (profile.value?.preference.displayName)
+            return profile.value?.preference.displayName
+        return profile.value?.player?.name
+    }
+    return undefined
 })
 
 const friendCode = computed(() => {
     // 覆盖优先级：用户偏好设置 > 被动获取好友代码
-    if (profile.value?.preference.friendCode)
-        return profile.value?.preference.friendCode
-    return profile.value?.player?.friendCode
+    if (profile.value?.preference.showFriendCode) {
+        if (profile.value?.preference.friendCode)
+            return profile.value?.preference.friendCode
+        return profile.value?.player?.friendCode
+    }
+    return undefined
 })
 
 const simplifiedCode = computed(() => {

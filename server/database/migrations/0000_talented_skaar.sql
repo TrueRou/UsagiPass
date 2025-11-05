@@ -9,10 +9,9 @@ CREATE TABLE "tbl_server" (
 	"credentials_strategy" text NOT NULL,
 	"credentials_field" text NOT NULL
 );
-
 --> statement-breakpoint
 CREATE TABLE "tbl_account" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"user_id" uuid NOT NULL,
 	"server_id" integer NOT NULL,
 	"credentials" text NOT NULL,
@@ -20,7 +19,6 @@ CREATE TABLE "tbl_account" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
-
 --> statement-breakpoint
 CREATE TABLE "tbl_preference" (
 	"user_id" uuid PRIMARY KEY NOT NULL,
@@ -32,8 +30,11 @@ CREATE TABLE "tbl_preference" (
 	"dx_rating" text DEFAULT '' NOT NULL,
 	"qr_size" integer DEFAULT 15 NOT NULL,
 	"mask_type" integer DEFAULT 0 NOT NULL,
+	"player_info_color" text DEFAULT '#ffffff' NOT NULL,
 	"chara_info_color" text DEFAULT '#fee37c' NOT NULL,
-	"dynamic_rating" boolean DEFAULT true NOT NULL,
+	"show_dx_rating" boolean DEFAULT true NOT NULL,
+	"show_display_name" boolean DEFAULT true NOT NULL,
+	"show_friend_code" boolean DEFAULT true NOT NULL,
 	"show_date" boolean DEFAULT true NOT NULL,
 	"character_id" text NOT NULL,
 	"mask_id" text NOT NULL,
@@ -41,16 +42,13 @@ CREATE TABLE "tbl_preference" (
 	"frame_id" text NOT NULL,
 	"passname_id" text NOT NULL
 );
-
 --> statement-breakpoint
 CREATE TABLE "tbl_rating" (
 	"user_id" uuid PRIMARY KEY NOT NULL,
+	"name" text DEFAULT '' NOT NULL,
 	"rating" integer DEFAULT 0 NOT NULL,
+	"friend_code" text DEFAULT '' NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
-
 --> statement-breakpoint
-ALTER TABLE
-	"tbl_account"
-ADD
-	CONSTRAINT "tbl_account_server_id_tbl_server_id_fk" FOREIGN KEY ("server_id") REFERENCES "public"."tbl_server"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "tbl_account" ADD CONSTRAINT "tbl_account_server_id_tbl_server_id_fk" FOREIGN KEY ("server_id") REFERENCES "public"."tbl_server"("id") ON DELETE no action ON UPDATE no action;

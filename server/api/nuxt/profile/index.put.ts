@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
             where: eq(tables.userAccount.userId, session.user.id),
         })
         const existingMap = new Map(existingAccounts.map(account => [account.id, account]))
-        const incomingIds = new Set<number>()
+        const incomingIds = new Set<string>()
 
         for (const account of body.accounts) {
             if (account.id != null) {
