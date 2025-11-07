@@ -12,7 +12,7 @@ watchEffect(() => {
 })
 
 // Extended register form with confirmPassword
-interface RegisterForm extends UserRegisterRequest {
+interface RegisterForm extends UserCreateRequest {
     confirmPassword: string
 }
 
@@ -40,7 +40,7 @@ async function handleRegister() {
     if (!validate())
         return
 
-    const requestData: UserRegisterRequest = {
+    const requestData: UserCreateRequest = {
         username: form.username,
         password: form.password,
         email: form.email,

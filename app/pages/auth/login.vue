@@ -18,7 +18,7 @@ const loginSchema = z.object({
     refresh_token: z.string().optional(),
 })
 
-const form = reactive <UserTokenCreateRequest> ({
+const form = reactive<UserAuthRequest>({
     username: '',
     password: '',
 })

@@ -1,13 +1,14 @@
 export default defineEventHandler(async (event) => {
-    const { username, password } = await readBody(event)
+    const { username, password, strategy }: UserAuthRequest = await readBody(event)
 
     try {
-        const tokenResponse = await $fetch<UserTokenCreateResponse>(`/api/auth/token`, {
+        const tokenResponse = await $fetch<UserAuthResponse>(`/api/auth/token`, {
             method: 'POST',
             query: {
                 grant_type: 'password',
                 username,
                 password,
+                strategy,
             },
         })
 

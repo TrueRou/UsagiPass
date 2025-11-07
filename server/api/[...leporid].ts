@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
     if (session.secure) {
         // 如果过期了，尝试刷新令牌
         if (session.secure.expiresAt < Date.now()) {
-            await $fetch<UserTokenCreateResponse>('/api/auth/token', {
+            await $fetch<UserAuthResponse>('/api/auth/token', {
                 method: 'POST',
                 ignoreResponseError: true,
                 query: {
