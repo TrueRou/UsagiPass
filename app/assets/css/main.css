@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+@font-face {
+  font-family: "SEGA_MARUGOTHICDB";
+  src: url("../fonts/SEGAMaruGothicDB.woff2");
+}
+
+.font-sega {
+  font-family: "SEGA_MARUGOTHICDB";
+}
