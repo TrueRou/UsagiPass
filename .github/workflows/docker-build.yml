@@ -1,0 +1,49 @@
+name: Docker Build
+
+on:
+  push:
+    branches:
+      - next # replace with main when ready
+    paths:
+      - 'app/**'
+      - 'i18n/**'
+      - 'server/**'
+      - 'shared/**'
+      - 'public/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'nuxt.config.ts'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Log in to the Container registry
+      uses: docker/login-action@v3.6.0
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v5.9.0
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v6.18.0
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+          
+        

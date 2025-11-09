@@ -1,0 +1,41 @@
+# VCS
+.git
+.gitignore
+
+# Node/Bun deps and lock files (keep bun.lock* so Dockerfile's COPY works)
+node_modules
+**/node_modules
+npm-debug.log
+package-lock.json
+yarn.lock
+
+# Local env and secrets
+.env
+.env.* 
+.env.local
+
+# Build artifacts and caches (allow build inside container; ignore local outputs)
+dist
+build
+.output
+.cache
+coverage
+tmp
+temp
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+*.log
+*.tmp
+
+# Database and runtime artifacts
+*.sqlite
+*.sqlite3
+*.db
+
+# Misc
+*.local
+*.bak
