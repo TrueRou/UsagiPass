@@ -6,6 +6,11 @@
     <p>从零开始美化你的玩家二维码</p>
 </div>
 
+![GitHub Repo stars](https://img.shields.io/github/stars/TrueRou/UsagiPass)
+![GitHub forks](https://img.shields.io/github/forks/TrueRou/UsagiPass)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/TrueRou/UsagiPass)
+![GitCode stars](https://gitcode.com/TrueRou/UsagiPass/star/badge.svg)
+
 ## 什么是 UsagiPass？
 
 DXPass 是**日服限定**的，可以在制卡机上制作的具有特殊功能的实体卡片。通常印有玩家信息、角色立绘、区域背景等元素，有提升跑图距离、解锁上位难度的谱面等功能。
