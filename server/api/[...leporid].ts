@@ -39,5 +39,14 @@ export default defineEventHandler(async (event) => {
         headers.Authorization = `Bearer ${session.secure.accessToken}`
     }
 
+    {
+        const method = event.node?.req?.method ?? 'UNKNOWN'
+        const userId = session?.user?.username ?? 'anonymous'
+
+        console.info(
+            `[proxy] ${new Date().toISOString()} ${method} ${event.node.req.url ?? event.path ?? ''} -> ${target} user=${userId}`,
+        )
+    }
+
     return proxyRequest(event, target, { headers })
 })

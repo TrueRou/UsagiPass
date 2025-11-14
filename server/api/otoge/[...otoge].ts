@@ -6,5 +6,13 @@ export default defineEventHandler(async (event) => {
     const path = event.path.replace(/^\/api\/otoge/, '')
     const target = joinURL(proxyUrl, path)
 
+    {
+        const method = event.node?.req?.method ?? 'UNKNOWN'
+
+        console.info(
+            `[proxy] ${new Date().toISOString()} ${method} ${event.node.req.url ?? event.path ?? ''} -> ${target}`,
+        )
+    }
+
     return proxyRequest(event, target)
 })

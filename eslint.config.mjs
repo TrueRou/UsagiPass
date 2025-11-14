@@ -7,6 +7,7 @@ export default withNuxt(
         rules: {
             'node/prefer-global/process': ['off'],
             'node/prefer-global/buffer': ['off'],
+            'no-console': ['off'],
         },
         stylistic: {
             indent: 4, // 4, or 'tab'
