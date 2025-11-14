@@ -1,5 +1,7 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  exclude: properties;
+};
 
 @font-face {
   font-family: "SEGA_MARUGOTHICDB";

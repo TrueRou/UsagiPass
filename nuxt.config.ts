@@ -10,6 +10,9 @@ export default defineNuxtConfig({
         plugins: [
             tailwindcss(),
         ],
+        build: {
+            sourcemap: false,
+        },
     },
     i18n: {
         defaultLocale: 'zh-CN',
@@ -61,5 +64,8 @@ export default defineNuxtConfig({
             imageURL: 'https://uc.turou.fun/api/images',
             imagePreviewURL: 'https://uc.turou.fun/api/images',
         },
+    },
+    nitro: {
+        preset: 'bun',
     },
 })
