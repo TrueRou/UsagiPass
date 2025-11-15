@@ -73,7 +73,7 @@ useHead({
 </script>
 
 <template>
-    <div class="max-w-md mx-auto pt-16">
+    <div class="max-w-md mx-auto px-4 pt-16">
         <h1 class="text-3xl font-bold text-center mb-8">
             登录
         </h1>
@@ -103,7 +103,7 @@ useHead({
 
             <div>
                 <p class="block text-sm font-medium mb-3">
-                    选择登录方式
+                    登录方式
                 </p>
                 <div class="space-y-3">
                     <label

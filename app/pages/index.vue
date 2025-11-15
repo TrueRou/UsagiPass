@@ -96,7 +96,7 @@ const maimaiVersion = computed(() => {
                     <button class="cursor-pointer" @click="triggerCrawl({ date: dateLimit || '', time: timeLimit || '', maid: maimaiMaid || '' })">
                         <div class="p-1 rounded-full bg-white dark:bg-gray-800" aria-label="rocket" role="img">
                             <svg
-                                xmlns="http://www.w3.org/2000/svg" style="width: 2.8vmin;" viewBox="-4 -4 32 32"
+                                xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" aria-hidden="true"
                             >
@@ -115,7 +115,7 @@ const maimaiVersion = computed(() => {
                     <NuxtLink to="/preference">
                         <div class="p-1 rounded-full bg-white dark:bg-gray-800" aria-label="settings" role="img">
                             <svg
-                                xmlns="http://www.w3.org/2000/svg" style="width: 2.8vmin;" viewBox="-4 -4 32 32"
+                                xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" aria-hidden="true"
                             >
@@ -152,7 +152,7 @@ const maimaiVersion = computed(() => {
 }
 
 .footer-widget {
-    width: 85%;
+    width: 80%;
     padding-left: 3%;
     padding-right: 3%;
 }
@@ -160,6 +160,10 @@ const maimaiVersion = computed(() => {
 .footer-text {
     font-size: clamp(1.2dvh, 2dvw, 1.8vmin);
     line-height: 120%;
+}
+
+.footer-icon {
+    width: clamp(2dvh, 4dvw, 3vmin);;
 }
 
 .qr-front {

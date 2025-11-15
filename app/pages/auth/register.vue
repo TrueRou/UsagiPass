@@ -69,7 +69,7 @@ useHead({
 </script>
 
 <template>
-    <div class="max-w-md mx-auto pt-16">
+    <div class="max-w-md mx-auto px-4 pt-16">
         <h1 class="text-3xl font-bold text-center mb-8">
             注册
         </h1>

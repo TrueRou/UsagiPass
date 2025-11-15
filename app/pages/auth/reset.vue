@@ -76,7 +76,7 @@ useHead({
 </script>
 
 <template>
-    <div class="max-w-md mx-auto pt-16">
+    <div class="max-w-md mx-auto px-4 pt-16">
         <div class="space-y-2 text-center">
             <p class="text-xs uppercase tracking-[0.25em] text-warning">
                 必须操作

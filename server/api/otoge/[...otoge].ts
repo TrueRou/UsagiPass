@@ -8,10 +8,9 @@ export default defineEventHandler(async (event) => {
 
     {
         const method = event.node?.req?.method ?? 'UNKNOWN'
+        const safeUrl = event.node.req.url?.split('?')[0] ?? ''
 
-        console.info(
-            `[proxy] ${new Date().toISOString()} ${method} ${event.node.req.url} -> ${proxyUrl}`,
-        )
+        console.info(`[proxy] ${new Date().toISOString()} ${method} ${safeUrl} -> ${proxyUrl}`)
     }
 
     return proxyRequest(event, target)

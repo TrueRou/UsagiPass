@@ -44,10 +44,9 @@ export default defineEventHandler(async (event) => {
     {
         const method = event.node?.req?.method ?? 'UNKNOWN'
         const userId = session?.user?.username ?? 'anonymous'
+        const safeUrl = event.node.req.url?.split('?')[0] ?? ''
 
-        console.info(
-            `[proxy] ${new Date().toISOString()} ${method} ${event.node.req.url} -> ${proxyUrl} user=${userId}`,
-        )
+        console.info(`[proxy] ${new Date().toISOString()} ${method} ${safeUrl} -> ${proxyUrl} user=${userId}`)
     }
 
     return proxyRequest(event, target, { headers })

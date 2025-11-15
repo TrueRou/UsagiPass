@@ -159,29 +159,29 @@ function goToPrev() {
                 <section class="rounded-box border border-base-200 bg-base-100 p-4 shadow-sm">
                     <div class="flex flex-wrap items-center gap-4">
                         <div class="avatar">
-                            <div class="w-16 rounded-full border border-base-200">
+                            <div class="w-10 rounded-full border border-base-200">
                                 <img src="../assets/icons/logo.webp">
                             </div>
                         </div>
                         <div class="flex-1">
-                            <p class="text-lg font-semibold">
+                            <p class="text-md font-semibold">
                                 {{ user?.username }}
                             </p>
-                            <p class="text-sm text-base-content/70">
+                            <p class="text-xs text-base-content/70">
                                 {{ user?.email }}
                             </p>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1">
                             <button class="btn btn-outline btn-sm" type="button" :disabled="!loggedIn" @click="handleLogout">
-                                <span>退出登录</span>
+                                <span>登出</span>
                             </button>
-                            <div class="dropdown dropdown-end">
-                                <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+                            <details class="dropdown">
+                                <summary class="btn btn-ghost btn-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01" />
                                     </svg>
-                                </div>
-                                <ul tabindex="0" class="dropdown-content menu menu-sm bg-base-100 rounded-box border border-base-200 z-10 w-48 p-2 shadow">
+                                </summary>
+                                <ul class="menu dropdown-content bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm">
                                     <li>
                                         <NuxtLink class="justify-between" to="/auth/merge">
                                             合并账户
@@ -189,7 +189,7 @@ function goToPrev() {
                                         </NuxtLink>
                                     </li>
                                 </ul>
-                            </div>
+                            </details>
                         </div>
                     </div>
                 </section>

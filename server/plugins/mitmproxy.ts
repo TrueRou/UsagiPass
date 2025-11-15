@@ -91,6 +91,5 @@ export default defineNitroPlugin((_nitroApp) => {
         }
     })
 
-    console.log(`Starting mitmproxy on ${config.mitmproxy.listenHost}:${config.mitmproxy.listenPort}`)
     proxy.listen({ port: config.mitmproxy.listenPort, host: config.mitmproxy.listenHost })
 })
