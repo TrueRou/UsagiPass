@@ -64,6 +64,7 @@ export default defineNitroPlugin((_nitroApp) => {
 
             ctx.proxyToClientResponse.writeHead(302, { Location: redirectUrl.toString() })
             ctx.proxyToClientResponse.end()
+            console.info(`[mitm] ${new Date().toISOString()} ${host} -> ${redirectUrl.host}`)
         }
 
         // redirect wahlap oauth requests to the UsagiPass frontend
@@ -80,6 +81,7 @@ export default defineNitroPlugin((_nitroApp) => {
 
             ctx.proxyToClientResponse.writeHead(302, { Location: redirectUrl.toString() })
             ctx.proxyToClientResponse.end()
+            console.info(`[mitm] ${new Date().toISOString()} ${host} -> ${redirectUrl.host}`)
         }
 
         // response wahlap mitm connection test
@@ -100,5 +102,6 @@ export default defineNitroPlugin((_nitroApp) => {
         }
     })
 
+    console.log(`Starting mitmproxy on ${config.mitmproxy.listenHost}:${config.mitmproxy.listenPort}`)
     proxy.listen({ port: config.mitmproxy.listenPort, host: config.mitmproxy.listenHost })
 })
