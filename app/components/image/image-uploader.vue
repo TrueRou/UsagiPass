@@ -196,12 +196,12 @@ async function submit() {
                         </div>
                         <div v-else class="space-y-3">
                             <ClientOnly>
-                                <div class="rounded-lg border h-80 w-full overflow-hidden">
+                                <div class="rounded-lg border h-96 w-full overflow-hidden">
                                     <VueCropper
-                                        ref="cropper" :img="filePreviewImage" :auto-crop="true" :fixed="true"
-                                        :fixed-number="cropRatio" :center-box="true" :auto-crop-width="cropBox.width"
-                                        :auto-crop-height="cropBox.height" :full="true" :can-scale="true"
-                                        class="h-80 w-full"
+                                        ref="cropper" :img="filePreviewImage" output-type="png" :auto-crop="true" :fixed="true"
+                                        :fixed-number="cropRatio" :center-box="false" :auto-crop-width="cropBox.width"
+                                        :auto-crop-height="cropBox.height" :full="true" :can-scale="true" :info-true="true"
+                                        class="h-96 w-full"
                                     />
                                 </div>
                             </ClientOnly>
