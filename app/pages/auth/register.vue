@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { z } from 'zod'
 
+useHead({
+    title: '注册 - UsagiPass',
+})
+
 const { loggedIn, fetch: fetchUser } = useUserSession()
 
 // Redirect if already logged in

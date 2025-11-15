@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { z } from 'zod'
 
+useHead({
+    title: '登录 - UsagiPass',
+})
+
 const { loggedIn, fetch: fetchUser, user } = useUserSession()
 
 const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length ?? 0) === 0)

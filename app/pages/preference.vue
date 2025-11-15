@@ -1,5 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'require-login' })
+useHead({
+    title: '偏好设置 - UsagiPass',
+})
 
 const { t } = useI18n()
 const { img } = useUtils()

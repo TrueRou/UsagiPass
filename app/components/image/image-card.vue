@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 const props = defineProps<{
     image: ImageResponse
     hidedLabels?: string[]
+    imageAspect: ImageAspect
     imageUrl: string
     selected: boolean
     disabled?: boolean
@@ -19,11 +20,16 @@ const { user } = useUserSession()
 
 const isEditing = ref(false)
 const editableName = ref(props.image.name)
+const isLoaded = ref(false)
 
 watch(() => props.image.name, (name) => {
     if (!isEditing.value) {
         editableName.value = name
     }
+})
+
+watch(() => props.image.id, () => {
+    isLoaded.value = false
 })
 
 function canModifyImage(image: ImageResponse) {
@@ -67,6 +73,17 @@ function emitDelete() {
 const representativeLabels = computed(() => {
     return props.image.labels.filter(label => !props.hidedLabels?.includes(label))
 })
+
+const skeletonAspectRatio = computed(() => {
+    const width = props.imageAspect.ratioWidthUnit
+    const height = props.imageAspect.ratioHeightUnit
+
+    return `${width} / ${height}`
+})
+
+function handleImageLoad() {
+    isLoaded.value = true
+}
 </script>
 
 <template>
@@ -98,7 +115,17 @@ const representativeLabels = computed(() => {
 
             <!-- 中间 图片本身 -->
             <div class="w-full overflow-hidden">
-                <img :src="imageUrl" :alt="image.name" class="w-full object-cover">
+                <div class="relative w-full rounded-lg" :style="{ aspectRatio: skeletonAspectRatio }">
+                    <div
+                        class="skeleton absolute inset-0 h-full w-full rounded-lg transition-opacity duration-300 ease-out"
+                        :class="{ 'opacity-0': isLoaded }" aria-hidden="true"
+                    />
+                    <img
+                        :src="imageUrl" :alt="image.name" loading="lazy"
+                        class="absolute inset-0 h-full w-full rounded-lg object-cover transition-opacity duration-300 ease-out"
+                        :class="{ 'opacity-0': !isLoaded }" @load="handleImageLoad" @error="handleImageLoad"
+                    >
+                </div>
             </div>
 
             <!-- 右上 选中标记 -->

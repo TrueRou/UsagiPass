@@ -1,7 +1,7 @@
 export enum AuthStrategy {
-    LOCAL = "LOCAL",
-    DIVING_FISH = "DIVING_FISH",
-    LXNS = "LXNS",
+    LOCAL = 'LOCAL',
+    DIVING_FISH = 'DIVING_FISH',
+    LXNS = 'LXNS',
 }
 
 /**

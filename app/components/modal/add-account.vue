@@ -19,7 +19,6 @@ const serverMap = computed(() => {
     props.servers.forEach(server => map.set(server.id, server))
     return map
 })
-
 </script>
 
 <template>
@@ -110,5 +109,3 @@ option[disabled] {
   display: none;
 }
 </style>
-
-

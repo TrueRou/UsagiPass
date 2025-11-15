@@ -1,5 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'require-login' })
+useHead({
+    title: '账户合并 - UsagiPass',
+})
 
 const nuxtApp = useNuxtApp()
 const leporidFetch = nuxtApp.$leporid as any
@@ -77,6 +80,14 @@ async function handleSecondaryLogin(payload: { username: string, password: strin
             Authorization: `Bearer ${tokenResponse.access_token}`,
         },
     }) as UserResponse
+
+    if (profile.id === user.value?.id) {
+        notificationsStore.addNotification({
+            type: 'error',
+            message: '不能合并相同的账户，请选择其他账户。',
+        })
+        return
+    }
 
     secondaryAccount.value = profile
     secondaryToken.value = tokenResponse.access_token

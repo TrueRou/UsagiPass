@@ -2,6 +2,10 @@
 import { z } from 'zod'
 
 definePageMeta({ middleware: 'require-login' })
+useHead({
+    title: '完善账户信息 - UsagiPass',
+})
+
 const nuxtApp = useNuxtApp()
 const { user, clear } = useUserSession()
 const notificationsStore = useNotificationsStore()

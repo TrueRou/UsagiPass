@@ -1,5 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'require-login' })
+useHead({
+    title: '首页 - UsagiPass',
+})
 
 const contextStore = useContextStore()
 
@@ -88,7 +91,7 @@ const maimaiVersion = computed(() => {
                     :chara-info-color="profile.preference.charaInfoColor" class="bottom-[18%] absolute"
                 />
 
-                <WidgetQrCode v-if="contextStore.maimaiMaid" class="absolute right-0 bottom-[6%]" :content="contextStore.maimaiMaid" :size="profile.preference.qrSize" />
+                <WidgetQrCode v-if="contextStore.maimaiMaid" class="absolute right-0 bottom-[6%] z-10" :content="contextStore.maimaiMaid" :size="profile.preference.qrSize" />
 
                 <div
                     id="c-footer" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"

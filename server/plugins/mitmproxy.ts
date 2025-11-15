@@ -16,11 +16,11 @@ const WAHLAP_HOSTS = new Set([
 ])
 
 const WEEKDAYS_JP = ['月', '火', '水', '木', '金', '土', '日']
-const TOKYO_OFFSET_SECONDS = 9 * 60 * 60
+const SHANGHAI_OFFSET_SECONDS = 8 * 60 * 60
 
-function buildTokyoDate(timestamp: number) {
+function buildShanghaiDate(timestamp: number) {
     const seconds = Number.isFinite(timestamp) ? timestamp : 0
-    const adjusted = new Date((seconds + TOKYO_OFFSET_SECONDS) * 1000)
+    const adjusted = new Date((seconds + SHANGHAI_OFFSET_SECONDS) * 1000)
 
     const hours = String(adjusted.getUTCHours()).padStart(2, '0')
     const minutes = String(adjusted.getUTCMinutes()).padStart(2, '0')
@@ -55,7 +55,7 @@ export default defineNitroPlugin((_nitroApp) => {
         else if (SYSALL_HOSTS.has(host) && urlPart.startsWith('/qrcode/req')) {
             const maid = urlPart.substring(urlPart.indexOf('/qrcode/req/'), urlPart.indexOf('.html')).replace('/qrcode/req/', '')
             const timestamp = Number(new URL(urlPart, `http://${host}`).searchParams.get('l') ?? '0')
-            const { time, date } = buildTokyoDate(timestamp)
+            const { time, date } = buildShanghaiDate(timestamp)
 
             const redirectUrl = new URL(config.usagipass.baseURL || 'https://up.turou.fun')
             redirectUrl.searchParams.set('maid', maid)

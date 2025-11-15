@@ -32,7 +32,6 @@ async function seed() {
         },
     ])
 
-    // eslint-disable-next-line no-console
     console.log('Database seeded successfully.')
 }
 

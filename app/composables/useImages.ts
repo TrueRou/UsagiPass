@@ -38,14 +38,20 @@ export function useImages(options: UseImagesOptions) {
     const currentAspectId = ref(options.aspectId)
 
     const fetchAspect = async () => {
-        if (aspect.value && aspect.value.id === currentAspectId.value) {
+        loading.value = true
+        try {
+            if (aspect.value && aspect.value.id === currentAspectId.value) {
+                return aspect.value
+            }
+            const response = await $leporid<ImageAspect | { data: ImageAspect }>(`/api/images/aspects/${currentAspectId.value}`, {
+                method: 'GET',
+            })
+            aspect.value = unwrapPayload<ImageAspect>(response)
             return aspect.value
         }
-        const response = await $leporid<ImageAspect | { data: ImageAspect }>(`/api/images/aspects/${currentAspectId.value}`, {
-            method: 'GET',
-        })
-        aspect.value = unwrapPayload<ImageAspect>(response)
-        return aspect.value
+        finally {
+            loading.value = false
+        }
     }
 
     const list = async (listOptions: ListOptions = {}) => {

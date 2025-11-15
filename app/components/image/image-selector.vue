@@ -216,11 +216,17 @@ watch([activeSecondary], async () => {
                                 上传新图片
                             </button>
                         </div>
+                        <div v-else-if="!aspect">
+                            <p>
+                                图片比例加载失败
+                            </p>
+                        </div>
                         <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
                             <ImageCard
                                 v-for="image in images" :key="imageKey(image)" :image="image"
                                 :image-url="imageUrl(image)" :selected="isSelected(image)"
-                                :disabled="pending" :hided-labels="initialFilters" @select="updateSelection"
+                                :disabled="pending" :hided-labels="initialFilters" :image-aspect="aspect"
+                                @select="updateSelection"
                                 @rename="handleRename"
                                 @delete="confirmDelete"
                             />
@@ -289,5 +295,3 @@ watch([activeSecondary], async () => {
         </div>
     </dialog>
 </template>
-
-
