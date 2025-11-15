@@ -1,15 +1,16 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'require-login' })
 
-const dateLimit = ref<string | undefined>(undefined)
-const timeLimit = ref<string | undefined>(undefined)
-const maimaiMaid = ref<string | undefined>(undefined)
+const contextStore = useContextStore()
 
 onMounted(() => {
     const route = useRoute()
-    dateLimit.value = route.query.date as string | undefined
-    timeLimit.value = route.query.time as string | undefined
-    maimaiMaid.value = route.query.maid as string | undefined
+    if (route.query.date)
+        contextStore.dateLimit = route.query.date as string
+    if (route.query.time)
+        contextStore.timeLimit = route.query.time as string
+    if (route.query.maid)
+        contextStore.maimaiMaid = route.query.maid as string
 })
 
 const { data: profile } = await useLeporid<UserProfile>('/api/nuxt/profile')
@@ -50,8 +51,8 @@ const simplifiedCode = computed(() => {
     // 覆盖优先级：用户偏好设置 > 页面参数
     if (profile.value?.preference.simplifiedCode)
         return profile.value?.preference.simplifiedCode
-    if (maimaiMaid.value)
-        return maimaiMaid.value?.slice(8, 28).match(/.{1,4}/g)?.join(' ')
+    if (contextStore.maimaiMaid)
+        return contextStore.maimaiMaid?.slice(8, 28).match(/.{1,4}/g)?.join(' ')
     return undefined
 })
 
@@ -82,18 +83,18 @@ const maimaiVersion = computed(() => {
                 </div>
 
                 <WidgetCharaInfo
-                    :chara-name="profile.preference.characterName || undefined" :time-limit="timeLimit"
-                    :date-limit="dateLimit" :show-date="profile.preference.showDate"
+                    :chara-name="profile.preference.characterName || undefined" :time-limit="contextStore.timeLimit"
+                    :date-limit="contextStore.dateLimit" :show-date="profile.preference.showDate"
                     :chara-info-color="profile.preference.charaInfoColor" class="bottom-[18%] absolute"
                 />
 
-                <WidgetQrCode v-if="maimaiMaid" class="absolute right-0 bottom-[6%]" :content="maimaiMaid" :size="profile.preference.qrSize" />
+                <WidgetQrCode v-if="contextStore.maimaiMaid" class="absolute right-0 bottom-[6%]" :content="contextStore.maimaiMaid" :size="profile.preference.qrSize" />
 
                 <div
                     id="c-footer" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
                     :style="{ '--b-bottom': `url(${img(profile.preference.frameId)})` }"
                 >
-                    <button class="cursor-pointer" @click="triggerCrawl({ date: dateLimit || '', time: timeLimit || '', maid: maimaiMaid || '' })">
+                    <button class="cursor-pointer" @click="triggerCrawl({ date: contextStore.dateLimit || '', time: contextStore.timeLimit || '', maid: contextStore.maimaiMaid || '' })">
                         <div class="p-1 rounded-full bg-white dark:bg-gray-800" aria-label="rocket" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"
