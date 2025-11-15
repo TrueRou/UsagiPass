@@ -1,26 +1,45 @@
 <script setup lang="ts">
 import { z } from 'zod'
 
-const { t } = useI18n()
-const { loggedIn, fetch: fetchUser } = useUserSession()
+const { loggedIn, fetch: fetchUser, user } = useUserSession()
+
+const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length ?? 0) === 0)
+
+type LoginStrategy = 'LOCAL' | 'DIVING_FISH' | 'LXNS'
+
+const strategyOptions: Array<{ value: LoginStrategy, name: string, desc: string }> = [
+    { value: 'LOCAL', name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一登录' },
+    { value: 'DIVING_FISH', name: '水鱼 · DIVING_FISH', desc: '使用第三方水鱼账号密码登录' },
+    { value: 'LXNS', name: '落雪 · LXNS', desc: '使用第三方落雪个人 Token 登录' },
+]
 
 // Redirect if already logged in
 watchEffect(() => {
-    if (loggedIn.value) {
-        navigateTo('/')
-    }
+    if (!loggedIn.value)
+        return
+
+    navigateTo(shouldCompleteProfile.value ? '/auth/reset' : '/')
 })
 
 // Zod schema for validation
 const loginSchema = z.object({
-    username: z.string().min(1, t('username-required')),
-    password: z.string().min(1, t('password-required')),
+    username: z.string().min(1, '用户名不能为空'),
+    password: z.string().min(1, '密码不能为空'),
     refresh_token: z.string().optional(),
+    strategy: z.enum(['LOCAL', 'DIVING_FISH', 'LXNS']).default('LOCAL'),
 })
 
-const form = reactive<UserAuthRequest>({
+interface LoginForm {
+    username: string
+    password: string
+    refresh_token?: string
+    strategy: LoginStrategy
+}
+
+const form = reactive<LoginForm>({
     username: '',
     password: '',
+    strategy: 'LOCAL' as LoginStrategy,
 })
 
 const { validate, ve } = useFormValidation(loginSchema, form)
@@ -29,33 +48,41 @@ async function handleLogin() {
     if (!validate())
         return
 
+    const body: Record<string, string> = {
+        username: form.username,
+        password: form.password,
+    }
+
+    if (form.strategy !== 'LOCAL')
+        body.strategy = form.strategy
+
     await useNuxtApp().$leporid('/api/nuxt/auth/login', {
         method: 'POST',
-        body: form,
+        body,
         showSuccessToast: true,
-        successMessage: t('login-success'),
+        successMessage: '登录成功！',
     })
 
     await fetchUser()
-    await navigateTo('/')
+    await navigateTo(shouldCompleteProfile.value ? '/auth/profile-update' : '/')
 }
 
 useHead({
-    title: t('login'),
+    title: '登录',
 })
 </script>
 
 <template>
     <div class="max-w-md mx-auto pt-16">
         <h1 class="text-3xl font-bold text-center mb-8">
-            {{ t('login') }}
+            登录
         </h1>
 
         <form class="space-y-6" @submit.prevent="handleLogin">
             <div>
-                <label class="block text-sm font-medium mb-2">{{ t('username') }}</label>
+                <label class="block text-sm font-medium mb-2">用户名</label>
                 <input
-                    v-model="form.username" type="text" :placeholder="t('username-placeholder')"
+                    v-model="form.username" type="text" placeholder="请输入用户名"
                     class="input input-bordered w-full" :class="{ 'input-error': ve('username') }"
                 >
                 <p v-if="ve('username')" class="text-error text-sm mt-1">
@@ -64,9 +91,9 @@ useHead({
             </div>
 
             <div>
-                <label class="block text-sm font-medium mb-2">{{ t('password') }}</label>
+                <label class="block text-sm font-medium mb-2">密码</label>
                 <input
-                    v-model="form.password" type="password" :placeholder="t('password-placeholder')"
+                    v-model="form.password" type="password" placeholder="请输入密码"
                     class="input input-bordered w-full" :class="{ 'input-error': ve('password') }"
                 >
                 <p v-if="ve('password')" class="text-error text-sm mt-1">
@@ -74,44 +101,43 @@ useHead({
                 </p>
             </div>
 
+            <div>
+                <p class="block text-sm font-medium mb-3">
+                    选择登录策略
+                </p>
+                <div class="space-y-3">
+                    <label
+                        v-for="option in strategyOptions" :key="option.value"
+                        class="flex items-start gap-3 rounded-box border border-base-300 px-3 py-2"
+                    >
+                        <input
+                            v-model="form.strategy" type="radio" class="radio radio-primary mt-1"
+                            :value="option.value"
+                        >
+                        <div>
+                            <p class="font-medium text-sm">
+                                {{ option.name }}
+                            </p>
+                            <p class="text-xs text-base-content/70">
+                                {{ option.desc }}
+                            </p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary w-full">
-                {{ t('login') }}
+                登录
             </button>
         </form>
 
         <hr class="my-8">
 
         <p class="text-center text-sm">
-            {{ t('no-account') }}
+            没有账户？
             <NuxtLink to="/auth/register" class="link link-primary">
-                {{ t('register') }}
+                注册
             </NuxtLink>
         </p>
     </div>
 </template>
-
-<i18n lang="yaml">
-en-GB:
-  login: Login
-  username: Username
-  password: Password
-  username-placeholder: Enter your username
-  password-placeholder: Enter your password
-  username-required: Username is required
-  password-required: Password is required
-  login-success: Login successful!
-  no-account: Don't have an account?
-  register: Register
-
-zh-CN:
-  login: 登录
-  username: 用户名
-  password: 密码
-  username-placeholder: 请输入用户名
-  password-placeholder: 请输入密码
-  username-required: 用户名不能为空
-  password-required: 密码不能为空
-  login-success: 登录成功！
-  no-account: 没有账户？
-  register: 注册
-</i18n>

@@ -14,24 +14,6 @@ export default defineNuxtConfig({
             sourcemap: false,
         },
     },
-    i18n: {
-        defaultLocale: 'zh-CN',
-        strategy: 'no_prefix',
-        locales: [
-            {
-                code: 'en-GB',
-                flag: 'GB',
-                name: 'English (International)',
-                file: 'en-GB.json',
-            },
-            {
-                code: 'zh-CN',
-                flag: 'CN',
-                name: '简体中文 (中国)',
-                file: 'zh-CN.json',
-            },
-        ],
-    },
     eslint: {
         config: {
             standalone: false, // <---
@@ -48,7 +30,7 @@ export default defineNuxtConfig({
             listenPort: 7300,
         },
         leporid: {
-            baseURL: 'http://43.139.192.17:8100',
+            baseURL: 'https://api.dev.turou.fun/leporid',
             defaultImage: {
                 characterId: '2e7046aa-ddc2-40fb-bf5d-5236ffca50f9',
                 maskId: '421943e9-2221-45f1-8f76-5a1ca012028e',
@@ -58,12 +40,24 @@ export default defineNuxtConfig({
             },
         },
         otoge: {
-            baseURL: 'http://43.139.192.17:8200',
+            baseURL: 'https://api.dev.turou.fun/otoge',
         },
         public: {
-            imageURL: 'https://uc.turou.fun/api/images',
-            imagePreviewURL: 'https://uc.turou.fun/api/images',
+            imageURL: 'https://assets.dev.turou.fun/leporid/images',
+            imagePreviewURL: 'https://assets.dev.turou.fun/leporid/thumbnails',
         },
+    },
+    i18n: {
+        defaultLocale: 'zh-CN',
+        strategy: 'no_prefix',
+        locales: [
+            {
+                code: 'zh-CN',
+                flag: 'CN',
+                name: '简体中文 (中国)',
+                file: 'zh-CN.json',
+            },
+        ],
     },
     nitro: {
         preset: 'bun',

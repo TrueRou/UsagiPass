@@ -3,6 +3,8 @@ definePageMeta({ middleware: 'require-login' })
 
 const { t } = useI18n()
 const { img } = useUtils()
+const { loggedIn, user, clear } = useUserSession()
+const notificationsStore = useNotificationsStore()
 
 const { data: profileDataRaw, pending: profilePending } = await useLeporid<UserProfile>('/api/nuxt/profile')
 const { data: serversData, pending: serversPending } = await useLeporid<Server[]>('/api/nuxt/servers')
@@ -40,6 +42,15 @@ const imageCardItems = computed(() =>
         }
     }),
 )
+
+async function handleLogout() {
+    await clear()
+    notificationsStore.addNotification({
+        type: 'info',
+        message: '已退出账户，请重新登录。',
+    })
+    await navigateTo('/auth/login')
+}
 
 // 图片选择逻辑
 
@@ -109,7 +120,7 @@ async function handleSave() {
             method: 'PUT',
             body: profileData.value,
             showSuccessToast: true,
-            successMessage: t('toast.save-success'),
+            successMessage: '偏好设置已保存',
         })
     }
     finally {
@@ -130,7 +141,7 @@ function goToPrev() {
         <ImageSelector
             v-if="selectorTarget"
             :open="selectorOpen" aspect-id="id-1-ff" :title="selectorTarget ? t(`images.${selectorTarget}.title`) : t('images.title-default')"
-            :confirm-label="t('actions.use-image')" :initial-filters="selectorTarget ? [selectorTarget] : []" @update:open="handleSelectorVisibility"
+            confirm-label="使用该图片" :initial-filters="selectorTarget ? [selectorTarget] : []" @update:open="handleSelectorVisibility"
             @select="handleImageSelect"
         />
         <ModalAddAccount
@@ -140,10 +151,49 @@ function goToPrev() {
         <div class="mx-auto w-full max-w-6xl px-4 py-4 lg:py-10">
             <div v-if="isInitialLoading" class="flex flex-col items-center gap-4 py-16 text-base-content/60">
                 <span class="loading loading-spinner loading-lg" />
-                <p>{{ t("loading.initial") }}</p>
+                <p>正在加载个人资料...</p>
             </div>
 
             <form v-else-if="profileData && serversData" class="space-y-4" @submit.prevent="handleSave">
+                <!-- 已登录用户 -->
+                <section class="rounded-box border border-base-200 bg-base-100 p-4 shadow-sm">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="avatar">
+                            <div class="w-16 rounded-full border border-base-200">
+                                <img src="../assets/icons/logo.webp">
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-lg font-semibold">
+                                {{ user?.username }}
+                            </p>
+                            <p class="text-sm text-base-content/70">
+                                {{ user?.email }}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="btn btn-outline btn-sm" type="button" :disabled="!loggedIn" @click="handleLogout">
+                                <span>退出登录</span>
+                            </button>
+                            <div class="dropdown dropdown-end">
+                                <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01" />
+                                    </svg>
+                                </div>
+                                <ul tabindex="0" class="dropdown-content menu menu-sm bg-base-100 rounded-box border border-base-200 z-10 w-48 p-2 shadow">
+                                    <li>
+                                        <NuxtLink class="justify-between" to="/auth/merge">
+                                            合并账户
+                                            <span class="badge badge-outline badge-xs">Beta</span>
+                                        </NuxtLink>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- 偏好设置标题 -->
                 <div class="divider my-2">
                     {{ t("sections.preference") }}
@@ -305,7 +355,7 @@ function goToPrev() {
                                 {{ t("fields.qrSize.helper") }}
                             </p>
                         </label>
-                        <div class="flex items-center gap-3 h-[40px]">
+                        <div class="flex items-center gap-3 h-10">
                             <input
                                 v-model="profileData.preference.qrSize" class="range range-primary flex-1" type="range" min="8"
                                 max="40"
@@ -401,7 +451,7 @@ function goToPrev() {
                         <div class="flex items-start gap-3">
                             <div class="flex w-16 items-center justify-center overflow-hidden rounded-lg border border-base-200">
                                 <img v-if="item.src" :src="item.src" :alt="t(`images.${item.key}.label`)" class="h-full w-full object-cover" loading="lazy">
-                                <span v-else class="text-xs text-base-content/40">{{ t("preview.empty") }}</span>
+                                <span v-else class="text-xs text-base-content/40">暂未选择</span>
                             </div>
                             <div class="flex-1 space-y-1">
                                 <p class="text-sm font-semibold">
@@ -412,7 +462,7 @@ function goToPrev() {
                                 </p>
                                 <div class="flex flex-wrap gap-2 pt-1">
                                     <button class="btn btn-sm btn-primary" type="button" @click="openImageSelector(item.key)">
-                                        {{ item.selected ? t("actions.replace-image") : t("actions.choose-image") }}
+                                        {{ item.selected ? '更换图片' : '选择图片' }}
                                     </button>
                                 </div>
                             </div>
@@ -431,14 +481,14 @@ function goToPrev() {
                         class="btn btn-outline" type="button"
                         @click="openAddAccount"
                     >
-                        {{ t("actions.add-account") }}
+                        新增账号
                     </button>
 
                     <div
                         v-if="profileData.accounts.length === 0"
                         class="rounded-lg border border-dashed border-base-200 p-8 text-center text-sm text-base-content/60"
                     >
-                        {{ t("accounts.empty") }}
+                        暂无账号，请新增账号
                     </div>
 
                     <div v-else class="space-y-4">
@@ -466,7 +516,7 @@ function goToPrev() {
                                         class="btn btn-ghost btn-sm text-error" type="button"
                                         @click="removeAccount(account.id)"
                                     >
-                                        {{ t("actions.remove-account") }}
+                                        删除
                                     </button>
                                 </div>
                             </div>
@@ -477,7 +527,7 @@ function goToPrev() {
                 <footer class="flex justify-end">
                     <button class="btn btn-primary w-full md:w-auto" type="submit" :disabled="isSaving" @click.stop="goToPrev()">
                         <span v-if="isSaving" class="loading loading-spinner" />
-                        <span>{{ t("actions.save") }}</span>
+                        <span>保存修改</span>
                     </button>
                 </footer>
             </form>
@@ -486,109 +536,7 @@ function goToPrev() {
 </template>
 
 <i18n lang="yaml">
-en-GB:
-  loading:
-    initial: Loading Profile...
-  sections:
-    preference: Preference Settings
-    display: Display Settings
-    images: Image Settings
-    accounts: Account Settings
-  fields:
-    displayName:
-      label: Player Name
-      helper: Override the player name displayed in the upper right of the card
-      placeholder: Leave blank to auto-fetch
-    simplifiedCode:
-      label: Card Label
-      helper: Override the text content displayed on the left side of the bottom bar of the card
-      placeholder: Leave blank to auto-fetch
-    friendCode:
-      label: Friend Code
-      helper: Override the friend code displayed in the upper right of the card
-      placeholder: Leave blank to auto-fetch
-    characterName:
-      label: Character Portrait Name
-      helper: Override the character portrait name displayed in the lower left of the card
-      placeholder: Leave blank to hide
-    maimaiVersion:
-      label: Game Version
-      helper: Override the version information displayed on the right side of the bottom bar of the card
-      placeholder: Leave blank to auto-fetch
-    dxRating:
-      label: Player Rating
-      helper: Override the player rating displayed on the right side of the top bar of the card
-      placeholder: Leave blank to auto-fetch
-    qrSize:
-      label: QR Code Size
-      helper: Adjust the size of the QR code displayed in the lower right of the card
-      unit: px
-    charaInfoColor:
-      label: Character Info Area Color
-      helper: Background color of the character area
-    playerInfoColor:
-      label: Player Info Area Color
-      helper: Background color of the player area
-    showDisplayName:
-      label: Show Player Name
-      helper: Whether to display the player name in the upper right
-    showFriendCode:
-      label: Show Friend Code
-      helper: Whether to display the friend code in the upper right
-    showDxRating:
-      label: Show Player Rating
-      helper: Whether to display the player rating on the right side of the top bar
-    showDate:
-      label: Show Date
-      helper: Whether to display the date in the lower left
-    account:
-      server: Select Server
-      credentials: Account Credentials
-  images:
-    title-default: Select Images
-    character:
-      label: Character Portrait
-      title: Select Character Portrait
-      helper: Character portrait of card front
-    mask:
-      label: Mask Layer
-      title: Select Mask Layer
-      helper: Decorative or obscuring overlays on character portrait
-    background:
-      label: Background
-      title: Select Background Image
-      helper: Background Image of character
-    frame:
-      label: Frame
-      title: Select Frame Image
-      helper: Decorative card frame
-    passname:
-      label: Banner
-      title: Select Banner Image
-      helper: Banner at the top of the card
-    empty: Not Selected
-    placeholder: Selecting an image will display its path
-    status:
-      assigned: Selected images will be applied to the card
-      empty: Not selected image
-      badge: Enable
-  actions:
-    choose-image: Choose
-    replace-image: Replace
-    clear-image: Clear
-    add-account: Add
-    remove-account: Remove
-    use-image: Use
-    save: Save
-  accounts:
-    empty: No account found. Please create one
-    fallback-name: Not Server Selected
-    fallback-desc: Please Select An Server to view more info
-  toast:
-    save-success: Preference Saved
 zh-CN:
-  loading:
-    initial: 正在加载个人资料...
   sections:
     preference: 偏好设置
     display: 显示设置
@@ -666,22 +614,4 @@ zh-CN:
       label: 名牌横幅
       title: 选择名牌横幅
       helper: 卡片顶部显示名牌的横幅
-    empty: 暂未选择
-    placeholder: 选择图片后将显示路径
-    status:
-      assigned: 已选中的图片将用于卡面
-      empty: 尚未选择图片
-      badge: 已启用
-  actions:
-    choose-image: 选择图片
-    replace-image: 更换图片
-    clear-image: 清除选择
-    add-account: 新增账号
-    remove-account: 删除
-    use-image: 使用该图片
-    save: 保存修改
-  accounts:
-    empty: 暂无账号，请新增账号
-  toast:
-    save-success: 偏好设置已保存
 </i18n>

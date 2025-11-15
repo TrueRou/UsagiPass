@@ -6,7 +6,6 @@ on:
       - next # replace with main when ready
     paths:
       - 'app/**'
-      - 'i18n/**'
       - 'server/**'
       - 'shared/**'
       - 'public/**'

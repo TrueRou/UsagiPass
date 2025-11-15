@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
     image: ImageResponse
@@ -16,7 +15,6 @@ const emit = defineEmits<{
     (event: 'delete', image: ImageResponse): void
 }>()
 
-const { t } = useI18n()
 const { user } = useUserSession()
 
 const isEditing = ref(false)
@@ -87,13 +85,13 @@ const representativeLabels = computed(() => {
                 <div v-else class="flex gap-2 flex-col bg-black/50 p-2 rounded">
                     <input
                         v-model="editableName" type="text" class="input input-xs"
-                        :placeholder="t('rename-placeholder')"
+                        placeholder="输入新名称"
                     >
                     <button class="btn btn-xs btn-primary" :disabled="!editableName.trim()" @click.stop="submitRename">
-                        {{ t('save') }}
+                        保存
                     </button>
                     <button class="btn btn-xs" @click.stop="cancelEdit">
-                        {{ t('cancel') }}
+                        取消
                     </button>
                 </div>
             </div>
@@ -106,7 +104,7 @@ const representativeLabels = computed(() => {
             <!-- 右上 选中标记 -->
             <template v-if="selected && !isEditing">
                 <div class="absolute top-1 right-1 badge lg:badge-lg badge-primary">
-                    {{ t('selected') }}
+                    已选
                 </div>
             </template>
 
@@ -126,21 +124,3 @@ const representativeLabels = computed(() => {
         </div>
     </div>
 </template>
-
-<i18n lang="yaml">
-en-GB:
-  selected: Selected
-  rename: Rename
-  delete: Delete
-  rename-placeholder: Enter a new name
-  save: Save
-  cancel: Cancel
-
-zh-CN:
-  selected: 已选
-  rename: 重命名
-  delete: 删除
-  rename-placeholder: 输入新名称
-  save: 保存
-  cancel: 取消
-</i18n>

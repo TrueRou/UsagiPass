@@ -14,8 +14,6 @@ const emit = defineEmits<{
     (event: 'uploaded', image: ImageResponse): void
 }>()
 
-const { t } = useI18n()
-
 const cropper = useTemplateRef<InstanceType<typeof VueCropper>>('cropperRef')
 const fileInput = ref<HTMLInputElement | null>(null)
 const filePreviewImage = ref<string | null>(null)
@@ -180,7 +178,7 @@ async function submit() {
                 </button>
             </form>
             <h3 class="font-bold text-xl mb-6 flex items-center gap-3">
-                <span>{{ t('title') }}</span>
+                <span>上传图片</span>
                 <span v-if="aspect" class="badge badge-accent">{{ aspect.name }}</span>
             </h3>
             <div class="grid gap-8 lg:grid-cols-[2fr,1fr]">
@@ -194,30 +192,28 @@ async function submit() {
                             v-if="!filePreviewImage"
                             class="p-6 border border-dashed rounded-lg text-center text-base-content/60"
                         >
-                            {{ t('placeholder') }}
+                            选择一张图片开始裁剪
                         </div>
                         <div v-else class="space-y-3">
                             <ClientOnly>
-                                <div class="rounded-lg border h-[320px] w-full overflow-hidden">
+                                <div class="rounded-lg border h-80 w-full overflow-hidden">
                                     <VueCropper
                                         ref="cropper" :img="filePreviewImage" :auto-crop="true" :fixed="true"
                                         :fixed-number="cropRatio" :center-box="true" :auto-crop-width="cropBox.width"
                                         :auto-crop-height="cropBox.height" :full="true" :can-scale="true"
-                                        class="h-[320px] w-full"
+                                        class="h-80 w-full"
                                     />
                                 </div>
                             </ClientOnly>
                             <div class="flex flex-wrap gap-2">
                                 <button class="btn btn-sm" type="button" @click="rotateLeft">
-                                    ⟲ {{ t('rotate-left')
-                                    }}
+                                    ⟲ 向左旋转
                                 </button>
                                 <button class="btn btn-sm" type="button" @click="rotateRight">
-                                    ⟳ {{ t('rotate-right')
-                                    }}
+                                    ⟳ 向右旋转
                                 </button>
                                 <button class="btn btn-sm" type="button" @click="resetCrop">
-                                    {{ t('reset') }}
+                                    重置
                                 </button>
                             </div>
                         </div>
@@ -226,44 +222,44 @@ async function submit() {
                 <div class="space-y-4">
                     <div>
                         <label class="label">
-                            <span class="label-text">{{ t('name') }}</span>
+                            <span class="label-text">名称</span>
                         </label>
                         <input
                             v-model="metadata.name" type="text" class="input input-bordered w-full"
-                            :placeholder="t('name-placeholder')"
+                            placeholder="给图片起个名字"
                         >
                     </div>
                     <div>
                         <label class="label">
-                            <span class="label-text">{{ t('description') }}</span>
+                            <span class="label-text">描述</span>
                         </label>
                         <textarea
                             v-model="metadata.description" class="textarea textarea-bordered w-full"
-                            :placeholder="t('description-placeholder')" rows="3"
+                            placeholder="描述这张图片（可选）" rows="3"
                         />
                     </div>
                     <div>
                         <label class="label">
-                            <span class="label-text">{{ t('visibility') }}</span>
+                            <span class="label-text">可见性</span>
                         </label>
                         <select v-model="metadata.visibility" class="select select-bordered w-full">
                             <option value="PRIVATE">
-                                {{ t('visibility-private') }}
+                                私有
                             </option>
                             <option value="PUBLIC">
-                                {{ t('visibility-public') }}
+                                公开
                             </option>
                         </select>
                     </div>
                     <div>
-                        <label class="label label-text">{{ t('labels') }}</label>
+                        <label class="label label-text">标签</label>
                         <div class="flex gap-2 mb-2">
                             <input
                                 v-model="tagDraft" type="text" class="input input-bordered input-sm flex-1"
-                                :placeholder="t('label-placeholder')" @keyup.enter.prevent="addTag"
+                                placeholder="输入标签并按回车" @keyup.enter.prevent="addTag"
                             >
                             <button class="btn btn-sm btn-primary" type="button" @click="addTag">
-                                {{ t('add') }}
+                                添加
                             </button>
                         </div>
                         <div class="flex flex-wrap gap-2">
@@ -279,53 +275,13 @@ async function submit() {
             </div>
             <div class="modal-action">
                 <button class="btn btn-ghost" type="button" @click="close">
-                    {{ t('cancel') }}
+                    取消
                 </button>
                 <button class="btn btn-primary" type="button" :disabled="!canSubmit || submitting" @click="submit">
                     <span v-if="submitting" class="loading loading-spinner" />
-                    <span>{{ t('submit') }}</span>
+                    <span>上传</span>
                 </button>
             </div>
         </div>
     </dialog>
 </template>
-
-<i18n lang="yaml">
-en-GB:
-  title: Upload image
-  placeholder: Choose an image to begin cropping
-  rotate-left: Rotate left
-  rotate-right: Rotate right
-  reset: Reset
-  name: Name
-  name-placeholder: Give your image a friendly name
-  description: Description
-  description-placeholder: Describe this image (optional)
-  visibility: Visibility
-  visibility-private: Private
-  visibility-public: Public
-  labels: Labels
-  label-placeholder: Add a label and press Enter
-  add: Add
-  cancel: Cancel
-  submit: Upload
-
-zh-CN:
-  title: 上传图片
-  placeholder: 选择一张图片开始裁剪
-  rotate-left: 向左旋转
-  rotate-right: 向右旋转
-  reset: 重置
-  name: 名称
-  name-placeholder: 给图片起个名字
-  description: 描述
-  description-placeholder: 描述这张图片（可选）
-  visibility: 可见性
-  visibility-private: 私有
-  visibility-public: 公开
-  labels: 标签
-  label-placeholder: 输入标签并按回车
-  add: 添加
-  cancel: 取消
-  submit: 上传
-</i18n>

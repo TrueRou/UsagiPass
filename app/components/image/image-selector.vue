@@ -13,7 +13,6 @@ const emit = defineEmits<{
     (event: 'select', payload: ImageResponse): void
 }>()
 
-const { t } = useI18n()
 const { imgPreview } = useUtils()
 
 const {
@@ -40,8 +39,8 @@ const openUploader = ref(false)
 const deleteTarget = ref<ImageResponse | null>(null)
 const pending = ref(false)
 
-const title = computed(() => props.title ?? t('title-default'))
-const confirmButtonText = computed(() => props.confirmLabel ?? t('actions.confirm'))
+const title = computed(() => props.title ?? '选择图片')
+const confirmButtonText = computed(() => props.confirmLabel ?? '使用此图片')
 
 const imageKey = (image: ImageResponse) => image.id
 
@@ -170,11 +169,7 @@ watch([activeSecondary], async () => {
                             {{ title }}
                         </h2>
                         <p v-if="aspect" class="text-sm text-base-content/70">
-                            {{ t('aspect-format', {
-                                name: aspect.name,
-                                ratio:
-                                    `${aspect.ratioWidthUnit}:${aspect.ratioHeightUnit}`,
-                            }) }}
+                            比例：{{ aspect.name }} · {{ `${aspect.ratioWidthUnit}:${aspect.ratioHeightUnit}` }}
                         </p>
                     </div>
                 </header>
@@ -196,16 +191,16 @@ watch([activeSecondary], async () => {
                         <div class="join w-full">
                             <input
                                 v-model="searchKeyword" type="search" class="input input-bordered join-item flex-1"
-                                :placeholder="t('search-placeholder')"
+                                placeholder="按名称搜索"
                             >
                             <button class="btn btn-neutral join-item" type="button" @click="confirmSearch">
-                                {{ t('search') }}
+                                搜索
                             </button>
                         </div>
                     </div>
                 </section>
 
-                <section class="min-h-[320px]">
+                <section class="min-h-80">
                     <div v-if="loading" class="flex items-center justify-center py-16">
                         <span class="loading loading-spinner loading-lg" />
                     </div>
@@ -215,10 +210,10 @@ watch([activeSecondary], async () => {
                             class="rounded-lg border border-dashed p-10 text-center space-y-4"
                         >
                             <p class="text-base-content/60">
-                                {{ t('empty') }}
+                                暂无符合条件的图片
                             </p>
                             <button class="btn btn-primary" type="button" @click="openUploader = true">
-                                {{ t('actions.upload') }}
+                                上传新图片
                             </button>
                         </div>
                         <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
@@ -235,11 +230,11 @@ watch([activeSecondary], async () => {
 
                 <section class="flex gap-4 items-center justify-between">
                     <div class="text-xs md:text-sm text-base-content/70">
-                        {{ t('pagination-status', { page: pageNumber, totalPage, totalRow }) }}
+                        第 {{ pageNumber }} / {{ totalPage }} 页，共 {{ totalRow }} 张图片
                     </div>
                     <div class="join">
                         <button class="btn btn-sm md:btn-md join-item" type="button" :disabled="pageNumber <= 1" @click="prevPage">
-                            {{ t('pagination-prev') }}
+                            &lt;
                         </button>
                         <input
                             class="input input-bordered join-item input-sm md:input-md w-10 md:w-12 text-center" :value="pageNumber"
@@ -249,7 +244,7 @@ watch([activeSecondary], async () => {
                             class="btn btn-sm md:btn-md join-item" type="button" :disabled="pageNumber >= totalPage"
                             @click="nextPage"
                         >
-                            {{ t('pagination-next') }}
+                            &gt;
                         </button>
                     </div>
                 </section>
@@ -257,7 +252,7 @@ watch([activeSecondary], async () => {
 
             <div class="modal-action">
                 <button class="btn btn-accent" type="button" @click="openUploader = true">
-                    {{ t('actions.upload') }}
+                    上传新图片
                 </button>
                 <button
                     class="btn btn-primary" type="button" :disabled="!selectedImage || pending"
@@ -279,56 +274,20 @@ watch([activeSecondary], async () => {
     <dialog v-if="deleteTarget" class="modal modal-open">
         <div class="modal-box">
             <h3 class="font-semibold text-lg mb-4">
-                {{ t('delete-title') }}
+                删除图片
             </h3>
-            <p>{{ t('delete-message', { name: deleteTarget.name }) }}</p>
+            <p>确定要删除“{{ deleteTarget.name }}”吗？</p>
             <div class="modal-action">
                 <button class="btn" type="button" @click="deleteTarget = null">
-                    {{ t('actions.cancel') }}
+                    取消
                 </button>
                 <button class="btn btn-error" type="button" :disabled="pending" @click="handleDelete">
                     <span v-if="pending" class="loading loading-spinner" />
-                    <span>{{ t('actions.delete') }}</span>
+                    <span>删除</span>
                 </button>
             </div>
         </div>
     </dialog>
 </template>
 
-<i18n lang="yaml">
-en-GB:
-  title-default: Select an image
-  aspect-format: "Aspect: {name} · {ratio}"
-  actions:
-    upload: Upload new image
-    cancel: Cancel
-    confirm: Use this image
-    delete: Delete
-  search-placeholder: Search by name
-  search: Search
-  empty: No images match your filters yet.
-  custom-placeholder: Upload your own image
-  pagination-status: "Page {page} of {totalPage}, total {total} images"
-  pagination-prev: "<"
-  pagination-next: ">"
-  delete-title: Delete image
-  delete-message: "Are you sure you want to delete “{name}”?"
 
-zh-CN:
-  title-default: 选择图片
-  aspect-format: "比例：{name} · {ratio}"
-  actions:
-    upload: 上传新图片
-    cancel: 取消
-    confirm: 使用此图片
-    delete: 删除
-  search-placeholder: 按名称搜索
-  search: 搜索
-  empty: 暂无符合条件的图片
-  custom-placeholder: 上传你的专属图片
-  pagination-status: "第 {page} / {totalPage} 页，共 {totalRow} 张图片"
-  pagination-prev: "<"
-  pagination-next: ">"
-  delete-title: 删除图片
-  delete-message: "确定要删除“{name}”吗？"
-</i18n>
