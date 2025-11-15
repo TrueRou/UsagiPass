@@ -30,7 +30,7 @@ export default defineNuxtPlugin((_nuxtApp) => {
                     })
                 }
 
-                if (rawData.code !== 200) {
+                if (rawData.code !== undefined && rawData.code !== 200) {
                     const message = rawData.message || context.response.statusText
                     addNotification({
                         type: 'error',

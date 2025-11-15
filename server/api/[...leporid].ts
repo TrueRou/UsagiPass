@@ -35,8 +35,10 @@ export default defineEventHandler(async (event) => {
                 },
             })
         }
-        // 使用访问令牌进行代理请求
-        headers.Authorization = `Bearer ${session.secure.accessToken}`
+        // 如果令牌不存在，使用后端访问令牌进行代理请求
+        const reqAuthorization = getHeader(event, 'authorization')
+        const curAuthorization = `Bearer ${session.secure.accessToken}`
+        headers.Authorization = reqAuthorization || curAuthorization
     }
 
     {
