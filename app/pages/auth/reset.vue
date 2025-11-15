@@ -3,7 +3,8 @@ import { z } from 'zod'
 
 definePageMeta({ middleware: 'require-login' })
 const nuxtApp = useNuxtApp()
-const { user, fetch: refreshSession } = useUserSession()
+const { user, clear } = useUserSession()
+const notificationsStore = useNotificationsStore()
 
 const shouldRedirectHome = computed(() => {
     const email = user.value?.email?.trim() ?? ''
@@ -56,11 +57,13 @@ async function handleSubmit() {
                 email: form.email,
                 password: form.password,
             },
-            showSuccessToast: true,
-            successMessage: '账户信息已更新',
         })
-        await refreshSession()
-        await navigateTo('/')
+        await clear()
+        notificationsStore.addNotification({
+            type: 'info',
+            message: '账户信息已更新，请重新登录。',
+        })
+        await navigateTo('/auth/login', { replace: true })
     }
     finally {
         isSubmitting.value = false

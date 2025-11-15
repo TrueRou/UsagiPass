@@ -98,28 +98,18 @@ async function executeMerge() {
                 source: selection.source === 'current' ? undefined : secondaryToken.value,
                 target: selection.target === 'current' ? undefined : secondaryToken.value,
             },
-            showSuccessToast: true,
-            successMessage: '合并成功',
         })
-        await performPostMergeLogout()
+        await clear()
+        notificationsStore.addNotification({
+            type: 'info',
+            message: '合并完成，请使用新账号重新登录。',
+        })
+        await navigateTo('/auth/login', { replace: true })
     }
     finally {
         isMerging.value = false
         confirmModalOpen.value = false
     }
-}
-
-async function performPostMergeLogout() {
-    try {
-        await leporidFetch('/api/auth/logout', { method: 'POST' })
-    }
-    catch {}
-    await clear()
-    notificationsStore.addNotification({
-        type: 'info',
-        message: '合并完成，请使用新账号重新登录。',
-    })
-    await navigateTo('/auth/login', { replace: true })
 }
 
 function advanceConfirmation() {
