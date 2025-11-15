@@ -64,7 +64,7 @@ const maimaiVersion = computed(() => {
 </script>
 
 <template>
-    <div v-if="profile" class="isolate h-[100dvh] dark:bg-gray-800">
+    <div v-if="profile" class="isolate h-dvh dark:bg-gray-800">
         <div class="relative h-full w-fit mx-auto">
             <img class="object-cover h-full" :src="img(profile.preference.backgroundId)">
             <div class="absolute inset-0">

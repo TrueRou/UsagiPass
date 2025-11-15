@@ -1,6 +1,6 @@
 export function useWechatCrawl() {
     const triggerCrawl = async (context: { date: string, time: string, maid: string }) => {
-        const { addNotification } = useNotificationsStore()
+        const { addNotification, removeNotification } = useNotificationsStore()
 
         // 检查 UA 确保是在微信内打开
         if (!navigator.userAgent.toLowerCase().includes('micromessenger')) {
@@ -8,25 +8,21 @@ export function useWechatCrawl() {
             return
         }
 
-        // 检查代理是否可用（使用$fetch以绕过Leporid相关中间件）
-        await $fetch('http://tgk-wcaime.wahlap.com/test', {
-            method: 'GET',
-            onResponseError() {
-                addNotification({ type: 'error', message: '代理配置有误，请更新订阅后重试' })
-            },
-        })
+        const alert = addNotification({ type: 'info', message: '正在发起微信服务号 OAuth 认证' })
 
-        // 发起 OAuth 请求，进行页面重定向
-        const redirectUrl = await useNuxtApp().$leporid<{ url: string }>('/api/otoge/maimai/wechat_oauth', {
-            method: 'GET',
-            onResponseError() {
-                addNotification({ type: 'error', message: '无法发起微信服务号OAuth认证' })
-            },
-        })
+        try {
+            // 发起 OAuth 请求
+            const redirectUrl = await useNuxtApp().$leporid<{ url: string }>('/api/otoge/maimai/wechat_oauth', { method: 'GET' })
 
-        // 储存当前上下文然后跳转
-        localStorage.setItem('context', JSON.stringify(context))
-        window.location.href = redirectUrl.url
+            // 储存当前上下文然后跳转
+            removeNotification(alert)
+            localStorage.setItem('context', JSON.stringify(context))
+            window.location.href = redirectUrl.url
+        }
+        catch {
+            removeNotification(alert)
+            addNotification({ type: 'error', message: '无法发起微信服务号 OAuth 认证' })
+        }
     }
     return { triggerCrawl }
 }

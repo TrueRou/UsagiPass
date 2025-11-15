@@ -84,17 +84,6 @@ export default defineNitroPlugin((_nitroApp) => {
             console.info(`[mitm] ${new Date().toISOString()} ${host} -> ${redirectUrl.host}`)
         }
 
-        // response wahlap mitm connection test
-        // example: http://tgk-wcaime.wahlap.com/test
-        else if (WAHLAP_HOSTS.has(host) && urlPart.startsWith('/test')) {
-            const body = Buffer.from('{"source": "UsagiPass", "proxy":"ok"}')
-            ctx.proxyToClientResponse.writeHead(200, {
-                'Content-Type': 'application/json; charset=utf-8',
-                'Access-Control-Allow-Origin': '*',
-            })
-            ctx.proxyToClientResponse.end(body)
-        }
-
         // block all other requests
         else {
             ctx.proxyToClientResponse.writeHead(204)
