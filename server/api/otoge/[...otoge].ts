@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
         const method = event.node?.req?.method ?? 'UNKNOWN'
 
         console.info(
-            `[proxy] ${new Date().toISOString()} ${method} ${event.node.req.url ?? event.path ?? ''} -> ${target}`,
+            `[proxy] ${new Date().toISOString()} ${method} ${event.node.req.url} -> ${proxyUrl}`,
         )
     }
 

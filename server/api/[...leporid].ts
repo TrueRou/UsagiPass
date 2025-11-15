@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
         const userId = session?.user?.username ?? 'anonymous'
 
         console.info(
-            `[proxy] ${new Date().toISOString()} ${method} ${event.node.req.url ?? event.path ?? ''} -> ${target} user=${userId}`,
+            `[proxy] ${new Date().toISOString()} ${method} ${event.node.req.url} -> ${proxyUrl} user=${userId}`,
         )
     }
 
