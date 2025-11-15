@@ -8,9 +8,9 @@ const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length 
 type LoginStrategy = 'LOCAL' | 'DIVING_FISH' | 'LXNS'
 
 const strategyOptions: Array<{ value: LoginStrategy, name: string, desc: string }> = [
-    { value: 'LOCAL', name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一登录' },
-    { value: 'DIVING_FISH', name: '水鱼 · DIVING_FISH', desc: '使用第三方水鱼账号密码登录' },
-    { value: 'LXNS', name: '落雪 · LXNS', desc: '使用第三方落雪个人 Token 登录' },
+    { value: 'LOCAL', name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证登录' },
+    { value: 'DIVING_FISH', name: '水鱼 · DIVING_FISH', desc: '使用绑定的 DivingFish 账号密码登录' },
+    { value: 'LXNS', name: '落雪 · LXNS', desc: '使用绑定的 LXNS 个人 API 密钥登录' },
 ]
 
 // Redirect if already logged in
@@ -91,7 +91,7 @@ useHead({
             </div>
 
             <div>
-                <label class="block text-sm font-medium mb-2">密码</label>
+                <label class="block text-sm font-medium mb-2">密码 / 个人密钥</label>
                 <input
                     v-model="form.password" type="password" placeholder="请输入密码"
                     class="input input-bordered w-full" :class="{ 'input-error': ve('password') }"
@@ -103,7 +103,7 @@ useHead({
 
             <div>
                 <p class="block text-sm font-medium mb-3">
-                    选择登录策略
+                    选择登录方式
                 </p>
                 <div class="space-y-3">
                     <label

@@ -95,7 +95,6 @@ useHead({
                 <input
                     v-model="form.username" class="input input-bordered w-full" type="text"
                     :class="{ 'input-error': ve('username') }" placeholder="正在载入用户名"
-                    readonly
                 >
             </div>
 
