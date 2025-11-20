@@ -105,7 +105,8 @@ function addTag() {
 }
 
 function removeTag(label: string) {
-    metadata.labels = metadata.labels.filter(item => item !== label)
+    if (label !== 'workshop')
+        metadata.labels = metadata.labels.filter(item => item !== label)
 }
 
 function close() {
@@ -124,7 +125,7 @@ function reset() {
     metadata.name = ''
     metadata.description = ''
     metadata.visibility = defaultVisibility
-    metadata.labels = props.suggestedLabels ?? []
+    metadata.labels = ['workshop', ...props.suggestedLabels ?? []]
     tagDraft.value = ''
     cleanupPreview()
     if (fileInput.value) {

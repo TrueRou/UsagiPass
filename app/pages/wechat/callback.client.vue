@@ -12,8 +12,8 @@ async function handleCallback() {
 
     const notificationId = addNotification({
         type: 'info',
-        message: '查分器更新请求处理中...',
-        duration: 60 * 1000,
+        message: '正在进行查分器更新...',
+        duration: 120 * 1000,
     })
 
     await useLeporid('/api/nuxt/wechat/callback', {
