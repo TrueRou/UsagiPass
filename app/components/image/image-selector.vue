@@ -156,13 +156,14 @@ watch([activeSecondary], async () => {
 
 <template>
     <dialog v-if="open" class="modal modal-open">
-        <div class="modal-box max-w-6xl">
-            <form method="dialog">
-                <button class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4" @click.prevent="close">
-                    ✕
-                </button>
-            </form>
-            <div class="space-y-6">
+        <div class="modal-box max-w-6xl h-[88vh] md:h-[85vh] my-[6vh] md:my-[7.5vh] flex flex-col p-0">
+            <!-- 固定头部 -->
+            <div class="shrink-0 px-6 pt-6 pb-4 border-b">
+                <form method="dialog">
+                    <button class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4" @click.prevent="close">
+                        ✕
+                    </button>
+                </form>
                 <header class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div>
                         <h2 class="text-2xl font-semibold">
@@ -173,6 +174,11 @@ watch([activeSecondary], async () => {
                         </p>
                     </div>
                 </header>
+            </div>
+            
+            <!-- 可滚动内容区域 -->
+            <div class="flex-1 overflow-y-auto px-6 py-6">
+                <div class="space-y-6">
 
                 <section class="space-y-4">
                     <div class="flex flex-wrap gap-3 items-center">
@@ -254,19 +260,23 @@ watch([activeSecondary], async () => {
                         </button>
                     </div>
                 </section>
+                </div>
             </div>
-
-            <div class="modal-action">
-                <button class="btn btn-accent" type="button" @click="openUploader = true">
-                    上传新图片
-                </button>
-                <button
-                    class="btn btn-primary" type="button" :disabled="!selectedImage || pending"
-                    @click="confirmSelection"
-                >
-                    <span v-if="pending" class="loading loading-spinner" />
-                    <span>{{ confirmButtonText }}</span>
-                </button>
+            
+            <!-- 固定底部 -->
+            <div class="shrink-0 px-6 pb-6 pt-4 border-t">
+                <div class="modal-action mt-0">
+                    <button class="btn btn-accent" type="button" @click="openUploader = true">
+                        上传新图片
+                    </button>
+                    <button
+                        class="btn btn-primary" type="button" :disabled="!selectedImage || pending"
+                        @click="confirmSelection"
+                    >
+                        <span v-if="pending" class="loading loading-spinner" />
+                        <span>{{ confirmButtonText }}</span>
+                    </button>
+                </div>
             </div>
         </div>
     </dialog>
