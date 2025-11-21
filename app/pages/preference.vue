@@ -213,13 +213,13 @@ function goToPrev() {
                             <button class="btn btn-outline btn-sm" type="button" :disabled="!loggedIn" @click="handleLogout">
                                 <span>登出</span>
                             </button>
-                            <details class="dropdown">
+                            <details class="dropdown dropdown-end">
                                 <summary class="btn btn-ghost btn-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01" />
                                     </svg>
                                 </summary>
-                                <ul class="menu dropdown-content bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm">
+                                <ul class="menu mt-1 dropdown-content bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm">
                                     <li>
                                         <NuxtLink class="justify-between" to="/auth/merge">
                                             合并账户
