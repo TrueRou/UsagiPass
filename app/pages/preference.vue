@@ -5,6 +5,7 @@ useHead({
 })
 
 const { t } = useI18n()
+const { $leporid } = useNuxtApp()
 const { loggedIn, user, clear } = useUserSession()
 const notificationsStore = useNotificationsStore()
 
@@ -39,8 +40,41 @@ function clearImage(key: ImageMapKey) {
     }
 }
 
-function matchCharacterMetadata() {
-    // TODO: 实现角色立绘匹配逻辑
+async function matchCharacterMetadata() {
+    const response: {
+        mask_image?: ImageResponse
+        source: string
+        character_name?: string
+        version?: string
+    } = await $leporid('/api/nuxt/image/metadata', {
+        method: 'GET',
+        query: {
+            id: profileData.value?.preference.characterId,
+        },
+    })
+
+    let message = '未能匹配到任何数据。'
+
+    if (response.source) {
+        message = `数据来源： ${response.source} \n`
+
+        if (response.mask_image && profileData.value) {
+            profileData.value.preference.maskId = response.mask_image.id
+            message += `遮罩图层： ${response.mask_image.metadata_id} \n`
+        }
+
+        if (response.character_name && profileData.value) {
+            profileData.value.preference.characterName = response.character_name
+            message += `立绘名称： ${response.character_name} \n`
+        }
+
+        if (response.version && profileData.value) {
+            profileData.value.preference.maimaiVersion = response.version
+            message += `游戏版本： ${response.version} \n`
+        }
+    }
+
+    notificationsStore.addNotification({ type: response.source ? 'success' : 'warning', message, duration: 5000 })
 }
 
 async function handleLogout() {
@@ -80,7 +114,8 @@ function showMatchCharacterMetadataHelp() {
     const notificationsStore = useNotificationsStore()
     notificationsStore.addNotification({
         type: 'info',
-        message: '此功能尚未实现，敬请期待。',
+        message: '匹配数据功能说明：\n根据当前选择的角色立绘，自动匹配游戏版本、立绘名称、遮罩图层。',
+        duration: 10000,
     })
 }
 

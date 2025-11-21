@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { no } from 'zod/locales'
-
 const props = defineProps<{
     imageId?: string
     label: string
