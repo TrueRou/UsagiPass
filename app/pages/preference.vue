@@ -5,7 +5,6 @@ useHead({
 })
 
 const { t } = useI18n()
-const { img } = useUtils()
 const { loggedIn, user, clear } = useUserSession()
 const notificationsStore = useNotificationsStore()
 
@@ -34,17 +33,15 @@ const imageFieldMap: Record<ImageMapKey, keyof PreferenceForm> = {
     frame: 'frameId',
 }
 
-const imageCardItems = computed(() =>
-    Object.keys(imageFieldMap).map(key => key as ImageMapKey).map((key) => {
-        const raw = profileData.value?.preference[imageFieldMap[key]] as string | undefined
-        return {
-            key,
-            field: imageFieldMap[key],
-            src: raw ? img(raw) : '',
-            selected: Boolean(raw),
-        }
-    }),
-)
+function clearImage(key: ImageMapKey) {
+    if (profileData.value) {
+        Object.assign(profileData.value.preference, { [imageFieldMap[key]]: '' })
+    }
+}
+
+function matchCharacterMetadata() {
+    // TODO: 实现角色立绘匹配逻辑
+}
 
 async function handleLogout() {
     await clear()
@@ -77,6 +74,14 @@ function handleImageSelect(image: ImageResponse) {
         if (profileData.value)
             Object.assign(profileData.value?.preference, { [imageFieldMap[selectorTarget.value]]: image.id })
     }
+}
+
+function showMatchCharacterMetadataHelp() {
+    const notificationsStore = useNotificationsStore()
+    notificationsStore.addNotification({
+        type: 'info',
+        message: '此功能尚未实现，敬请期待。',
+    })
 }
 
 // 账户系统逻辑
@@ -445,27 +450,60 @@ function goToPrev() {
 
                 <!-- 图片设置表单 -->
                 <div class="grid gap-4 md:grid-cols-2">
-                    <div v-for="item in imageCardItems" :key="item.key" class="rounded-xl p-4">
-                        <div class="flex items-start gap-3">
-                            <div class="flex w-16 items-center justify-center overflow-hidden rounded-lg border border-base-200">
-                                <img v-if="item.src" :src="item.src" :alt="t(`images.${item.key}.label`)" class="h-full w-full object-cover" loading="lazy">
-                                <span v-else class="text-xs text-base-content/40">暂未选择</span>
+                    <!-- 角色立绘 -->
+                    <AppPreferImage
+                        :image-id="profileData.preference.characterId"
+                        :label="t('images.character.label')"
+                        :helper="t('images.character.helper')"
+                        :alt="t('images.character.label')"
+                        :allow-clear="true"
+                        @select="openImageSelector('character')"
+                        @clear="clearImage('character')"
+                    >
+                        <template #actions>
+                            <div class="flex items-center gap-1">
+                                <button class="btn btn-sm btn-outline" type="button" @click="matchCharacterMetadata">
+                                    匹配数据
+                                </button>
+                                <button class="btn btn-ghost btn-xs btn-circle" type="button" title="查看说明" @click="showMatchCharacterMetadataHelp">
+                                    <span class="text-xs">?</span>
+                                </button>
                             </div>
-                            <div class="flex-1 space-y-1">
-                                <p class="text-sm font-semibold">
-                                    {{ t(`images.${item.key}.label`) }}
-                                </p>
-                                <p class="text-xs text-base-content/60">
-                                    {{ t(`images.${item.key}.helper`) }}
-                                </p>
-                                <div class="flex flex-wrap gap-2 pt-1">
-                                    <button class="btn btn-sm btn-primary" type="button" @click="openImageSelector(item.key)">
-                                        {{ item.selected ? '更换图片' : '选择图片' }}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        </template>
+                    </AppPreferImage>
+
+                    <!-- 遮罩图层 -->
+                    <AppPreferImage
+                        :image-id="profileData.preference.maskId"
+                        :label="t('images.mask.label')"
+                        :helper="t('images.mask.helper')"
+                        :alt="t('images.mask.label')"
+                        :allow-clear="true"
+                        @select="openImageSelector('mask')"
+                        @clear="clearImage('mask')"
+                    />
+
+                    <!-- 背景 -->
+                    <AppPreferImage
+                        :image-id="profileData.preference.backgroundId"
+                        :label="t('images.background.label')"
+                        :helper="t('images.background.helper')"
+                        :alt="t('images.background.label')"
+                        :allow-clear="false"
+                        @select="openImageSelector('background')"
+                        @clear="clearImage('background')"
+                    />
+
+                    <!-- 边框 -->
+                    <AppPreferImage
+                        :image-id="profileData.preference.frameId"
+                        :label="t('images.frame.label')"
+                        :helper="t('images.frame.helper')"
+                        :alt="t('images.frame.label')"
+                        :allow-clear="true"
+                        @select="openImageSelector('frame')"
+                        @clear="clearImage('frame')"
+                    />
                 </div>
 
                 <!-- 账号设置标题 -->
