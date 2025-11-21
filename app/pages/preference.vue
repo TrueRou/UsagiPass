@@ -9,10 +9,10 @@ const { img } = useUtils()
 const { loggedIn, user, clear } = useUserSession()
 const notificationsStore = useNotificationsStore()
 
-const { data: profileDataRaw, pending: profilePending } = await useLeporid<UserProfile>('/api/nuxt/profile')
-const { data: serversData, pending: serversPending } = await useLeporid<Server[]>('/api/nuxt/servers')
+const { data: profileDataRaw } = await useLeporid<UserProfile>('/api/nuxt/profile')
+const { data: serversData } = await useLeporid<Server[]>('/api/nuxt/servers')
+const { data: imageAspect } = await useLeporid<ImageAspect>('/api/images/aspects/id-1-ff')
 
-const isInitialLoading = computed(() => profilePending.value || serversPending.value)
 const profileData = ref<UserProfile>()
 
 watch(profileDataRaw, val => profileData.value = val, { immediate: true })
@@ -142,8 +142,8 @@ function goToPrev() {
 <template>
     <div class="min-h-screen bg-base-200">
         <ImageSelector
-            v-if="selectorTarget"
-            :open="selectorOpen" aspect-id="id-1-ff" :title="selectorTarget ? t(`images.${selectorTarget}.title`) : t('images.title-default')"
+            v-if="selectorTarget && imageAspect"
+            :open="selectorOpen" :aspect="imageAspect" :title="selectorTarget ? t(`images.${selectorTarget}.title`) : t('images.title-default')"
             confirm-label="使用该图片" :initial-filters="selectorTarget ? [selectorTarget] : []" @update:open="handleSelectorVisibility"
             @select="handleImageSelect"
         />
@@ -152,12 +152,7 @@ function goToPrev() {
             @confirm="handleAddAccount"
         />
         <div class="mx-auto w-full max-w-6xl px-4 py-4 lg:py-10">
-            <div v-if="isInitialLoading" class="flex flex-col items-center gap-4 py-16 text-base-content/60">
-                <span class="loading loading-spinner loading-lg" />
-                <p>正在加载个人资料...</p>
-            </div>
-
-            <form v-else-if="profileData && serversData" class="space-y-4" @submit.prevent="handleSave">
+            <form v-if="profileData && serversData" class="space-y-4" @submit.prevent="handleSave">
                 <!-- 已登录用户 -->
                 <section class="rounded-box border border-base-200 bg-base-100 p-4 shadow-sm">
                     <div class="flex flex-wrap items-center gap-4">

@@ -4,7 +4,6 @@ import { computed, ref, watch } from 'vue'
 const props = defineProps<{
     image: ImageResponse
     hidedLabels?: string[]
-    imageAspect: ImageAspect
     imageUrl: string
     selected: boolean
     disabled?: boolean
@@ -17,6 +16,8 @@ const emit = defineEmits<{
 }>()
 
 const { user } = useUserSession()
+
+const imageAspect = inject<ComputedRef<ImageAspect | null>>('imageAspect')
 
 const isEditing = ref(false)
 const editableName = ref(props.image.name)
@@ -75,8 +76,11 @@ const representativeLabels = computed(() => {
 })
 
 const skeletonAspectRatio = computed(() => {
-    const width = props.imageAspect.ratioWidthUnit
-    const height = props.imageAspect.ratioHeightUnit
+    if (!imageAspect?.value) {
+        return '4 / 3'
+    }
+    const width = imageAspect.value.ratioWidthUnit
+    const height = imageAspect.value.ratioHeightUnit
 
     return `${width} / ${height}`
 })

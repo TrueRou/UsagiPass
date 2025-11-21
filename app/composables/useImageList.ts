@@ -1,4 +1,4 @@
-interface UseImagesOptions {
+interface UseImageListOptions {
     aspectId: string
     pageSize?: number
     initialFilters?: string[] | null
@@ -11,21 +11,9 @@ interface ListOptions {
     keyword?: string
 }
 
-interface UploadResult {
-    image: ImageResponse
-}
-
-function unwrapPayload<T>(payload: T | { data: T }): T {
-    if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
-        return (payload as { data: T }).data
-    }
-    return payload as T
-}
-
-export function useImages(options: UseImagesOptions) {
+export function useImageList(options: UseImageListOptions) {
     const { $leporid } = useNuxtApp()
 
-    const aspect = shallowRef<ImageAspect | null>(null)
     const images = ref<ImageResponse[]>([])
     const loading = ref(false)
     const error = ref<Error | null>(null)
@@ -36,23 +24,6 @@ export function useImages(options: UseImagesOptions) {
     const activeFilters = ref<string[] | null>(options.initialFilters ?? null)
     const availableLabels = ref<string[]>([])
     const currentAspectId = ref(options.aspectId)
-
-    const fetchAspect = async () => {
-        loading.value = true
-        try {
-            if (aspect.value && aspect.value.id === currentAspectId.value) {
-                return aspect.value
-            }
-            const response = await $leporid<ImageAspect | { data: ImageAspect }>(`/api/images/aspects/${currentAspectId.value}`, {
-                method: 'GET',
-            })
-            aspect.value = unwrapPayload<ImageAspect>(response)
-            return aspect.value
-        }
-        finally {
-            loading.value = false
-        }
-    }
 
     const list = async (listOptions: ListOptions = {}) => {
         loading.value = true
@@ -79,17 +50,16 @@ export function useImages(options: UseImagesOptions) {
                 query.keyword = listOptions.keyword
             }
 
-            const response = await $leporid<ImageSearchResponse | { data: ImageSearchResponse }>('/api/images', {
+            const response = await $leporid<ImageSearchResponse>('/api/images', {
                 method: 'GET',
                 query,
             })
-            const payload = unwrapPayload<ImageSearchResponse>(response)
-            images.value = payload.images.records ?? []
-            pageNumber.value = payload.images.page_number ?? pageNumber.value
-            pageSize.value = payload.images.page_size ?? pageSize.value
-            totalPage.value = payload.images.total_page ?? 0
-            totalRow.value = payload.images.total_row ?? 0
-            availableLabels.value = payload.labels ?? []
+            images.value = response.images.records ?? []
+            pageNumber.value = response.images.page_number ?? pageNumber.value
+            pageSize.value = response.images.page_size ?? pageSize.value
+            totalPage.value = response.images.total_page ?? 0
+            totalRow.value = response.images.total_row ?? 0
+            availableLabels.value = response.labels ?? []
 
             return {
                 images: images.value,
@@ -128,25 +98,7 @@ export function useImages(options: UseImagesOptions) {
         await refresh()
     }
 
-    const uploadImage = async (formData: FormData): Promise<UploadResult> => {
-        const response = await $leporid<ImageResponse | { data: ImageResponse }>('/api/images', {
-            method: 'POST',
-            body: formData,
-        })
-        const created = unwrapPayload<ImageResponse>(response)
-        await refresh()
-        return { image: created }
-    }
-
     const customImages = computed(() => images.value.filter(image => image.visibility === 'PRIVATE'))
-
-    const setAspectId = (aspectId: string) => {
-        if (currentAspectId.value !== aspectId) {
-            currentAspectId.value = aspectId
-            aspect.value = null
-            activeFilters.value = options.initialFilters ?? null
-        }
-    }
 
     const representativeLabels = computed(() => {
         const allLabels = [...availableLabels.value, ...activeFilters.value ?? []]
@@ -155,8 +107,6 @@ export function useImages(options: UseImagesOptions) {
     })
 
     return {
-        aspect,
-        fetchAspect,
         images,
         loading,
         error,
@@ -169,10 +119,8 @@ export function useImages(options: UseImagesOptions) {
         refresh,
         updateImage,
         deleteImage,
-        uploadImage,
         availableLabels,
         representativeLabels,
         customImages,
-        setAspectId,
     }
 }

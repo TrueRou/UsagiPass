@@ -3,16 +3,16 @@ import type { VueCropper } from 'vue-cropper'
 
 const props = defineProps<{
     open: boolean
-    aspect: ImageAspect | null
-    aspectId: string
+    aspect: ImageAspect
     suggestedLabels?: string[]
-    upload: (formData: FormData) => Promise<{ image: ImageResponse }>
 }>()
 
 const emit = defineEmits<{
     (event: 'update:open', value: boolean): void
     (event: 'uploaded', image: ImageResponse): void
 }>()
+
+const { $leporid } = useNuxtApp()
 
 const cropper = useTemplateRef<InstanceType<typeof VueCropper>>('cropperRef')
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -152,7 +152,7 @@ async function submit() {
         const formData = new FormData()
         const fileName = fileRaw.value?.name ?? 'image.png'
         formData.append('file', blob, fileName)
-        formData.append('aspect_id', props.aspect?.id ?? props.aspectId)
+        formData.append('aspect_id', props.aspect?.id ?? props.aspect.id)
         formData.append('name', metadata.name.trim())
         if (metadata.description.trim()) {
             formData.append('description', metadata.description.trim())
@@ -160,8 +160,11 @@ async function submit() {
         formData.append('visibility', metadata.visibility)
         metadata.labels.forEach(label => formData.append('labels', label))
 
-        const result = await props.upload(formData)
-        emit('uploaded', result.image)
+        const response = await $leporid<ImageResponse>('/api/images', {
+            method: 'POST',
+            body: formData,
+        })
+        emit('uploaded', response)
         close()
     }
     finally {

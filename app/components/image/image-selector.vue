@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
     open: boolean
-    aspectId: string
+    aspect: ImageAspect
     initialFilters?: string[]
     pageSize?: number
     title?: string
@@ -16,8 +16,6 @@ const emit = defineEmits<{
 const { imgPreview } = useUtils()
 
 const {
-    aspect,
-    fetchAspect,
     images,
     loading,
     list,
@@ -28,9 +26,8 @@ const {
     representativeLabels,
     updateImage,
     deleteImage,
-    uploadImage,
-    setAspectId,
-} = useImages({ aspectId: props.aspectId, pageSize: props.pageSize, initialFilters: props.initialFilters })
+    refresh,
+} = useImageList({ aspectId: props.aspect.id, pageSize: props.pageSize, initialFilters: props.initialFilters })
 
 const activeSecondary = ref<string[]>([])
 const searchKeyword = ref('')
@@ -132,14 +129,13 @@ async function handleDelete() {
     }
 }
 
-function handleUploaded(image: ImageResponse) {
+async function handleUploaded(image: ImageResponse) {
+    await refresh()
     selectedImage.value = image
 }
 
 watch(() => props.open, async (isOpen) => {
     if (isOpen) {
-        setAspectId(props.aspectId)
-        await fetchAspect()
         await list({ pageNumber: 1, filters: activeSecondary.value })
     }
     else {
@@ -175,94 +171,93 @@ watch([activeSecondary], async () => {
                     </div>
                 </header>
             </div>
-            
+
             <!-- 可滚动内容区域 -->
             <div class="flex-1 overflow-y-auto px-6 py-6">
                 <div class="space-y-6">
+                    <section class="space-y-4">
+                        <div class="flex flex-wrap gap-3 items-center">
+                            <div class="flex gap-1 overflow-hidden">
+                                <form class="flex overflow-auto gap-1" @submit.prevent>
+                                    <input
+                                        v-for="val in representativeLabels" :key="val" v-model="activeSecondary" type="checkbox"
+                                        name="secondary-filter" class="btn" :value="val" :aria-label="val"
+                                    >
+                                </form>
+                                <button class="btn btn-square" type="button" @click="activeSecondary = []">
+                                    x
+                                </button>
+                            </div>
 
-                <section class="space-y-4">
-                    <div class="flex flex-wrap gap-3 items-center">
-                        <div class="flex gap-1 overflow-hidden">
-                            <form class="flex overflow-auto gap-1" @submit.prevent>
+                            <div class="join w-full">
                                 <input
-                                    v-for="val in representativeLabels" :key="val" v-model="activeSecondary" type="checkbox"
-                                    name="secondary-filter" class="btn" :value="val" :aria-label="val"
+                                    v-model="searchKeyword" type="search" class="input input-bordered join-item flex-1"
+                                    placeholder="按名称搜索"
                                 >
-                            </form>
-                            <button class="btn btn-square" type="button" @click="activeSecondary = []">
-                                x
-                            </button>
+                                <button class="btn btn-neutral join-item" type="button" @click="confirmSearch">
+                                    搜索
+                                </button>
+                            </div>
                         </div>
+                    </section>
 
-                        <div class="join w-full">
-                            <input
-                                v-model="searchKeyword" type="search" class="input input-bordered join-item flex-1"
-                                placeholder="按名称搜索"
+                    <section class="min-h-80">
+                        <div v-if="loading" class="flex items-center justify-center py-16">
+                            <span class="loading loading-spinner loading-lg" />
+                        </div>
+                        <div v-else>
+                            <div
+                                v-if="images.length === 0"
+                                class="rounded-lg border border-dashed p-10 text-center space-y-4"
                             >
-                            <button class="btn btn-neutral join-item" type="button" @click="confirmSearch">
-                                搜索
+                                <p class="text-base-content/60">
+                                    暂无符合条件的图片
+                                </p>
+                                <button class="btn btn-primary" type="button" @click="openUploader = true">
+                                    上传新图片
+                                </button>
+                            </div>
+                            <div v-else-if="!aspect">
+                                <p>
+                                    图片比例加载失败
+                                </p>
+                            </div>
+                            <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+                                <ImageCard
+                                    v-for="image in images" :key="imageKey(image)" :image="image"
+                                    :image-url="imageUrl(image)" :selected="isSelected(image)"
+                                    :disabled="pending" :hided-labels="initialFilters"
+                                    @select="updateSelection"
+                                    @rename="handleRename"
+                                    @delete="confirmDelete"
+                                />
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="flex gap-4 items-center justify-between">
+                        <div class="text-xs md:text-sm text-base-content/70">
+                            第 {{ pageNumber }} / {{ totalPage }} 页，共 {{ totalRow }} 张图片
+                        </div>
+                        <div class="join">
+                            <button class="btn btn-sm md:btn-md join-item" type="button" :disabled="pageNumber <= 1" @click="prevPage">
+                                &lt;
+                            </button>
+                            <input
+                                class="input input-bordered join-item input-sm md:input-md w-10 md:w-12 text-center" :value="pageNumber"
+                                min="1" :max="totalPage" @change="jumpToPage($event)"
+                            >
+                            <button
+                                class="btn btn-sm md:btn-md join-item" type="button" :disabled="pageNumber >= totalPage"
+                                @click="nextPage"
+                            >
+                                &gt;
                             </button>
                         </div>
-                    </div>
-                </section>
-
-                <section class="min-h-80">
-                    <div v-if="loading" class="flex items-center justify-center py-16">
-                        <span class="loading loading-spinner loading-lg" />
-                    </div>
-                    <div v-else>
-                        <div
-                            v-if="images.length === 0"
-                            class="rounded-lg border border-dashed p-10 text-center space-y-4"
-                        >
-                            <p class="text-base-content/60">
-                                暂无符合条件的图片
-                            </p>
-                            <button class="btn btn-primary" type="button" @click="openUploader = true">
-                                上传新图片
-                            </button>
-                        </div>
-                        <div v-else-if="!aspect">
-                            <p>
-                                图片比例加载失败
-                            </p>
-                        </div>
-                        <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-                            <ImageCard
-                                v-for="image in images" :key="imageKey(image)" :image="image"
-                                :image-url="imageUrl(image)" :selected="isSelected(image)"
-                                :disabled="pending" :hided-labels="initialFilters" :image-aspect="aspect"
-                                @select="updateSelection"
-                                @rename="handleRename"
-                                @delete="confirmDelete"
-                            />
-                        </div>
-                    </div>
-                </section>
-
-                <section class="flex gap-4 items-center justify-between">
-                    <div class="text-xs md:text-sm text-base-content/70">
-                        第 {{ pageNumber }} / {{ totalPage }} 页，共 {{ totalRow }} 张图片
-                    </div>
-                    <div class="join">
-                        <button class="btn btn-sm md:btn-md join-item" type="button" :disabled="pageNumber <= 1" @click="prevPage">
-                            &lt;
-                        </button>
-                        <input
-                            class="input input-bordered join-item input-sm md:input-md w-10 md:w-12 text-center" :value="pageNumber"
-                            min="1" :max="totalPage" @change="jumpToPage($event)"
-                        >
-                        <button
-                            class="btn btn-sm md:btn-md join-item" type="button" :disabled="pageNumber >= totalPage"
-                            @click="nextPage"
-                        >
-                            &gt;
-                        </button>
-                    </div>
-                </section>
+                    </section>
                 </div>
             </div>
-            
+
             <!-- 固定底部 -->
             <div class="shrink-0 px-6 pb-6 pt-4 border-t">
                 <div class="modal-action mt-0">
@@ -282,8 +277,8 @@ watch([activeSecondary], async () => {
     </dialog>
 
     <ImageUploader
-        v-if="open" :open="openUploader" :aspect="aspect" :aspect-id="props.aspectId"
-        :suggested-labels="[...activeFilters]" :upload="uploadImage" @update:open="val => openUploader = val"
+        v-if="open" :open="openUploader" :aspect="aspect"
+        :suggested-labels="[...activeFilters]" @update:open="val => openUploader = val"
         @uploaded="handleUploaded"
     />
 
