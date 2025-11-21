@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 
 const props = defineProps<{
     image: ImageResponse
+    imageAspect: ImageAspect
     hidedLabels?: string[]
     imageUrl: string
     selected: boolean
@@ -16,8 +17,6 @@ const emit = defineEmits<{
 }>()
 
 const { user } = useUserSession()
-
-const imageAspect = inject<ComputedRef<ImageAspect | null>>('imageAspect')
 
 const isEditing = ref(false)
 const editableName = ref(props.image.name)
@@ -76,11 +75,8 @@ const representativeLabels = computed(() => {
 })
 
 const skeletonAspectRatio = computed(() => {
-    if (!imageAspect?.value) {
-        return '4 / 3'
-    }
-    const width = imageAspect.value.ratioWidthUnit
-    const height = imageAspect.value.ratioHeightUnit
+    const width = props.imageAspect.ratioWidthUnit
+    const height = props.imageAspect.ratioHeightUnit
 
     return `${width} / ${height}`
 })
@@ -99,9 +95,9 @@ function handleImageLoad() {
     >
         <div class="relative">
             <!-- 左上 图片名称 -->
-            <div class="absolute top-1 left-1">
-                <div v-if="!isEditing" class="badge lg:badge-lg" @click.stop="beginEdit">
-                    {{ image.name }}
+            <div class="absolute top-1 left-1 max-w-[calc(100%-0.5rem)] z-10">
+                <div v-if="!isEditing" class="badge lg:badge-lg max-w-full" :title="image.name" @click.stop="beginEdit">
+                    <span class="truncate">{{ image.name }}</span>
                 </div>
                 <div v-else class="flex gap-2 flex-col bg-black/50 p-2 rounded">
                     <input

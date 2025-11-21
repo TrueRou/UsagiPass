@@ -225,6 +225,7 @@ watch([activeSecondary], async () => {
                             <div v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
                                 <ImageCard
                                     v-for="image in images" :key="imageKey(image)" :image="image"
+                                    :image-aspect="aspect"
                                     :image-url="imageUrl(image)" :selected="isSelected(image)"
                                     :disabled="pending" :hided-labels="initialFilters"
                                     @select="updateSelection"
