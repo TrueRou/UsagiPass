@@ -73,7 +73,11 @@ const maimaiVersion = computed(() => {
             <img class="object-cover h-full" :src="img(profile.preference.backgroundId)">
             <div class="absolute inset-0">
                 <img class="chara-center h-full absolute object-cover" :src="img(profile.preference.characterId)">
-
+                <template v-if="profile.preference.enableMask && profile.preference.maskId">
+                    <div class="lazer-mask h-full w-full absolute" :style="{ maskImage: `url(${img(profile.preference.maskId)})` }">
+                        <div class="h-full w-full flow-colorful" />
+                    </div>
+                </template>
                 <img class="frame-upper h-full absolute" :src="img(profile.preference.frameId)">
                 <div class="absolute inset-0">
                     <div class="relative space-y-2 w-full">
@@ -193,6 +197,28 @@ const maimaiVersion = computed(() => {
 
     >* {
         z-index: 1;
+    }
+}
+
+.lazer-mask {
+    mask-mode: alpha;
+    mask-repeat: no-repeat;
+    mask-size: cover;
+    mask-position: center;
+}
+
+.flow-colorful {
+    background: linear-gradient(to bottom right, red, yellow, blue);
+    animation: hue 4s linear infinite;
+}
+
+@keyframes hue {
+    from {
+        filter: hue-rotate(0deg);
+    }
+
+    to {
+        filter: hue-rotate(360deg);
     }
 }
 </style>

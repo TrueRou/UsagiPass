@@ -1,0 +1,1 @@
+ALTER TABLE "tbl_preference" ADD COLUMN "enable_mask" boolean DEFAULT false NOT NULL;

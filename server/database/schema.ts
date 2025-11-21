@@ -33,6 +33,7 @@ export const userPreference = pgTable('tbl_preference', {
     showDisplayName: boolean('show_display_name').notNull().default(true),
     showFriendCode: boolean('show_friend_code').notNull().default(true),
     showDate: boolean('show_date').notNull().default(true),
+    enableMask: boolean('enable_mask').notNull().default(false),
     characterId: text('character_id').notNull(),
     maskId: text('mask_id').notNull(),
     backgroundId: text('background_id').notNull(),

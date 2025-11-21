@@ -476,6 +476,22 @@ function goToPrev() {
                             type="checkbox"
                         >
                     </div>
+
+                    <!-- 开启遮罩图层 -->
+                    <div class="form-control flex items-center justify-between gap-4 rounded-lg px-4 py-3">
+                        <div>
+                            <p class="font-medium text-sm">
+                                {{ t("fields.enableMask.label") }}
+                            </p>
+                            <p class="text-xs text-base-content/70">
+                                {{ t("fields.enableMask.helper") }}
+                            </p>
+                        </div>
+                        <input
+                            v-model="profileData.preference.enableMask" class="toggle toggle-primary"
+                            type="checkbox"
+                        >
+                    </div>
                 </div>
 
                 <!-- 图片设置标题 -->
@@ -660,6 +676,9 @@ zh-CN:
     showDate:
       label: 显示日期
       helper: 是否显示左下方日期
+    enableMask:
+      label: 开启遮罩图层
+      helper: 是否在角色立绘上应用遮罩图层渐变效果
     account:
       server: 选择服务器
       credentials: 账号凭据
