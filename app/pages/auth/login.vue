@@ -12,7 +12,7 @@ const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length 
 type LoginStrategy = 'LOCAL' | 'DIVING_FISH' | 'LXNS'
 
 const strategyOptions: Array<{ value: LoginStrategy, name: string, desc: string }> = [
-    { value: 'LOCAL', name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证登录' },
+    { value: 'LOCAL', name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证登录，原 UsagiCard 兔卡账号可直接登录' },
     { value: 'DIVING_FISH', name: '水鱼 · DIVING_FISH', desc: '使用绑定的 DivingFish 账号密码登录' },
     { value: 'LXNS', name: '落雪 · LXNS', desc: '使用绑定的 LXNS 个人 API 密钥登录' },
 ]

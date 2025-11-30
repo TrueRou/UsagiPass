@@ -636,7 +636,7 @@ zh-CN:
       placeholder: 留空以自动获取
     simplifiedCode:
       label: 卡面标签
-      helper: 覆盖卡面底栏左侧显示的文字内容
+      helper: 覆盖卡面底栏左侧显示的随机码内容
       placeholder: 留空以自动获取
     friendCode:
       label: 好友代码
@@ -648,11 +648,11 @@ zh-CN:
       placeholder: 留空以隐藏
     maimaiVersion:
       label: 游戏版本
-      helper: 覆盖卡面底栏右侧显示的版本信息
+      helper: 覆盖卡面底栏右侧显示的机台版本信息
       placeholder: 留空以自动获取
     dxRating:
-      label: 玩家评分
-      helper: 覆盖卡面顶栏右侧显示的玩家评分
+      label: DX 分数
+      helper: 覆盖卡面顶栏右侧显示的 DX Rating
       placeholder: 留空以自动获取
     qrSize:
       label: 二维码尺寸
@@ -671,8 +671,8 @@ zh-CN:
       label: 显示好友代码
       helper: 是否显示右上方好友代码
     showDxRating:
-      label: 显示玩家评分
-      helper: 是否显示顶栏右侧玩家评分
+      label: 显示 DX 分数
+      helper: 是否显示顶栏右侧 DX Rating
     showDate:
       label: 显示日期
       helper: 是否显示左下方日期

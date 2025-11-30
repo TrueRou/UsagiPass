@@ -63,7 +63,7 @@ const maimaiVersion = computed(() => {
     // 覆盖优先级：用户偏好设置 > 机台最新版本（TODO）
     if (profile.value?.preference.maimaiVersion)
         return profile.value?.preference.maimaiVersion
-    return '[maimaiDX]CN1.51-F'
+    return '[maimaiDX]CN1.51-H'
 })
 </script>
 

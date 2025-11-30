@@ -18,9 +18,9 @@ const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<MergeLoginEmits>()
 
 const strategyOptions: Array<{ label: string, value: MergeStrategy, description: string }> = [
-    { label: 'UsagiPass 默认账号', value: 'LOCAL', description: '使用 UsagiPass 默认账号' },
-    { label: 'DIVING_FISH 旧账号', value: 'DIVING_FISH', description: '使用 DIVING_FISH 旧账号' },
-    { label: 'LXNS 旧账号', value: 'LXNS', description: '使用 LXNS 旧账号' },
+    { label: 'UsagiCard（兔卡）账号', value: 'LOCAL', description: '使用 UsagiCard 兔卡旧账号' },
+    { label: '水鱼旧账号', value: 'DIVING_FISH', description: '使用水鱼查分器旧账号' },
+    { label: '落雪旧账号', value: 'LXNS', description: '使用落雪查分器旧账号' },
 ]
 
 const form = reactive({
