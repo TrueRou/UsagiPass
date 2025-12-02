@@ -5,16 +5,7 @@ useHead({
 })
 
 const contextStore = useContextStore()
-
-onMounted(() => {
-    const route = useRoute()
-    if (route.query.date)
-        contextStore.dateLimit = route.query.date as string
-    if (route.query.time)
-        contextStore.timeLimit = route.query.time as string
-    if (route.query.maid)
-        contextStore.maimaiMaid = route.query.maid as string
-})
+const { startMainPageTour } = useTour()
 
 const { data: profile } = await useLeporid<UserProfile>('/api/nuxt/profile')
 const { img } = useUtils()
@@ -65,6 +56,24 @@ const maimaiVersion = computed(() => {
         return profile.value?.preference.maimaiVersion
     return '[maimaiDX]CN1.51-H'
 })
+
+onMounted(() => {
+    const route = useRoute()
+    if (route.query.date)
+        contextStore.dateLimit = route.query.date as string
+    if (route.query.time)
+        contextStore.timeLimit = route.query.time as string
+    if (route.query.maid)
+        contextStore.maimaiMaid = route.query.maid as string
+
+    // 检查是否需要启动用户引导
+    if (profile.value && !profile.value.preference.skipTour) {
+        // 延迟启动引导，确保页面完全加载
+        setTimeout(() => {
+            startMainPageTour()
+        }, 500)
+    }
+})
 </script>
 
 <template>
@@ -81,10 +90,11 @@ const maimaiVersion = computed(() => {
                 <img class="frame-upper h-full absolute" :src="img(profile.preference.frameId)">
                 <div class="absolute inset-0">
                     <div class="relative space-y-2 w-full">
-                        <WidgetDxRating class="pt-4 w-[40%]" :rating="playerRating" />
+                        <WidgetDxRating class="pt-4 w-[40%]" :rating="playerRating" data-tour="dx-rating" />
                         <WidgetPlayerInfo
                             :username="playerName"
                             :friend-code="friendCode" :player-info-color="profile.preference.playerInfoColor"
+                            data-tour="player-info"
                         />
                     </div>
                 </div>
@@ -101,7 +111,7 @@ const maimaiVersion = computed(() => {
                     id="c-footer" class="flex absolute bottom-0 items-center justify-center w-full pb-[0.8%]"
                     :style="{ '--b-bottom': `url(${img(profile.preference.frameId)})` }"
                 >
-                    <button class="cursor-pointer" @click="triggerCrawl({ date: contextStore.dateLimit || '', time: contextStore.timeLimit || '', maid: contextStore.maimaiMaid || '' })">
+                    <button class="cursor-pointer" data-tour="rocket-button" @click="triggerCrawl({ date: contextStore.dateLimit || '', time: contextStore.timeLimit || '', maid: contextStore.maimaiMaid || '' })">
                         <div class="p-1 rounded-full bg-white dark:bg-gray-800" aria-label="rocket" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"
@@ -120,7 +130,7 @@ const maimaiVersion = computed(() => {
                             {{ maimaiVersion }}
                         </p>
                     </div>
-                    <NuxtLink to="/preference">
+                    <NuxtLink to="/preference" data-tour="settings-button">
                         <div class="p-1 rounded-full bg-white dark:bg-gray-800" aria-label="settings" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"

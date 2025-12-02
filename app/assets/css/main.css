@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
   exclude: properties;
 };
@@ -10,4 +11,98 @@
 
 .font-sega {
   font-family: "SEGA_MARUGOTHICDB";
+}
+/* intro.js 自定义样式 */
+.introjs-helperLayer {
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 0.5rem !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .introjs-overlay {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+  }
+
+  .introjs-tooltip {
+    background-color: #23272f !important;
+    color: #f3f4f6 !important;
+    border: 1px solid #374151 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .introjs-tooltip-header,
+  .introjs-tooltip-title {
+    color: #f3f4f6 !important;
+  }
+
+  .introjs-arrow {
+    border-top-color: #23272f !important;
+    border-bottom-color: #23272f !important;
+    border-left-color: #23272f !important;
+    border-right-color: #23272f !important;
+  }
+
+  .introjs-button {
+    background-color: #2563eb !important;
+    color: #fff !important;
+    border: none !important;
+    text-shadow: none !important;
+  }
+
+  .introjs-button:hover {
+    background-color: #1d4ed8 !important;
+  }
+
+  .introjs-button:focus {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3) !important;
+  }
+
+  .introjs-skipbutton {
+    color: rgba(243, 244, 246, 0.6) !important;
+  }
+
+  .introjs-skipbutton:hover {
+    color: #f3f4f6 !important;
+  }
+
+  .introjs-bullets ul li a.active {
+    background-color: #2563eb !important;
+  }
+
+  .introjs-bullets ul li a {
+    background-color: rgba(243, 244, 246, 0.3) !important;
+  }
+
+  .introjs-progress {
+    background-color: #374151 !important;
+  }
+
+  .introjs-progressbar {
+    background-color: #2563eb !important;
+  }
+
+  .introjs-helperLayer {
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7) !important;
+    border-radius: 0.5rem !important;
+  }
+}
+
+/* intro.js 移动端优化 */
+@media (max-width: 768px) {
+  .introjs-tooltip {
+    max-width: 90vw !important;
+  }
+
+  .introjs-tooltip-title {
+    font-size: 1.125rem !important;
+  }
+
+  .introjs-tooltiptext {
+    font-size: 0.9rem !important;
+  }
+
+  .introjs-button {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
 }

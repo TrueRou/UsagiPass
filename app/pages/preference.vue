@@ -8,6 +8,18 @@ const { t } = useI18n()
 const { $leporid } = useNuxtApp()
 const { loggedIn, user, clear } = useUserSession()
 const notificationsStore = useNotificationsStore()
+const { startPreferenceTour, restartTour } = useTour()
+const route = useRoute()
+
+// 检查是否需要继续引导（从主页跳转过来）
+onMounted(() => {
+    if (route.query.tour === 'continue') {
+        // 延迟启动引导，确保页面完全加载
+        setTimeout(() => {
+            startPreferenceTour()
+        }, 500)
+    }
+})
 
 const { data: profileDataRaw } = await useLeporid<UserProfile>('/api/nuxt/profile')
 const { data: serversData } = await useLeporid<Server[]>('/api/nuxt/servers')
@@ -214,7 +226,7 @@ function goToPrev() {
                                 <span>登出</span>
                             </button>
                             <details class="dropdown dropdown-end">
-                                <summary class="btn btn-ghost btn-sm">
+                                <summary class="btn btn-ghost btn-sm" data-tour="merge-account">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01" />
                                     </svg>
@@ -225,6 +237,11 @@ function goToPrev() {
                                             合并账户
                                             <span class="badge badge-outline badge-xs">Beta</span>
                                         </NuxtLink>
+                                    </li>
+                                    <li>
+                                        <button type="button" @click="restartTour">
+                                            重新开始引导
+                                        </button>
                                     </li>
                                 </ul>
                             </details>
@@ -500,7 +517,7 @@ function goToPrev() {
                 </div>
 
                 <!-- 图片设置表单 -->
-                <div class="grid gap-4 md:grid-cols-2">
+                <div class="grid gap-4 md:grid-cols-2" data-tour="image-settings">
                     <!-- 角色立绘 -->
                     <AppPreferImage
                         :image-id="profileData.preference.characterId"
@@ -563,9 +580,10 @@ function goToPrev() {
                 </div>
 
                 <!-- 账号设置表单 -->
-                <div class="flex flex-col flex-auto gap-4">
+                <div class="flex flex-col flex-auto gap-4" data-tour="account-settings">
                     <button
                         class="btn btn-outline" type="button"
+                        data-tour="add-account"
                         @click="openAddAccount"
                     >
                         新增账号
@@ -612,7 +630,7 @@ function goToPrev() {
                 </div>
 
                 <footer class="flex justify-end">
-                    <button class="btn btn-primary w-full md:w-auto" type="submit" :disabled="isSaving" @click.stop="goToPrev()">
+                    <button class="btn btn-primary w-full md:w-auto" type="submit" data-tour="save-button" :disabled="isSaving" @click.stop="goToPrev()">
                         <span v-if="isSaving" class="loading loading-spinner" />
                         <span>保存修改</span>
                     </button>

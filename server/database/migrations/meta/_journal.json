@@ -15,6 +15,13 @@
       "when": 1763726753680,
       "tag": "0001_chilly_cable",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1764692282273,
+      "tag": "0002_yielding_fixer",
+      "breakpoints": true
     }
   ]
 }

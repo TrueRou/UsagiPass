@@ -1,0 +1,1 @@
+ALTER TABLE "tbl_preference" ADD COLUMN "skip_tour" boolean DEFAULT false NOT NULL;

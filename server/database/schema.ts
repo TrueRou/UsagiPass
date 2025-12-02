@@ -39,6 +39,7 @@ export const userPreference = pgTable('tbl_preference', {
     backgroundId: text('background_id').notNull(),
     frameId: text('frame_id').notNull(),
     passnameId: text('passname_id').notNull(),
+    skipTour: boolean('skip_tour').notNull().default(false),
 })
 
 export const userRating = pgTable('tbl_rating', {
