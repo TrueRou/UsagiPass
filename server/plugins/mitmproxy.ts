@@ -15,7 +15,7 @@ const WAHLAP_HOSTS = new Set([
     'tgk-wcaime.wahlap.com',
 ])
 
-const WEEKDAYS_JP = ['月', '火', '水', '木', '金', '土', '日']
+const WEEKDAYS_JP = ['一', '二', '三', '四', '五', '六', '日']
 const SHANGHAI_OFFSET_SECONDS = 8 * 60 * 60
 
 function buildShanghaiDate(timestamp: number) {
