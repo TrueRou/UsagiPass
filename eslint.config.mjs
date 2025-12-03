@@ -13,5 +13,10 @@ export default withNuxt(
             indent: 4, // 4, or 'tab'
             quotes: 'single', // or 'double'
         },
+        ignores: [
+            '**/*.json',
+            '**/*.yaml',
+            '**/*.yml',
+        ],
     }),
 )
