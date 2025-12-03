@@ -29,6 +29,6 @@ watchEffect(() => {
 
 <template>
     <div v-if="Number(size) !== -1" class="p-0.5 rounded bg-white">
-        <img ref="qr-image" class="w-full h-full" :style="{ width: `${size}vh` }">
+        <img ref="qr-image" class="w-full h-full" fetchpriority="high" :style="{ width: `${size}vh` }">
     </div>
 </template>

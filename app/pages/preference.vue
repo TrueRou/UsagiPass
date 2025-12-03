@@ -126,7 +126,7 @@ function showMatchCharacterMetadataHelp() {
     const notificationsStore = useNotificationsStore()
     notificationsStore.addNotification({
         type: 'info',
-        message: '匹配数据功能说明：\n根据当前选择的角色立绘，自动匹配游戏版本、立绘名称、遮罩图层。',
+        message: '根据当前选择的角色立绘，自动匹配游戏版本、立绘名称、遮罩图层。',
         duration: 10000,
     })
 }

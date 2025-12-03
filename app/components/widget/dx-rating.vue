@@ -66,23 +66,33 @@ async function drawCanvas() {
     if (!ctx)
         return
 
-    const baseImg = new Image()
-    baseImg.src = baseImage.value
-    await baseImg.decode()
-
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height)
 
-    const numImgPromises = numImages.value.map((src) => {
-        const img = new Image()
-        img.src = src
-        return img.decode().then(() => img)
-    })
+    const baseImg = new Image()
+    baseImg.fetchPriority = 'high'
+    baseImg.src = baseImage.value
 
-    const numImgs = await Promise.all(numImgPromises)
-    numImgs.forEach((img, index) => {
-        ctx.drawImage(img, 115 + index * 28, 20, 34 * scale, 40 * scale)
-    })
+    baseImg.onload = () => {
+        ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height)
+
+        const numImgPromises = numImages.value.map((src) => {
+            const img = new Image()
+            img.fetchPriority = 'high'
+            img.src = src
+            return new Promise<HTMLImageElement>((resolve) => {
+                img.onload = () => resolve(img)
+                img.onerror = () => resolve(img)
+            })
+        })
+
+        Promise.all(numImgPromises).then((numImgs) => {
+            numImgs.forEach((img, index) => {
+                if (img.complete && img.naturalHeight !== 0) {
+                    ctx.drawImage(img, 115 + index * 28, 20, 34 * scale, 40 * scale)
+                }
+            })
+        })
+    }
 }
 
 onMounted(drawCanvas)

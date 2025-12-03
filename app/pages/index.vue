@@ -79,15 +79,15 @@ onMounted(() => {
 <template>
     <div v-if="profile" class="isolate h-dvh dark:bg-gray-800">
         <div class="relative h-full w-fit mx-auto">
-            <img class="object-cover h-full" :src="img(profile.preference.backgroundId)">
+            <img class="object-cover h-full" fetchpriority="low" :src="img(profile.preference.backgroundId)">
             <div class="absolute inset-0">
-                <img class="chara-center h-full absolute object-cover" :src="img(profile.preference.characterId)">
+                <img class="chara-center h-full absolute object-cover" fetchpriority="low" :src="img(profile.preference.characterId)">
                 <template v-if="profile.preference.enableMask && profile.preference.maskId">
                     <div class="lazer-mask h-full w-full absolute" :style="{ maskImage: `url(${img(profile.preference.maskId)})` }">
                         <div class="h-full w-full flow-colorful" />
                     </div>
                 </template>
-                <img class="frame-upper h-full absolute" :src="img(profile.preference.frameId)">
+                <img class="frame-upper h-full absolute" fetchpriority="low" :src="img(profile.preference.frameId)">
                 <div class="absolute inset-0">
                     <div class="relative space-y-2 w-full">
                         <WidgetDxRating class="pt-4 w-[40%]" :rating="playerRating" data-tour="dx-rating" />
