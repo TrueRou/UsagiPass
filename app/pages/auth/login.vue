@@ -9,12 +9,10 @@ const { loggedIn, fetch: fetchUser, user } = useUserSession()
 
 const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length ?? 0) === 0)
 
-type LoginStrategy = 'LOCAL' | 'DIVING_FISH' | 'LXNS'
-
-const strategyOptions: Array<{ value: LoginStrategy, name: string, desc: string }> = [
-    { value: 'LOCAL', name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证（原兔卡账号）登录' },
-    { value: 'DIVING_FISH', name: '水鱼 · DIVING_FISH', desc: '使用绑定的 DivingFish 账号密码登录' },
-    { value: 'LXNS', name: '落雪 · LXNS', desc: '使用绑定的 LXNS 个人 API 密钥登录' },
+const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string }> = [
+    { value: 0, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证（原兔卡账号）登录' },
+    { value: 1, name: '水鱼 · DIVING_FISH', desc: '使用绑定的 DivingFish 账号密码登录' },
+    { value: 2, name: '落雪 · LXNS', desc: '使用绑定的 LXNS 个人 API 密钥登录' },
 ]
 
 // Redirect if already logged in
@@ -30,20 +28,20 @@ const loginSchema = z.object({
     username: z.string().min(1, '用户名不能为空'),
     password: z.string().min(1, '密码不能为空'),
     refresh_token: z.string().optional(),
-    strategy: z.enum(['LOCAL', 'DIVING_FISH', 'LXNS']).default('LOCAL'),
+    strategy: z.number(),
 })
 
 interface LoginForm {
     username: string
     password: string
     refresh_token?: string
-    strategy: LoginStrategy
+    strategy: AuthStrategy
 }
 
 const form = reactive<LoginForm>({
     username: '',
     password: '',
-    strategy: 'LOCAL' as LoginStrategy,
+    strategy: 0,
 })
 
 const { validate, ve } = useFormValidation(loginSchema, form)
@@ -52,13 +50,11 @@ async function handleLogin() {
     if (!validate())
         return
 
-    const body: Record<string, string> = {
+    const body: Record<string, string | number> = {
         username: form.username,
         password: form.password,
+        strategy: form.strategy,
     }
-
-    if (form.strategy !== 'LOCAL')
-        body.strategy = form.strategy
 
     await useNuxtApp().$leporid('/api/nuxt/auth/login', {
         method: 'POST',

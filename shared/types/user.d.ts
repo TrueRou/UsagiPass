@@ -1,7 +1,7 @@
 export enum AuthStrategy {
-    LOCAL = 'LOCAL',
-    DIVING_FISH = 'DIVING_FISH',
-    LXNS = 'LXNS',
+    LOCAL = 0,
+    DIVING_FISH = 1,
+    LXNS = 2,
 }
 
 /**
@@ -25,7 +25,7 @@ export interface UserAuthRequest {
     /** 密码 */
     password: string
     /** 认证策略 */
-    strategy?: AuthStrategy
+    strategy: AuthStrategy
     /** 刷新令牌 */
     refresh_token?: string
 }

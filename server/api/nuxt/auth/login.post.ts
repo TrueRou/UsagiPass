@@ -4,11 +4,14 @@ export default defineEventHandler(async (event) => {
     try {
         const tokenResponse = await $fetch<UserAuthResponse>(`/api/auth/token`, {
             method: 'POST',
-            query: {
+            body: new URLSearchParams({
                 grant_type: 'password',
+                strategy: strategy.toString(),
                 username,
                 password,
-                strategy,
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
         })
 

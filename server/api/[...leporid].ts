@@ -14,9 +14,12 @@ export default defineEventHandler(async (event) => {
             await $fetch<UserAuthResponse>('/api/auth/token', {
                 method: 'POST',
                 ignoreResponseError: true,
-                query: {
+                body: new URLSearchParams({
                     grant_type: 'refresh_token',
                     refresh_token: session.secure.refreshToken,
+                }),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 async onResponse({ response }) {
                     if (response.status === 200) {
