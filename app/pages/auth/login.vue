@@ -9,10 +9,10 @@ const { loggedIn, fetch: fetchUser, user } = useUserSession()
 
 const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length ?? 0) === 0)
 
-const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string }> = [
-    { value: 0, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证（原兔卡账号）登录' },
-    { value: 1, name: '水鱼 · DIVING_FISH', desc: '使用绑定的 DivingFish 账号密码登录' },
-    { value: 2, name: '落雪 · LXNS', desc: '使用绑定的 LXNS 个人 API 密钥登录' },
+const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string, passwordLabel: string, usernameLabel?: string }> = [
+    { value: 0, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名' },
+    { value: 1, name: '水鱼 · DIVING_FISH', desc: '使用绑定的 DivingFish 账号密码登录', passwordLabel: '密码', usernameLabel: '用户名' },
+    { value: 2, name: '落雪 · LXNS', desc: '使用绑定的 LXNS 个人 API 密钥登录', passwordLabel: '个人密钥', usernameLabel: undefined },
 ]
 
 // Redirect if already logged in
@@ -82,10 +82,10 @@ useHead({
             </h1>
 
             <form class="space-y-6" @submit.prevent="handleLogin">
-                <div>
-                    <label class="block text-sm font-medium mb-2">用户名</label>
+                <div v-if="strategyOptions[form.strategy]?.usernameLabel">
+                    <label class="block text-sm font-medium mb-2">{{ strategyOptions[form.strategy]?.usernameLabel }}</label>
                     <input
-                        v-model="form.username" type="text" placeholder="请输入用户名"
+                        v-model="form.username" type="text" :placeholder="`请输入${strategyOptions[form.strategy]?.usernameLabel}`"
                         class="input input-bordered w-full" :class="{ 'input-error': ve('username') }"
                     >
                     <p v-if="ve('username')" class="text-error text-sm mt-1">
@@ -94,9 +94,9 @@ useHead({
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium mb-2">密码 / 个人密钥</label>
+                    <label class="block text-sm font-medium mb-2">{{ strategyOptions[form.strategy]?.passwordLabel }}</label>
                     <input
-                        v-model="form.password" type="password" placeholder="请输入密码"
+                        v-model="form.password" type="password" :placeholder="`请输入${strategyOptions[form.strategy]?.passwordLabel}`"
                         class="input input-bordered w-full" :class="{ 'input-error': ve('password') }"
                     >
                     <p v-if="ve('password')" class="text-error text-sm mt-1">

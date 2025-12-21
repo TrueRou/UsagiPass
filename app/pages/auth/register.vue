@@ -22,9 +22,9 @@ interface RegisterForm extends UserCreateRequest {
 // Zod schema for validation
 const registerSchema = z.object({
     username: z.string().min(3, '用户名至少需要 3 个字符'),
-    email: z.email(),
+    email: z.email('请输入有效的邮箱地址'),
     password: z.string().min(6, '密码至少需要 6 个字符'),
-    confirmPassword: z.string(),
+    confirmPassword: z.string().min(6, '密码至少需要 6 个字符'),
 }).refine(data => data.password === data.confirmPassword, {
     message: '两次输入的密码不一致',
     path: ['confirmPassword'],
