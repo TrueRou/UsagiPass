@@ -9,7 +9,6 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/TrueRou/UsagiPass)
 ![GitHub forks](https://img.shields.io/github/forks/TrueRou/UsagiPass)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/TrueRou/UsagiPass)
-![GitCode stars](https://gitcode.com/TrueRou/UsagiPass/star/badge.svg)
 
 ## ✨ 主要功能
 
@@ -59,13 +58,13 @@ pnpm dev
 
 访问 `http://localhost:7200` 即可使用。
 
-### 关于更新成绩功能
+### 关于代理
 
 UsagiPass 更新成绩需要配合中间人代理（MITM）使用，在开发环境下，需要使用支持 ClashMeta 规则的代理软件。
 
 在 `pnpm dev` 启动后，默认监听 HTTP 代理 `http://localhost:7300`。
 
-将 `shared/rules/Developement.yaml` 导入支持 ClashMeta 规则的代理软件后，启动系统代理即可。
+将 `public/UsagiPassDev.yaml` 导入支持 ClashMeta 规则的代理软件后，启动系统代理即可。
 
 ## 🤝 支持项目
 
