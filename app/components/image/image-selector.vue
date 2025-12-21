@@ -166,7 +166,7 @@ watch([activeSecondary], async () => {
                             {{ title }}
                         </h2>
                         <p v-if="aspect" class="text-sm text-base-content/70">
-                            比例：{{ aspect.name }} · {{ `${aspect.ratioWidthUnit}:${aspect.ratioHeightUnit}` }}
+                            比例：{{ aspect.name }} · {{ `${aspect.ratio_width_unit}:${aspect.ratio_height_unit}` }}
                         </p>
                     </div>
                 </header>

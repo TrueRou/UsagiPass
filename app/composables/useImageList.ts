@@ -98,7 +98,7 @@ export function useImageList(options: UseImageListOptions) {
         await refresh()
     }
 
-    const customImages = computed(() => images.value.filter(image => image.visibility === 'PRIVATE'))
+    const customImages = computed(() => images.value.filter(image => image.visibility === ImageVisibility.PRIVATE))
 
     const representativeLabels = computed(() => {
         const allLabels = [...availableLabels.value, ...activeFilters.value ?? []]

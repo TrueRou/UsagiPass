@@ -10,9 +10,9 @@ const { loggedIn, fetch: fetchUser, user } = useUserSession()
 const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length ?? 0) === 0)
 
 const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string, passwordLabel: string, usernameLabel?: string }> = [
-    { value: 0, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名' },
-    { value: 1, name: '水鱼 · DIVING_FISH', desc: '使用绑定的 DivingFish 账号密码登录', passwordLabel: '密码', usernameLabel: '用户名' },
-    { value: 2, name: '落雪 · LXNS', desc: '使用绑定的 LXNS 个人 API 密钥登录', passwordLabel: '个人密钥', usernameLabel: undefined },
+    { value: AuthStrategy.LOCAL, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名' },
+    { value: AuthStrategy.DIVING_FISH, name: '水鱼 · DIVING_FISH', desc: '使用绑定的 DivingFish 账号密码登录', passwordLabel: '密码', usernameLabel: '用户名' },
+    { value: AuthStrategy.LXNS, name: '落雪 · LXNS', desc: '使用绑定的 LXNS 个人 API 密钥登录', passwordLabel: '个人密钥', usernameLabel: undefined },
 ]
 
 // Redirect if already logged in
@@ -41,7 +41,7 @@ interface LoginForm {
 const form = reactive<LoginForm>({
     username: '',
     password: '',
-    strategy: 0,
+    strategy: AuthStrategy.LOCAL,
 })
 
 const { validate, ve } = useFormValidation(loginSchema, form)
@@ -50,15 +50,13 @@ async function handleLogin() {
     if (!validate())
         return
 
-    const body: Record<string, string | number> = {
-        username: form.username,
-        password: form.password,
-        strategy: form.strategy,
-    }
-
     await useNuxtApp().$leporid('/api/nuxt/auth/login', {
         method: 'POST',
-        body,
+        body: {
+            username: form.username,
+            password: form.password,
+            strategy: form.strategy,
+        },
         showSuccessToast: true,
         successMessage: '登录成功！',
     })

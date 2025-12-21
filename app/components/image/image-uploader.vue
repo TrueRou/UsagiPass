@@ -32,7 +32,7 @@ const metadata = reactive({
 
 const cropRatio = computed(() => {
     if (props.aspect) {
-        return [props.aspect.ratioWidthUnit || 1, props.aspect.ratioHeightUnit || 1]
+        return [props.aspect.ratio_width_unit || 1, props.aspect.ratio_height_unit || 1]
     }
     return [4, 3]
 })
@@ -42,9 +42,9 @@ const cropBox = computed(() => {
         return { width: 300, height: 225 }
     }
     const base = 320
-    const total = props.aspect.ratioWidthUnit + props.aspect.ratioHeightUnit
-    const width = (props.aspect.ratioWidthUnit / total) * base * 2
-    const height = (props.aspect.ratioHeightUnit / total) * base * 2
+    const total = props.aspect.ratio_width_unit + props.aspect.ratio_height_unit
+    const width = (props.aspect.ratio_width_unit / total) * base * 2
+    const height = (props.aspect.ratio_height_unit / total) * base * 2
     return { width, height }
 })
 

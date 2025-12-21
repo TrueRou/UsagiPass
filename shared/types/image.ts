@@ -2,9 +2,9 @@
  * 图片可见性枚举
  */
 export enum ImageVisibility {
-    DELETED = 'DELETED',
-    PRIVATE = 'PRIVATE',
-    PUBLIC = 'PUBLIC',
+    DELETED = -1,
+    PRIVATE = 0,
+    PUBLIC = 1,
 }
 
 /**
@@ -44,8 +44,8 @@ export interface ImageAspect {
     id: string
     name: string
     description?: string
-    ratioWidthUnit: number
-    ratioHeightUnit: number
+    ratio_width_unit: number
+    ratio_height_unit: number
 }
 
 /**

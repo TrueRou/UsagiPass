@@ -75,8 +75,8 @@ const representativeLabels = computed(() => {
 })
 
 const skeletonAspectRatio = computed(() => {
-    const width = props.imageAspect.ratioWidthUnit
-    const height = props.imageAspect.ratioHeightUnit
+    const width = props.imageAspect.ratio_width_unit
+    const height = props.imageAspect.ratio_height_unit
 
     return `${width} / ${height}`
 })
