@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
     devtools: { enabled: true },
-    modules: ['@pinia/nuxt', '@nuxtjs/i18n', '@nuxt/eslint', 'nuxt-auth-utils', 'nuxt-prepare'],
+    modules: ['@pinia/nuxt', '@nuxtjs/i18n', '@nuxt/eslint', 'nuxt-auth-utils', 'nuxt-prepare', '@nuxt/content', '@nuxt/icon', '@nuxtjs/color-mode'],
     css: ['~/assets/css/main.css'],
     vite: {
         plugins: [
@@ -19,6 +19,7 @@ export default defineNuxtConfig({
             standalone: false, // <---
         },
     },
+    colorMode: { classSuffix: '' },
     runtimeConfig: {
         usagipass: {
             baseURL: 'http://localhost:7200',
@@ -55,9 +56,21 @@ export default defineNuxtConfig({
                 code: 'zh-CN',
                 flag: 'CN',
                 name: '简体中文 (中国)',
-                file: 'zh-CN.json',
             },
         ],
+    },
+    content: {
+        experimental: { nativeSqlite: true },
+        build: {
+            markdown: {
+                highlight: {
+                    theme: {
+                        dark: 'github-dark',
+                        default: 'github-light',
+                    },
+                },
+            },
+        },
     },
     nitro: {
         preset: 'bun',
