@@ -74,7 +74,7 @@ useHead({
 
 <template>
     <div>
-        <AppAccountMergeBanner />
+        <BannerAccountSystem />
 
         <div class="max-w-md mx-auto px-4 pt-16">
             <h1 class="text-3xl font-bold text-center mb-8">

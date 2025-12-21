@@ -18,7 +18,6 @@
         "@iconify-json/simple-icons": "^1.2.63",
         "@nuxt/content": "^3.9.0",
         "@nuxt/icon": "^2.1.1",
-        "@nuxtjs/color-mode": "^4.0.0",
         "@nuxtjs/i18n": "10.1.1",
         "@pinia/nuxt": "0.11.2",
         "@tailwindcss/typography": "^0.5.19",

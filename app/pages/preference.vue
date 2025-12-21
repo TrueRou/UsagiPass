@@ -519,7 +519,7 @@ function goToPrev() {
                 <!-- 图片设置表单 -->
                 <div class="grid gap-4 md:grid-cols-2" data-tour="image-settings">
                     <!-- 角色立绘 -->
-                    <AppPreferImage
+                    <ImageChooseImage
                         :image-id="profileData.preference.characterId"
                         :label="t('images.character.label')"
                         :helper="t('images.character.helper')"
@@ -538,10 +538,10 @@ function goToPrev() {
                                 </button>
                             </div>
                         </template>
-                    </AppPreferImage>
+                    </ImageChooseImage>
 
                     <!-- 遮罩图层 -->
-                    <AppPreferImage
+                    <ImageChooseImage
                         :image-id="profileData.preference.maskId"
                         :label="t('images.mask.label')"
                         :helper="t('images.mask.helper')"
@@ -552,7 +552,7 @@ function goToPrev() {
                     />
 
                     <!-- 背景 -->
-                    <AppPreferImage
+                    <ImageChooseImage
                         :image-id="profileData.preference.backgroundId"
                         :label="t('images.background.label')"
                         :helper="t('images.background.helper')"
@@ -563,7 +563,7 @@ function goToPrev() {
                     />
 
                     <!-- 边框 -->
-                    <AppPreferImage
+                    <ImageChooseImage
                         :image-id="profileData.preference.frameId"
                         :label="t('images.frame.label')"
                         :helper="t('images.frame.helper')"

@@ -2,7 +2,7 @@
     <div>
         <ClientOnly>
             <NuxtLoadingIndicator />
-            <AppNotification />
+            <BannerNotification />
         </ClientOnly>
         <NuxtPage />
     </div>
