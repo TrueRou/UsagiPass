@@ -40,7 +40,7 @@
             "type": "shadowsocks",
             "tag": "UsagiPass",
             "server": "up.turou.fun",
-            "server_port": 16789,
+            "server_port": 15678,
             "method": "chacha20-ietf-poly1305",
             "password": "o5bZUHHvbFLy3eXkzi2M",
             "network": "tcp",

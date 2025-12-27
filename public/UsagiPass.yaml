@@ -8,7 +8,7 @@ proxies:
     "name": "UsagiPass",
     "type": "ss",
     "server": "up.turou.fun",
-    "port": 16789,
+    "port": 15678,
     "cipher": "chacha20-ietf-poly1305",
     "password": "o5bZUHHvbFLy3eXkzi2M",
     "udp": false
