@@ -5,7 +5,7 @@ export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
     devtools: { enabled: true },
     modules: ['@pinia/nuxt', '@nuxtjs/i18n', '@nuxt/eslint', 'nuxt-auth-utils', '@nuxt/content', '@nuxt/icon'],
-    css: ['~/assets/css/main.css'],
+    css: ['~/assets/css/main.css', 'intro.js/introjs.css'],
     vite: {
         plugins: [
             tailwindcss(),

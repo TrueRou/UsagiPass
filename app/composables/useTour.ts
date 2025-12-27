@@ -1,15 +1,13 @@
-import introJs from 'intro.js'
-import 'intro.js/introjs.css'
-
 export function useTour() {
     const router = useRouter()
     const { $leporid } = useNuxtApp()
+    const nuxtApp = useNuxtApp()
 
     /**
      * 启动主页引导（第一阶段）
      */
     function startMainPageTour() {
-        const intro = introJs.tour()
+        const intro = nuxtApp.$intro.tour()
 
         intro.setOptions({
             steps: [
@@ -71,7 +69,7 @@ export function useTour() {
      * 启动设置页引导（第二阶段）
      */
     function startPreferenceTour() {
-        const intro = introJs.tour()
+        const intro = nuxtApp.$intro.tour()
 
         intro.setOptions({
             steps: [
