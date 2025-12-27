@@ -45,7 +45,6 @@
         "daisyui": "^5.5.3",
         "drizzle-kit": "^0.31.7",
         "eslint": "^9.39.1",
-        "nuxt-prepare": "^3.0.0",
         "typescript": "^5.9.3"
     }
 }
