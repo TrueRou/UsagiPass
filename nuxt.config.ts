@@ -71,6 +71,12 @@ export default defineNuxtConfig({
             },
         },
     },
+    hooks: {
+        close: (nuxt) => {
+            if (!nuxt.options._prepare)
+                process.exit()
+        },
+    },
     nitro: {
         preset: 'bun',
     },
