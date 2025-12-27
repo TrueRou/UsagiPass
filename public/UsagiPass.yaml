@@ -15,6 +15,7 @@ proxies:
   }
 
 rules:
+  - DOMAIN-SUFFIX,wq.wahlap.net,UsagiPass
   - DOMAIN-SUFFIX,sys-all.cn,UsagiPass
   - DOMAIN-SUFFIX,sys-allnet.cn,UsagiPass
   - DOMAIN,tgk-wcaime.wahlap.com,UsagiPass

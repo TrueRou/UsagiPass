@@ -15,6 +15,7 @@ proxies:
 # 生产环境由 V2Ray 负责分流，将 80 端口流量转发到中间人，443 端口流量直连
 
 rules:
+  - DOMAIN-SUFFIX,wq.wahlap.net,UsagiPass
   - DOMAIN-SUFFIX,sys-all.cn,UsagiPass
   - DOMAIN-SUFFIX,sys-allnet.cn,UsagiPass
   - AND,((DOMAIN,tgk-wcaime.wahlap.com),(DST-PORT,80)),UsagiPass

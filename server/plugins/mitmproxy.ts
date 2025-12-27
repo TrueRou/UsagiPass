@@ -6,6 +6,8 @@ const SYSALL_HOSTS = new Set([
     '43.137.91.207',
     '81.71.193.236',
     '43.145.45.124',
+    '43.137.89.90',
+    'wq.wahlap.net',
     'wq.sys-all.cn',
     'wq.sys-allnet.cn',
 ])
