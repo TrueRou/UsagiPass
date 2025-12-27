@@ -22,11 +22,11 @@ function handleImageError(event: Event) {
                         从零开始美化你的玩家二维码
                     </p>
                     <div class="hero-actions">
-                        <NuxtLink to="/begin" class="btn btn-primary">
+                        <NuxtLink to="/" class="btn btn-primary">
                             <Icon name="heroicons:rocket-launch" class="btn-icon" />
                             开始使用
                         </NuxtLink>
-                        <NuxtLink to="/implementation" class="btn btn-secondary">
+                        <NuxtLink to="/manual" class="btn btn-secondary">
                             <Icon name="heroicons:book-open" class="btn-icon" />
                             查看手册
                         </NuxtLink>
