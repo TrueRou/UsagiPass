@@ -9,10 +9,11 @@
         "generate": "nuxt generate",
         "preview": "nuxt preview",
         "postinstall": "nuxt prepare",
-        "docs:build": "vitepress build docs --base /docs/ --outDir public/docs",
-        "db:generate": "drizzle-kit generate",
         "lint": "eslint",
-        "lint:fix": "eslint --fix"
+        "lint:fix": "eslint --fix",
+        "docs:dev": "vitepress dev docs",
+        "docs:build": "vitepress build docs --base /docs/ --outDir public/docs",
+        "db:generate": "drizzle-kit generate"
     },
     "dependencies": {
         "@nuxtjs/i18n": "10.1.1",

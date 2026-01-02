@@ -2,17 +2,15 @@ export default defineEventHandler(async (event) => {
     const { username, password, strategy }: UserAuthRequest = await readBody(event)
 
     try {
+        const loginForm = new FormData()
+        loginForm.append('grant_type', 'password')
+        loginForm.append('username', username)
+        loginForm.append('password', password)
+        loginForm.append('strategy', strategy.toString())
+
         const tokenResponse = await $fetch<UserAuthResponse>(`/api/auth/token`, {
             method: 'POST',
-            body: new URLSearchParams({
-                grant_type: 'password',
-                strategy: strategy.toString(),
-                username,
-                password,
-            }),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            body: loginForm,
         })
 
         const userResponse = await $fetch<{ data: UserResponse }>(`/api/users/me`, {

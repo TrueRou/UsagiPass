@@ -5,7 +5,6 @@ useHead({
 })
 
 const nuxtApp = useNuxtApp()
-const leporidFetch = nuxtApp.$leporid as any
 const { user, clear } = useUserSession()
 const notificationsStore = useNotificationsStore()
 
@@ -64,17 +63,18 @@ function openConfirmModal() {
 }
 
 async function handleSecondaryLogin(payload: { username: string, password: string, strategy: 'LOCAL' | 'DIVING_FISH' | 'LXNS' }) {
-    const tokenResponse = await leporidFetch('/api/auth/token', {
+    const loginForm = new FormData()
+    loginForm.append('grant_type', 'password')
+    loginForm.append('username', payload.username)
+    loginForm.append('password', payload.password)
+    loginForm.append('strategy', payload.strategy)
+
+    const tokenResponse = await nuxtApp.$leporid('/api/auth/token', {
         method: 'POST',
-        query: {
-            grant_type: 'password',
-            username: payload.username,
-            password: payload.password,
-            strategy: payload.strategy,
-        },
+        body: loginForm,
     }) as UserAuthResponse
 
-    const profile = await leporidFetch('/api/users/me', {
+    const profile = await nuxtApp.$leporid('/api/users/me', {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${tokenResponse.access_token}`,
@@ -103,7 +103,7 @@ async function executeMerge() {
         return
     isMerging.value = true
     try {
-        await leporidFetch('/api/nuxt/auth/merge', {
+        await nuxtApp.$leporid('/api/nuxt/auth/merge', {
             method: 'POST',
             body: {
                 source: selection.source === 'current' ? undefined : secondaryToken.value,
