@@ -2,12 +2,18 @@ export function useTour() {
     const router = useRouter()
     const { $leporid } = useNuxtApp()
     const nuxtApp = useNuxtApp()
+    const { inTour } = storeToRefs(useContextStore())
+
+    const tourUsername = 'Ｗａｒｍａ'
+    const tourRating = 15000
+    const tourFriendCode = '114514-1919810'
 
     /**
      * 启动主页引导（第一阶段）
      */
     function startMainPageTour() {
         const intro = nuxtApp.$intro.tour()
+        inTour.value = true
 
         intro.setOptions({
             steps: [
@@ -55,11 +61,13 @@ export function useTour() {
         intro.onComplete(async () => {
             // 跳转到设置页，并启动第二阶段引导
             await router.push('/preference?tour=continue')
+            inTour.value = false
         })
 
         intro.onExit(async () => {
             // 用户跳过引导，更新 skipTour
             await updateSkipTour()
+            inTour.value = false
         })
 
         intro.start()
@@ -151,5 +159,9 @@ export function useTour() {
         startMainPageTour,
         startPreferenceTour,
         restartTour,
+        inTour,
+        tourUsername,
+        tourRating,
+        tourFriendCode,
     }
 }

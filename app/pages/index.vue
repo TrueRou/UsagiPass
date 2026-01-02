@@ -5,13 +5,18 @@ useHead({
 })
 
 const contextStore = useContextStore()
-const { startMainPageTour } = useTour()
+const { startMainPageTour, inTour, tourRating, tourUsername, tourFriendCode } = useTour()
 
 const { data: profile } = await useLeporid<UserProfile>('/api/nuxt/profile')
 const { img } = useUtils()
 const { triggerCrawl } = useWechatCrawl()
 
 const playerRating = computed(() => {
+    // 引导模式下使用预设数据
+    if (inTour.value) {
+        return String(tourRating)
+    }
+
     // 覆盖优先级：用户偏好设置 > 被动获取好友代码
     if (profile.value?.preference.showDxRating) {
         if (profile.value?.preference.dxRating)
@@ -22,6 +27,11 @@ const playerRating = computed(() => {
 })
 
 const playerName = computed(() => {
+    // 引导模式下使用预设数据
+    if (inTour.value) {
+        return tourUsername
+    }
+
     // 覆盖优先级：用户偏好设置 > 被动获取用户名
     if (profile.value?.preference.showDisplayName) {
         if (profile.value?.preference.displayName)
@@ -32,6 +42,11 @@ const playerName = computed(() => {
 })
 
 const friendCode = computed(() => {
+    // 引导模式下使用预设数据
+    if (inTour.value) {
+        return tourFriendCode
+    }
+
     // 覆盖优先级：用户偏好设置 > 被动获取好友代码
     if (profile.value?.preference.showFriendCode) {
         if (profile.value?.preference.friendCode)
