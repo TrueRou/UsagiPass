@@ -74,4 +74,4 @@ UsagiPass 更新成绩需要配合中间人代理（MITM）使用，在开发环
 
 ---
 
-Copyright © 2019-2025 TuRou
+Copyright © 2019-2026 TuRou

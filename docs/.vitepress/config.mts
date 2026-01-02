@@ -49,11 +49,14 @@ export default defineConfig({
 
         footer: {
             message: '欢迎加入 UsagiPass 兔兔群：363346002',
-            copyright: 'Copyright © 2019-2025 TuRou',
+            copyright: 'Copyright © 2019-2026 TuRou',
         },
 
         socialLinks: [
             { icon: 'github', link: 'https://github.com/TrueRou/UsagiPass' },
         ],
+    },
+    vite: {
+        build: { assetsDir: '../' },
     },
 })

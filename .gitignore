@@ -1,4 +1,5 @@
 .http-mitm-proxy
+public/docs
 
 # Nuxt dev/build outputs
 .output
