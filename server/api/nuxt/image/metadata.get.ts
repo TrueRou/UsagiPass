@@ -53,59 +53,59 @@ export default defineEventHandler(async (event) => {
         }
     }
 
-    const metadataId = imageResponse.data.metadata_id
-
-    const imageListResponse = await $fetch<{
-        code: number
-        message: string
-        data?: { images: { records: ImageResponse[] } }
-    }>(`/api/images`, {
-        method: 'GET',
-        ignoreResponseError: true,
-        query: {
-            metadata_id: metadataId,
-        },
-    })
-
+    const metadataId = imageResponse.data.original_id
     let maskImage: ImageResponse | null = null
     let source: string | null = null
     let characterName: string | null = null
     let version: string | null = null
 
-    if (imageListResponse.code === 200 && imageListResponse.data) {
-        console.log(imageListResponse.data.images)
-        maskImage = imageListResponse.data.images.records.find(
-            img => img.labels.includes('mask'),
-        ) ?? null
-    }
+    if (metadataId) {
+        const imageListResponse = await $fetch<{
+            code: number
+            message: string
+            data?: { images: { records: ImageResponse[] } }
+        }>(`/api/images`, {
+            method: 'GET',
+            ignoreResponseError: true,
+            query: {
+                original_id: metadataId,
+            },
+        })
 
-    if (metadataId.startsWith('chu_')) {
-        const result = await getChunithmMetadata(Number(metadataId.slice(4)))
-        if (result) {
-            source = 'CHUNITHM'
-            characterName = result.name
-            if (characterName.includes('【')) {
-                characterName = characterName.split('【')[0] as string
-            }
-            if (characterName.includes('／')) {
-                characterName = characterName.split('／')[0] as string
+        if (imageListResponse.code === 200 && imageListResponse.data) {
+            maskImage = imageListResponse.data.images.records.find(
+                img => img.labels.includes('mask'),
+            ) ?? null
+        }
+
+        if (metadataId.startsWith('chu_')) {
+            const result = await getChunithmMetadata(Number(metadataId.slice(4)))
+            if (result) {
+                source = 'CHUNITHM'
+                characterName = result.name
+                if (characterName.includes('【')) {
+                    characterName = characterName.split('【')[0] as string
+                }
+                if (characterName.includes('／')) {
+                    characterName = characterName.split('／')[0] as string
+                }
             }
         }
-    }
-    else if (metadataId.startsWith('mai_')) {
-        const result = await getMaimaiMetadata(Number(metadataId.slice(4)))
-        if (result) {
-            source = 'maimai でらっくす'
-            characterName = result.name
-            version = `[maimaiDX]${result.version}`
+        else if (metadataId.startsWith('mai_')) {
+            const result = await getMaimaiMetadata(Number(metadataId.slice(4)))
+            if (result) {
+                source = 'maimai でらっくす'
+                characterName = result.name
+                version = `[maimaiDX]${result.version}`
+            }
         }
-    }
-    else if (metadataId.startsWith('mu3_')) {
-        const result = await getOngekiMetadata(Number(metadataId.slice(4)))
-        if (result) {
-            source = 'オンゲキ'
-            characterName = result.character_name
-            version = `[O.N.G.E.K.I.]${result.version_number}`
+        else if (metadataId.startsWith('mu3_')) {
+            const result = await getOngekiMetadata(Number(metadataId.slice(4)))
+            if (result) {
+                source = 'オンゲキ'
+                characterName = result.character_name
+                version = `[O.N.G.E.K.I.]${result.version_number}`
+            }
         }
     }
 

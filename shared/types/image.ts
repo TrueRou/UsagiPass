@@ -8,18 +8,27 @@ export enum ImageVisibility {
 }
 
 /**
- * 图片响应
+ * 图片完整响应
  */
 export interface ImageResponse {
-    user_id: string
-    file_name: string
-    metadata_id: string
-    created_at: string
-    updated_at: string
     id: string
     name: string
-    description?: string
+    description: string
     visibility: ImageVisibility
+    labels: string[]
+    original_id?: string
+    original_name?: string
+    user_id: string
+    aspect_id: string
+}
+
+/**
+ * 图片简略响应
+ */
+export interface ImageSimpleResponse {
+    id: string
+    name: string
+    description: string
     labels: string[]
 }
 
@@ -33,7 +42,7 @@ export interface ImageSearchResponse {
         page_size: number
         total_page: number
         total_row: number
-        records: ImageResponse[]
+        records: ImageSimpleResponse[]
     }
 }
 
@@ -53,11 +62,11 @@ export interface ImageAspect {
  */
 export interface ImageUploadRequest {
     file: File
-    aspect_id: string
     name: string
-    description?: string
+    description: string
     visibility: ImageVisibility
     labels: string[]
+    aspect_id: string
 }
 
 /**
