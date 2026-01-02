@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const metadataId = imageResponse.data.original_id
-    let maskImage: ImageResponse | null = null
+    let maskImage: ImageSimpleResponse | null = null
     let source: string | null = null
     let characterName: string | null = null
     let version: string | null = null
@@ -63,7 +63,7 @@ export default defineEventHandler(async (event) => {
         const imageListResponse = await $fetch<{
             code: number
             message: string
-            data?: { images: { records: ImageResponse[] } }
+            data?: { images: { records: ImageSimpleResponse[] } }
         }>(`/api/images`, {
             method: 'GET',
             ignoreResponseError: true,

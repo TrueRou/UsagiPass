@@ -14,7 +14,7 @@ interface ListOptions {
 export function useImageList(options: UseImageListOptions) {
     const { $leporid } = useNuxtApp()
 
-    const images = ref<ImageResponse[]>([])
+    const images = ref<ImageSimpleResponse[]>([])
     const loading = ref(false)
     const error = ref<Error | null>(null)
     const pageNumber = ref(1)
@@ -56,7 +56,7 @@ export function useImageList(options: UseImageListOptions) {
             })
             images.value = response.images.records ?? []
             pageNumber.value = response.images.page_number ?? pageNumber.value
-            pageSize.value = response.images.page_size ?? pageSize.value
+            // pageSize.value = response.images.page_size ?? pageSize.value
             totalPage.value = response.images.total_page ?? 0
             totalRow.value = response.images.total_row ?? 0
             availableLabels.value = response.labels ?? []
@@ -98,8 +98,6 @@ export function useImageList(options: UseImageListOptions) {
         await refresh()
     }
 
-    const customImages = computed(() => images.value.filter(image => image.visibility === ImageVisibility.PRIVATE))
-
     const representativeLabels = computed(() => {
         const allLabels = [...availableLabels.value, ...activeFilters.value ?? []]
         const filteredLabels = allLabels.filter(label => !options.initialFilters?.includes(label))
@@ -121,6 +119,5 @@ export function useImageList(options: UseImageListOptions) {
         deleteImage,
         availableLabels,
         representativeLabels,
-        customImages,
     }
 }

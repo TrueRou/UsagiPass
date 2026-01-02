@@ -54,7 +54,7 @@ function clearImage(key: ImageMapKey) {
 
 async function matchCharacterMetadata() {
     const response: {
-        mask_image?: ImageResponse
+        mask_image?: ImageSimpleResponse
         source: string
         character_name?: string
         version?: string
