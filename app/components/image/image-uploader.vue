@@ -153,7 +153,7 @@ async function submit() {
         formData.append('aspect_id', props.aspect.id)
         formData.append('name', metadata.name.trim())
         formData.append('description', metadata.description.trim())
-        formData.append('visibility', String(metadata.visibility))
+        formData.append('visibility', String(metadata.visibility.valueOf()))
         metadata.labels.forEach(label => formData.append('labels', label))
 
         const response = await $leporid<ImageResponse>('/api/images', {

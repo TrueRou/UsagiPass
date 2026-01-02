@@ -72,7 +72,7 @@ async function matchCharacterMetadata() {
 
         if (response.mask_image && profileData.value) {
             profileData.value.preference.maskId = response.mask_image.id
-            message += `遮罩图层： ${response.mask_image.metadata_id} \n`
+            message += `遮罩图层： ${response.mask_image.name} \n`
         }
 
         if (response.character_name && profileData.value) {
