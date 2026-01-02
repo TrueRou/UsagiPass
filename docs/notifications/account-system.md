@@ -1,9 +1,3 @@
----
-seo:
-  title: 账号迁移说明
-  description: UsagiPass 与 兔卡账号迁移至 UsagiLab 平台的详细说明
----
-
 # 账号迁移说明
 
 UsagiPass 与 兔卡账号 已完成深度融合升级，现统一更名为 UsagiLab 账号。

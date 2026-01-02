@@ -47,9 +47,15 @@ export default defineNitroPlugin((_nitroApp) => {
         process.exit(1)
     }
 
-    const pool = new Pool({ connectionString: databaseURL, max: 1 })
-    const db = drizzle(pool, { schema })
+    try {
+        const pool = new Pool({ connectionString: databaseURL, max: 1 })
+        const db = drizzle(pool, { schema })
 
-    const migrationFolder = join(process.cwd(), 'server', 'database', 'migrations')
-    migrate(db, { migrationsFolder: migrationFolder }).then(() => seedInitialData(db))
+        const migrationFolder = join(process.cwd(), 'server', 'database', 'migrations')
+        migrate(db, { migrationsFolder: migrationFolder }).then(() => seedInitialData(db))
+    }
+    catch (error) {
+        console.error('Failed to run migrations:', error)
+        process.exit(1)
+    }
 })

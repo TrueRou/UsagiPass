@@ -1,11 +1,3 @@
----
-navigation:
-  title: 隐私政策
-seo:
-  title: UsagiPass 隐私政策
-  description: UsagiPass 隐私政策
----
-
 # 隐私政策
 
 > 最后更新日期：2025/12/28

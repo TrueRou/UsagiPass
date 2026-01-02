@@ -1,11 +1,3 @@
----
-navigation:
-  title: 服务条款
-seo:
-  title: UsagiPass 服务条款
-  description: UsagiPass 服务条款
----
-
 # 服务条款
 
 > 最后更新日期：2025/12/28

@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
     devtools: { enabled: true },
-    modules: ['@pinia/nuxt', '@nuxtjs/i18n', '@nuxt/eslint', 'nuxt-auth-utils', '@nuxt/content', '@nuxt/icon'],
+    modules: ['@pinia/nuxt', '@nuxtjs/i18n', '@nuxt/eslint', 'nuxt-auth-utils'],
     css: ['~/assets/css/main.css', 'intro.js/introjs.css'],
     vite: {
         plugins: [
@@ -57,25 +57,6 @@ export default defineNuxtConfig({
                 name: '简体中文 (中国)',
             },
         ],
-    },
-    content: {
-        experimental: { nativeSqlite: true },
-        build: {
-            markdown: {
-                highlight: {
-                    theme: {
-                        dark: 'github-dark',
-                        default: 'github-light',
-                    },
-                },
-            },
-        },
-    },
-    hooks: {
-        close: (nuxt) => {
-            if (!nuxt.options._prepare)
-                process.exit()
-        },
     },
     nitro: {
         preset: 'bun',
