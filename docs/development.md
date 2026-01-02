@@ -10,34 +10,47 @@ UsagiPass 的前后端以及官网均已开源，欢迎提出 Issues 和 PullReq
 
 我们的 GitHub 仓库：https://github.com/TrueRou/UsagiPass
 
-## 配置私人MITM
-
-UsagiPass 使用 [MITM 中间人](https://developer.mozilla.org/zh-CN/docs/Glossary/MitM)转发并修改来自华立服务器的流量。
-
-当前版本的 UsagiPass 会修改来自 `wq.sys-all.cn` 和 `tgk-wcaime.wahlap.com` 的流量，后者主要用于更新查分器。
-
-有条件的开发者可以搭建属于自己的代理服务器，可以在降低服务器负载的同时提升安全性。
+## 项目部署
 
 ### 前置环境
 
-- 合适的 Linux 发行版，这里以 Debian 为例
-- 能够连接至 GitHub 的网络环境
-- Python 3.12+
-- MySQL Community Server
+- Node.js 18+ 或 Bun 1.0+
+- pnpm 包管理器
+- **PostgreSQL 15.0+** 数据库
 
-### 搭建方式
+### 部署方式
 
-- 前往对应的查分器网站申请开发者密钥并等待审核通过；
-- 在 项目根目录 下创建 `.env` 文件, 可以根据 `.env.example.mitm-only` 模板文件进行配置，别忘了在 `LXNS_DEVELOPER_TOKEN` 或 `DIVINGFISH_DEVELOPER_TOKEN` 中填入你申请的开发者密钥；
-- 执行 `pip install poetry` 全局安装 Poetry；
-- 执行 `poetry install` 安装项目依赖；
-- 执行 `poetry run app` 运行后端及代理；
-- 执行 `cd web && npm run dev` 运行前端。
+1. **克隆项目并安装依赖**
 
-> 更新项目: `git pull && poetry install && poetry run app`
+```bash
+git clone https://github.com/TrueRou/UsagiPass.git
+cd UsagiPass
+pnpm install
+```
 
-::: tip
-切记：必须暴露 TCP `2560` 端口，如部署防火墙的请在规则允许 `2560` 端口的外网访问
+保证 PostgreSQL 服务已启动，并创建好用于 UsagiPass 的数据库。
 
-端口可以在 `.env` 文件中进行配置
-:::
+2. **配置环境变量**
+
+创建 `.env` 文件，至少配置以下环境变量：
+
+```env
+# 数据库配置（请根据实际情况修改：postgresql://用户名:密码@主机:端口/数据库名））
+NUXT_USAGIPASS_DATABASE_URL=postgresql://postgres:password@localhost:5432/usagipass
+```
+
+3. **启动开发服务器**
+
+```bash
+pnpm dev
+```
+
+访问 `http://localhost:7200` 即可使用。
+
+### 关于代理
+
+UsagiPass 更新成绩需要配合中间人代理（MITM）使用，在开发环境下，需要使用支持 ClashMeta 规则的代理软件。
+
+在 `pnpm dev` 启动后，默认监听 HTTP 代理 `http://localhost:7300`。
+
+将 `public/UsagiPassDev.yaml` 导入支持 ClashMeta 规则的代理软件后，启动系统代理即可。

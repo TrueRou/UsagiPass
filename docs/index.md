@@ -9,10 +9,10 @@ hero:
   tagline: 从零开始美化你的玩家二维码
   actions:
     - theme: brand
-      text: 开始使用
+      text: 快速开始
       link: /begin
     - theme: alt
-      text: 手册
+      text: 开发者手册
       link: /implementation
     - theme: alt
       text: ⭐
@@ -22,7 +22,7 @@ hero:
 
 features:
   - title: 动态生成
-    details: 基于水鱼 / 落雪查分器的数据动态生成玩家的 DXPASS，用户个性化数据云端储存。
+    details: 基于舞萌 NET 的数据动态生成玩家的 DXPASS，用户个性化数据云端储存。
   - title: 高度自定义
     details: 自定义 DXPASS 背景、外框、角色，支持使用预设素材或个性化上传自己的图片。
   - title: 支持登录

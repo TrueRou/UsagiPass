@@ -16,30 +16,52 @@ DXPass 是**日服限定**的，可以在制卡机上制作的具有特殊功能
 
 安装 UsagiPass 需要你具有一定的动手能力，下面我们将逐步讲解如何安装 UsagiPass：
 
-1. 安装代理软件，UsagiPass 需要代理才能运行，如果你不清楚什么是代理，请点击下方推荐方式即可：
-    - 安卓：[**Clash（推荐）**](https://dxpass.turou.fun/proxies/clash.html)，[Sing-box](https://dxpass.turou.fun/proxies/singbox.html)
-    - iOS：[**Shadowrocket（推荐）**](https://dxpass.turou.fun/proxies/rocket.html)，[Sing-box](https://dxpass.turou.fun/proxies/singbox.html)，[QuantX](https://dxpass.turou.fun/proxies/quantx.html)
-2. 启动代理软件：UsagiPass 需要代理才能运行，请确保你的代理已经运行在手机后台；
-3. 在**微信 -> 舞萌|中二公众号**中正常打开**登入二维码**，你应该已经跳转到 UsagiPass 的登录界面；
-4. 使用水鱼或落雪查分器账号进行登录，登录后即可进入 UsagiPass 主页，享受可登录的国服 DXPass 功能。
+### 第一步：安装 CA 证书
 
-::: tip
-UsagiPass 利用代理来重定向华立二维码网页，请保证在使用过程中代理不要关闭。
+UsagiPass 需要代理 HTTPS 流量以实现二维码页面的替换功能，故需要安装 CA 证书。
+
+::: details 安卓设备
+下载 [https://up.turou.fun/ca.pem](https://up.turou.fun/ca.pem) 并安装。
 :::
 
-## 使用 UsagiPass
-
-登录 UsagiPass 后，将使用默认的个性化配置，点击画面右下方的齿轮图标可以进入设置页面。
-
-在设置中，可以按照喜好调整个性化配置，切换背景、角色、边框等资源，在调整结束后可以点击最下方的保存。
-
-请初次使用的玩家在设置中粘贴自己的好友代码（可在舞萌DX-好友页面查询）。
-
-同时，我们还支持覆盖页面中的部分文本，玩家可以自行尝试相关功能。
-
-::: tip
-想了解更多 UsagiPass 的功能，可以在左侧的目录（手机用户请点击左上角 Menu 按钮）找到。
+::: details iOS 设备
+下载 [https://up.turou.fun/ca.pem](https://up.turou.fun/ca.pem) 并安装。
 :::
+
+### 第二步：配置代理软件
+
+UsagiPass 需要代理才能运行，请根据你的设备选择合适的代理软件：
+
+::: details 安卓设备
+推荐使用 **Mihomo**：
+
+1. 下载安装 Mihomo：
+   - **Github（推荐）**：[https://github.com/MetaCubeX/ClashMetaForAndroid/releases](https://github.com/MetaCubeX/ClashMetaForAndroid/releases)
+   - **蓝奏云（国内）**：[https://wwps.lanzouj.com/iXMCk2cydjmd](https://wwps.lanzouj.com/iXMCk2cydjmd)
+   - 加入 UsagiPass 用户群，在群公告处获取：363346002
+
+2. 导入 UsagiPass 配置：
+   - 一键导入：[导入 Clash 配置](clash://install-config?url=https://up.turou.fun/UsagiPass.yaml&name=UsagiPass)
+   - 复制链接到 Clash 导入：`https://up.turou.fun/UsagiPass.yaml`
+   - 从群文件获取配置：363346002
+:::
+
+::: details iOS 设备
+推荐使用 **Singbox**：
+
+1. 切换外区账号，在 AppStore 中搜索 **Singbox VT** 并下载
+
+2. Profiles -> New Profile -> Name: 随意，Type: Remote，URL: `https://up.turou.fun/UsagiPass.json` -> Create
+
+3. **确保选择了 UsagiPass 配置，点击启动代理即可生效！**
+:::
+
+### 第三步：访问 UsagiPass
+
+1. 在**微信 -> 舞萌|中二公众号**中正常打开**登入二维码**
+2. 你应该已经跳转到 UsagiPass 的登录界面
+3. 使用水鱼或落雪查分器账号进行登录
+4. 登录后即可进入 UsagiPass 主页，享受可登录的国服 DXPass 功能
 
 ## 支持 UsagiPass
 
@@ -47,7 +69,11 @@ UsagiPass 利用代理来重定向华立二维码网页，请保证在使用过�
 
 我们也开放了爱发电入口，如果你愿意[赞助 UsagiPass](https://afdian.com/a/turou) 我们会在特别感谢中提到你的名字。
 
-## Q&A
+## 常见问题
+
+### Q: 打开网页后提示不安全，或者证书无效
+
+A: 请确保你已经正确安装了 UsagiPass 的 CA 证书。
 
 **Q：我不清楚 UsagiPass 的某某功能如何使用**
 

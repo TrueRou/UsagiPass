@@ -8,8 +8,7 @@ export default defineConfig({
     themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
         nav: [
-            { text: '主页', link: '/' },
-            { text: '手册', link: '/implementation' },
+            { text: '快速开始', link: '/' },
             { text: '博客', link: 'https://turou.fun/' },
             { text: '❤️', link: 'https://afdian.com/a/turou' },
         ],
@@ -18,20 +17,20 @@ export default defineConfig({
             {
                 text: '介绍',
                 items: [
-                    { text: '安装', link: '/begin' },
+                    { text: '快速开始', link: '/begin' },
                 ],
             },
             {
-                text: '代理',
+                text: '受支持的代理',
                 items: [
-                    { text: 'Clash', link: '/proxies/clash' },
+                    { text: 'Clash / Mihomo', link: '/proxies/clash' },
                     { text: 'Shadowrocket', link: '/proxies/rocket' },
                     { text: 'Sing-box', link: '/proxies/singbox' },
                     { text: 'Quantumult X', link: '/proxies/quantx' },
                 ],
             },
             {
-                text: '手册',
+                text: '开发者手册',
                 items: [
                     { text: '实现方式', link: '/implementation' },
                     { text: '参与开发', link: '/development' },
