@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { z } from 'zod'
 
-type MergeStrategy = 'LOCAL' | 'DIVING_FISH' | 'LXNS'
-
 interface MergeLoginPayload {
     username: string
     password: string
-    strategy: MergeStrategy
+    strategy: AuthStrategy
 }
 
 interface MergeLoginEmits {
@@ -17,22 +15,22 @@ interface MergeLoginEmits {
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<MergeLoginEmits>()
 
-const strategyOptions: Array<{ label: string, value: MergeStrategy, description: string }> = [
-    { label: 'UsagiCard（兔卡）账号', value: 'LOCAL', description: '使用 UsagiCard 兔卡旧账号' },
-    { label: '水鱼旧账号', value: 'DIVING_FISH', description: '使用水鱼查分器旧账号' },
-    { label: '落雪旧账号', value: 'LXNS', description: '使用落雪查分器旧账号' },
+const strategyOptions: Array<{ label: string, value: AuthStrategy, description: string }> = [
+    { label: 'UsagiCard（兔卡）账号', value: AuthStrategy.LOCAL, description: '使用 UsagiCard 兔卡旧账号' },
+    { label: '水鱼旧账号', value: AuthStrategy.DIVING_FISH, description: '使用水鱼查分器旧账号' },
+    { label: '落雪旧账号', value: AuthStrategy.LXNS, description: '使用落雪查分器旧账号' },
 ]
 
 const form = reactive({
     username: '',
     password: '',
-    strategy: 'LOCAL' as MergeStrategy,
+    strategy: AuthStrategy.LOCAL,
 })
 
 const schema = z.object({
     username: z.string().min(1, '用户名不能为空'),
     password: z.string().min(1, '密码不能为空'),
-    strategy: z.enum(['LOCAL', 'DIVING_FISH', 'LXNS']),
+    strategy: z.number(),
 })
 
 const { validate, ve, clearErrors } = useFormValidation(schema, form)
@@ -41,7 +39,7 @@ watch(() => props.open, (open) => {
     if (open) {
         form.username = ''
         form.password = ''
-        form.strategy = 'LOCAL'
+        form.strategy = AuthStrategy.LOCAL
         clearErrors()
     }
 }, { immediate: true })

@@ -62,12 +62,12 @@ function openConfirmModal() {
     confirmModalOpen.value = true
 }
 
-async function handleSecondaryLogin(payload: { username: string, password: string, strategy: 'LOCAL' | 'DIVING_FISH' | 'LXNS' }) {
+async function handleSecondaryLogin(payload: { username: string, password: string, strategy: AuthStrategy }) {
     const loginForm = new FormData()
     loginForm.append('grant_type', 'password')
     loginForm.append('username', payload.username)
     loginForm.append('password', payload.password)
-    loginForm.append('strategy', payload.strategy)
+    loginForm.append('strategy', String(payload.strategy.valueOf()))
 
     const tokenResponse = await nuxtApp.$leporid('/api/auth/token', {
         method: 'POST',
