@@ -21,12 +21,10 @@ const fileRaw = ref<File | null>(null)
 const submitting = ref(false)
 const tagDraft = ref('')
 
-const defaultVisibility: ImageVisibility = 'PRIVATE' as ImageVisibility
-
 const metadata = reactive({
     name: '',
     description: '',
-    visibility: defaultVisibility,
+    visibility: ImageVisibility.PRIVATE,
     labels: [] as string[],
 })
 
@@ -124,7 +122,7 @@ function cleanupPreview() {
 function reset() {
     metadata.name = ''
     metadata.description = ''
-    metadata.visibility = defaultVisibility
+    metadata.visibility = ImageVisibility.PRIVATE
     metadata.labels = ['workshop', ...props.suggestedLabels ?? []]
     tagDraft.value = ''
     cleanupPreview()
@@ -152,12 +150,10 @@ async function submit() {
         const formData = new FormData()
         const fileName = fileRaw.value?.name ?? 'image.png'
         formData.append('file', blob, fileName)
-        formData.append('aspect_id', props.aspect?.id ?? props.aspect.id)
+        formData.append('aspect_id', props.aspect.id)
         formData.append('name', metadata.name.trim())
-        if (metadata.description.trim()) {
-            formData.append('description', metadata.description.trim())
-        }
-        formData.append('visibility', metadata.visibility)
+        formData.append('description', metadata.description.trim())
+        formData.append('visibility', String(metadata.visibility))
         metadata.labels.forEach(label => formData.append('labels', label))
 
         const response = await $leporid<ImageResponse>('/api/images', {
