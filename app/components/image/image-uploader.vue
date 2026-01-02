@@ -152,7 +152,7 @@ async function submit() {
         formData.append('file', blob, fileName)
         formData.append('aspect_id', props.aspect.id)
         formData.append('name', metadata.name.trim())
-        formData.append('description', metadata.description.trim())
+        formData.append('description', metadata.description.trim() ?? metadata.name.trim())
         formData.append('visibility', String(metadata.visibility.valueOf()))
         metadata.labels.forEach(label => formData.append('labels', label))
 
@@ -249,10 +249,10 @@ async function submit() {
                                 <span class="label-text">可见性</span>
                             </label>
                             <select v-model="metadata.visibility" class="select select-bordered w-full">
-                                <option value="PRIVATE">
+                                <option :value="ImageVisibility.PRIVATE">
                                     私有
                                 </option>
-                                <option value="PUBLIC">
+                                <option :value="ImageVisibility.PUBLIC">
                                     公开
                                 </option>
                             </select>
