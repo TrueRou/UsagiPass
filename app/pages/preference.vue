@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ middleware: 'require-login' })
+definePageMeta({ middleware: 'redirect-guest' })
 useHead({
     title: '偏好设置 - UsagiPass',
 })
@@ -9,6 +9,7 @@ const { $leporid } = useNuxtApp()
 const { loggedIn, user, clear } = useUserSession()
 const notificationsStore = useNotificationsStore()
 const { startPreferenceTour, restartTour } = useTour()
+const { saveGuestProfile } = useGuestProfile()
 const route = useRoute()
 
 // 检查是否需要继续引导（从主页跳转过来）
@@ -171,12 +172,24 @@ const isSaving = ref(false)
 async function handleSave() {
     isSaving.value = true
     try {
-        profileData.value = await useNuxtApp().$leporid('/api/nuxt/profile', {
-            method: 'PUT',
-            body: profileData.value,
-            showSuccessToast: true,
-            successMessage: '偏好设置已保存',
-        })
+        if (loggedIn.value) {
+            // Authenticated: save to database
+            profileData.value = await useNuxtApp().$leporid('/api/nuxt/profile', {
+                method: 'PUT',
+                body: profileData.value,
+                showSuccessToast: true,
+                successMessage: '偏好设置已保存',
+            })
+        }
+        else {
+            // Guest: save to localStorage
+            saveGuestProfile(profileData.value!.preference)
+
+            notificationsStore.addNotification({
+                type: 'success',
+                message: '偏好设置已保存（仅本机有效，登录后可同步到云端）',
+            })
+        }
     }
     finally {
         setTimeout(() => isSaving.value = false, 500) // 保证最短等待 500 毫秒
@@ -204,9 +217,29 @@ function goToPrev() {
             @confirm="handleAddAccount"
         />
         <div class="mx-auto w-full max-w-6xl px-4 py-4 lg:py-10">
+            <!-- Guest mode banner -->
+            <section v-if="!loggedIn" class="rounded-box border border-warning bg-warning/10 p-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <svg class="h-6 w-6 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-warning">
+                            访客模式
+                        </p>
+                        <p class="text-sm text-base-content/70">
+                            您正在使用访客模式，偏好设置仅保存在本机浏览器中。
+                            <NuxtLink to="/auth/login" class="link link-primary">
+                                登录后可同步到云端
+                            </NuxtLink>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
             <form v-if="profileData && serversData" class="space-y-4" @submit.prevent="handleSave">
                 <!-- 已登录用户 -->
-                <section class="rounded-box border border-base-200 bg-base-100 p-4 shadow-sm">
+                <section v-if="loggedIn" class="rounded-box border border-base-200 bg-base-100 p-4 shadow-sm">
                     <div class="flex flex-wrap items-center gap-4">
                         <div class="avatar">
                             <div class="w-10 rounded-full border border-base-200">
@@ -222,7 +255,7 @@ function goToPrev() {
                             </p>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button class="btn btn-outline btn-sm" type="button" :disabled="!loggedIn" @click="handleLogout">
+                            <button class="btn btn-outline btn-sm" type="button" @click="handleLogout">
                                 <span>登出</span>
                             </button>
                             <details class="dropdown dropdown-end">
@@ -246,6 +279,30 @@ function goToPrev() {
                                 </ul>
                             </details>
                         </div>
+                    </div>
+                </section>
+
+                <!-- 访客用户 -->
+                <section v-else class="rounded-box border border-base-200 bg-base-100 p-4 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="avatar">
+                                <div class="w-10 rounded-full border border-base-200">
+                                    <img src="../assets/icons/logo.webp">
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-md font-semibold">
+                                    访客用户
+                                </p>
+                                <p class="text-xs text-base-content/70">
+                                    未登录
+                                </p>
+                            </div>
+                        </div>
+                        <NuxtLink to="/auth/login" class="btn btn-primary btn-sm">
+                            立即登录
+                        </NuxtLink>
                     </div>
                 </section>
 
@@ -575,12 +632,18 @@ function goToPrev() {
                 </div>
 
                 <!-- 账号设置标题 -->
-                <div class="divider my-2">
-                    {{ t("sections.accounts") }}
+                <div class="divider my-2 flex items-center justify-between">
+                    <span>{{ t("sections.accounts") }}</span>
+                    <div v-if="!loggedIn" class="badge badge-warning gap-1 text-xs">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        需要登录
+                    </div>
                 </div>
 
                 <!-- 账号设置表单 -->
-                <div class="flex flex-col flex-auto gap-4" data-tour="account-settings">
+                <div class="flex flex-col flex-auto gap-4" :class="{ 'opacity-50 pointer-events-none': !loggedIn }" data-tour="account-settings">
                     <button
                         class="btn btn-outline" type="button"
                         data-tour="add-account"
@@ -626,6 +689,14 @@ function goToPrev() {
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Guest message -->
+                    <div v-if="!loggedIn" class="text-center text-sm text-base-content/60 py-4 bg-base-200 rounded-lg">
+                        <p>账号管理功能需要登录后才能使用</p>
+                        <NuxtLink to="/auth/login" class="link link-primary">
+                            立即登录
+                        </NuxtLink>
                     </div>
                 </div>
 

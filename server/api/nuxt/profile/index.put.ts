@@ -1,5 +1,16 @@
 export default defineEventHandler(async (event) => {
-    const session = await requireUserSession(event)
+    const session = await getUserSession(event)
+
+    // Guest: reject with helpful message
+    if (!session?.user) {
+        setResponseStatus(event, 401)
+        return {
+            code: 401,
+            message: '访客模式无法保存设置，请先登录',
+            data: null,
+        }
+    }
+
     const body = await readBody<UserProfile>(event)
     const db = useDrizzle()
 

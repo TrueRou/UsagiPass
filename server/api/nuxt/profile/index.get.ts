@@ -1,7 +1,44 @@
 export default defineEventHandler(async (event) => {
-    const session = await requireUserSession(event)
+    const session = await getUserSession(event)
     const db = useDrizzle()
     const config = useRuntimeConfig()
+
+    // Guest: return default profile
+    if (!session?.user) {
+        const defaultProfile: UserProfile = {
+            preference: {
+                userId: '',
+                maimaiVersion: '',
+                simplifiedCode: '',
+                characterName: '',
+                friendCode: '',
+                displayName: '',
+                dxRating: '',
+                qrSize: 15,
+                maskType: 0,
+                playerInfoColor: '#ffffff',
+                charaInfoColor: '#fee37c',
+                showDxRating: true,
+                showDisplayName: true,
+                showFriendCode: true,
+                showDate: true,
+                enableMask: false,
+                characterId: config.leporid.defaultImage.characterId,
+                maskId: config.leporid.defaultImage.maskId,
+                backgroundId: config.leporid.defaultImage.backgroundId,
+                frameId: config.leporid.defaultImage.frameId,
+                passnameId: config.leporid.defaultImage.passnameId,
+                skipTour: false,
+            },
+            accounts: [],
+            player: null,
+        }
+        return {
+            code: 200,
+            message: '请求成功',
+            data: defaultProfile,
+        }
+    }
 
     // 查询用户偏好设置
     const preference = await db.query.userPreference.findFirst({

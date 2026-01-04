@@ -1,11 +1,12 @@
 <script setup lang="ts">
-definePageMeta({ middleware: 'require-login' })
+definePageMeta({ middleware: 'redirect-guest' })
 useHead({
     title: '首页 - UsagiPass',
 })
 
 const contextStore = useContextStore()
 const { startMainPageTour, inTour, tourRating, tourUsername, tourFriendCode } = useTour()
+const { loggedIn } = useUserSession()
 
 const { data: profile } = await useLeporid<UserProfile>('/api/nuxt/profile')
 const { img } = useUtils()
@@ -81,8 +82,8 @@ onMounted(() => {
     if (route.query.maid)
         contextStore.maimaiMaid = route.query.maid as string
 
-    // 检查是否需要启动用户引导
-    if (profile.value && !profile.value.preference.skipTour) {
+    // 检查是否需要启动用户引导（仅登录用户）
+    if (loggedIn.value && profile.value && !profile.value.preference.skipTour) {
         // 延迟启动引导，确保页面完全加载
         setTimeout(() => {
             startMainPageTour()
@@ -145,7 +146,7 @@ onMounted(() => {
                             {{ maimaiVersion }}
                         </p>
                     </div>
-                    <NuxtLink to="/preference" data-tour="settings-button">
+                    <NuxtLink :to="{ path: '/preference', query: { guest: loggedIn ? '1' : '0' } }" data-tour="settings-button">
                         <div class="p-1 rounded-full bg-white dark:bg-gray-800" aria-label="settings" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"
