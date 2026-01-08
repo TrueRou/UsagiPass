@@ -19,7 +19,7 @@ export function useTour() {
             steps: [
                 {
                     title: '欢迎使用 UsagiPass！',
-                    intro: '让我们快速了解一下主要功能，帮助您更好地使用本系统。',
+                    intro: '让我们快速了解一下主要功能，帮助您更好地使用本项目。',
                 },
                 {
                     element: '[data-tour="dx-rating"]',
@@ -36,7 +36,7 @@ export function useTour() {
                 {
                     element: '[data-tour="rocket-button"]',
                     title: '小火箭更新',
-                    intro: '点击小火箭可以更新绑定账号的数据，包括上方的 Rating、姓名等信息。更新后会自动刷新显示。',
+                    intro: '点击小火箭可以更新绑定账号的数据，包括上方的 Rating、玩家名称等信息。更新后会自动刷新显示。',
                     position: 'top',
                 },
                 {
@@ -83,36 +83,36 @@ export function useTour() {
             steps: [
                 {
                     title: '设置页面',
-                    intro: '在这里您可以自定义各种显示选项和管理您的游戏账号。',
+                    intro: '在这里您可以自定义各种显示选项和管理您的查分器账号。',
                 },
                 {
                     element: '[data-tour="image-settings"]',
-                    title: '图片设置',
-                    intro: '点击图片可以更换角色、遮罩、背景和边框等素材，打造专属卡片。',
+                    title: '图片预览与设定',
+                    intro: '独特的背景与立绘是 UsagiPass 的核心。点击图片可以更换角色、遮罩、背景和边框等素材，打造专属赛博 DX Pass。',
                     position: 'top',
                 },
                 {
                     element: '[data-tour="account-settings"]',
-                    title: '账号设置',
-                    intro: '在这里添加和管理您的游戏账号。绑定账号后，点击主页的小火箭即可自动更新数据。',
+                    title: '账号绑定',
+                    intro: '在这里添加和管理您的查分器账号。绑定账号后，点击主页的小火箭即可自动更新数据。',
                     position: 'top',
                 },
                 {
                     element: '[data-tour="add-account"]',
                     title: '新增账号',
-                    intro: '点击此按钮可以添加新的游戏账号，支持多个服务器和账号绑定。',
+                    intro: '点击此按钮可以添加新的查分器账号，支持多个查分器和 UsagiLab 通行证绑定。',
                     position: 'left',
                 },
                 {
                     element: '[data-tour="merge-account"]',
                     title: '合并账户',
-                    intro: '如果您有多个 UsagiPass 账户，可以在这里合并它们。您也可以随时从这里重新开始本引导。',
+                    intro: '如果您有多个 UsagiLab 通行证，可以在这里合并它们。您也可以随时从这里重新开始本引导。',
                     position: 'bottom',
                 },
                 {
                     element: '[data-tour="save-button"]',
                     title: '保存设置',
-                    intro: '修改任何设置后，记得点击保存按钮来应用更改。现在您已经了解了所有主要功能！',
+                    intro: '修改任何设置后，记得点击保存按钮来应用更改。现在您已经了解了所有主要功能，即刻开启您的 UsagiPass 之旅吧！',
                     position: 'top',
                 },
             ],

@@ -693,7 +693,7 @@ function goToPrev() {
 
                     <!-- Guest message -->
                     <div v-if="!loggedIn" class="text-center text-sm text-base-content/60 py-4 bg-base-200 rounded-lg">
-                        <p>账号管理功能需要登录后才能使用</p>
+                        <p>账号绑定功能需要登录后才能使用</p>
                         <NuxtLink to="/auth/login" class="link link-primary">
                             立即登录
                         </NuxtLink>
@@ -714,10 +714,10 @@ function goToPrev() {
 <i18n lang="yaml">
 zh-CN:
   sections:
-    preference: 偏好设置
+    preference: 自定义选项
     display: 显示设置
-    images: 图片设置
-    accounts: 账号设置
+    images: 图片预览与设定
+    accounts: 账号绑定
   fields:
     displayName:
       label: 玩家名称

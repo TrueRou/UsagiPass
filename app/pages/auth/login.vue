@@ -10,9 +10,9 @@ const { loggedIn, fetch: fetchUser, user } = useUserSession()
 const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length ?? 0) === 0)
 
 const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string, passwordLabel: string, usernameLabel?: string }> = [
-    { value: AuthStrategy.LOCAL, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 统一认证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名' },
-    { value: AuthStrategy.DIVING_FISH, name: '水鱼 · DIVING_FISH', desc: '使用绑定的 DivingFish 账号密码登录', passwordLabel: '密码', usernameLabel: '用户名' },
-    { value: AuthStrategy.LXNS, name: '落雪 · LXNS', desc: '使用绑定的 LXNS 个人 API 密钥登录', passwordLabel: '个人密钥', usernameLabel: undefined },
+    { value: AuthStrategy.LOCAL, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 通行证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名' },
+    { value: AuthStrategy.DIVING_FISH, name: '水鱼 · DIVING-FISH', desc: '使用此前绑定的水鱼查分器账号密码登录', passwordLabel: '密码', usernameLabel: '用户名' },
+    { value: AuthStrategy.LXNS, name: '落雪 · LXNS', desc: '使用此前绑定的落雪咖啡屋个人 API 密钥登录', passwordLabel: '个人密钥', usernameLabel: undefined },
 ]
 
 // Redirect if already logged in
@@ -156,7 +156,7 @@ useHead({
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                以访客模式浏览
+                以访客模式使用
             </button>
 
             <hr class="my-8">

@@ -59,7 +59,7 @@ const serverMap = computed(() => {
                     </label>
                     <input
                         v-model="credentialsModel" class="input input-bordered" type="text"
-                        :placeholder="selectedServer?.credentialsName || '输入查分器凭证（如个人秘钥）'"
+                        :placeholder="selectedServer?.credentialsName || '输入查分器凭证（如个人密钥）'"
                     >
                 </div>
             </div>
@@ -81,7 +81,7 @@ const serverMap = computed(() => {
                         :href="serverMap.get(selectedServer.id)!.tipsUrl" target="_blank"
                         rel="noopener"
                     >
-                        查看帮助
+                        前往查分器
                     </a>
                 </div>
             </div>
