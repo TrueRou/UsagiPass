@@ -115,7 +115,7 @@ function handleSelectorVisibility(value: boolean) {
     }
 }
 
-function handleImageSelect(image: ImageResponse) {
+function handleImageSelect(image: ImageSimpleResponse) {
     if (selectorTarget.value) {
         if (profileData.value)
             Object.assign(profileData.value?.preference, { [imageFieldMap[selectorTarget.value]]: image.id })
@@ -207,8 +207,8 @@ function goToPrev() {
         <ImageSelector
             v-if="selectorTarget && imageAspect"
             :open="selectorOpen" :aspect="imageAspect" :title="selectorTarget ? t(`images.${selectorTarget}.title`) : t('images.title-default')"
-            confirm-label="使用该图片" :initial-filters="selectorTarget ? [selectorTarget] : []" @update:open="handleSelectorVisibility"
-            @select="handleImageSelect"
+            confirm-label="使用该图片" :initial-filters="selectorTarget ? [selectorTarget] : []" :readonly="!loggedIn"
+            @update:open="handleSelectorVisibility" @select="handleImageSelect"
         />
         <ModalAddAccount
             :open="addAccountOpen" :servers="serversData || []" @update:open="handleAddAccountVisibility"

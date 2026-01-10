@@ -6,11 +6,12 @@ const props = defineProps<{
     pageSize?: number
     title?: string
     confirmLabel?: string
+    readonly?: boolean
 }>()
 
 const emit = defineEmits<{
     (event: 'update:open', value: boolean): void
-    (event: 'select', payload: ImageResponse): void
+    (event: 'select', payload: ImageSimpleResponse): void
 }>()
 
 const { imgPreview } = useUtils()
@@ -31,19 +32,19 @@ const {
 
 const activeSecondary = ref<string[]>([])
 const searchKeyword = ref('')
-const selectedImage = ref<ImageResponse | null>(null)
+const selectedImage = ref<ImageSimpleResponse | null>(null)
 const openUploader = ref(false)
-const deleteTarget = ref<ImageResponse | null>(null)
+const deleteTarget = ref<ImageSimpleResponse | null>(null)
 const pending = ref(false)
 
 const title = computed(() => props.title ?? '选择图片')
 const confirmButtonText = computed(() => props.confirmLabel ?? '使用此图片')
 
-const imageKey = (image: ImageResponse) => image.id
+const imageKey = (image: ImageSimpleResponse) => image.id
 
-const imageUrl = (image: ImageResponse) => imgPreview(image.id)
+const imageUrl = (image: ImageSimpleResponse) => imgPreview(image.id)
 
-function isSelected(image: ImageResponse) {
+function isSelected(image: ImageSimpleResponse) {
     if (!selectedImage.value)
         return false
     return image.id === selectedImage.value.id
@@ -55,7 +56,7 @@ function close() {
     emit('update:open', false)
 }
 
-function updateSelection(image: ImageResponse) {
+function updateSelection(image: ImageSimpleResponse) {
     selectedImage.value = image
 }
 
@@ -94,13 +95,12 @@ function confirmSelection() {
     close()
 }
 
-async function handleRename({ image, name }: { image: ImageResponse, name: string }) {
+async function handleRename({ image, name }: { image: ImageSimpleResponse, name: string }) {
     pending.value = true
     try {
         await updateImage(image.id, {
             name,
             description: image.description,
-            visibility: image.visibility,
             labels: image.labels ?? [],
         })
     }
@@ -109,7 +109,7 @@ async function handleRename({ image, name }: { image: ImageResponse, name: strin
     }
 }
 
-function confirmDelete(image: ImageResponse) {
+function confirmDelete(image: ImageSimpleResponse) {
     deleteTarget.value = image
 }
 
@@ -213,7 +213,7 @@ watch([activeSecondary], async () => {
                                 <p class="text-base-content/60">
                                     暂无符合条件的图片
                                 </p>
-                                <button class="btn btn-primary" type="button" @click="openUploader = true">
+                                <button v-if="!readonly" class="btn btn-primary" type="button" @click="openUploader = true">
                                     上传新图片
                                 </button>
                             </div>
@@ -262,7 +262,7 @@ watch([activeSecondary], async () => {
             <!-- 固定底部 -->
             <div class="shrink-0 px-6 pb-6 pt-4 border-t">
                 <div class="modal-action mt-0">
-                    <button class="btn btn-accent" type="button" @click="openUploader = true">
+                    <button v-if="!readonly" class="btn btn-accent" type="button" @click="openUploader = true">
                         上传新图片
                     </button>
                     <button

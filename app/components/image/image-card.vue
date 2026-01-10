@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 
 const props = defineProps<{
-    image: ImageResponse
+    image: ImageSimpleResponse
     imageAspect: ImageAspect
     hidedLabels?: string[]
     imageUrl: string
@@ -11,9 +11,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    (event: 'select', image: ImageResponse): void
-    (event: 'rename', payload: { image: ImageResponse, name: string }): void
-    (event: 'delete', image: ImageResponse): void
+    (event: 'select', image: ImageSimpleResponse): void
+    (event: 'rename', payload: { image: ImageSimpleResponse, name: string }): void
+    (event: 'delete', image: ImageSimpleResponse): void
 }>()
 
 const { user } = useUserSession()
@@ -32,7 +32,7 @@ watch(() => props.image.id, () => {
     isLoaded.value = false
 })
 
-function canModifyImage(image: ImageResponse) {
+function canModifyImage(image: ImageSimpleResponse) {
     return image.user_id === user.value?.id
 }
 

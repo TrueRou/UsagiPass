@@ -30,6 +30,7 @@ export interface ImageSimpleResponse {
     name: string
     description: string
     labels: string[]
+    user_id: string
 }
 
 /**
@@ -73,8 +74,8 @@ export interface ImageUploadRequest {
  * 图片更新请求
  */
 export interface ImageUpdateRequest {
-    name: string
+    name?: string
     description?: string
-    visibility: ImageVisibility
-    labels: string[]
+    visibility?: ImageVisibility
+    labels?: string[]
 }

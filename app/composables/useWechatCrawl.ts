@@ -1,6 +1,12 @@
 export function useWechatCrawl() {
     const triggerCrawl = async (context: { date: string, time: string, maid: string }) => {
         const { addNotification } = useNotificationsStore()
+        const { loggedIn } = useUserSession()
+
+        if (!loggedIn.value) {
+            addNotification({ type: 'error', message: '请先登录以使用该功能' })
+            return
+        }
 
         // 检查 UA 确保是在微信内打开
         if (!navigator.userAgent.toLowerCase().includes('micromessenger')) {
