@@ -1,4 +1,4 @@
-export function useTour() {
+export function useTour(updateCallback: () => void = () => {}) {
     const router = useRouter()
     const { $leporid } = useNuxtApp()
     const nuxtApp = useNuxtApp()
@@ -49,7 +49,7 @@ export function useTour() {
             nextLabel: '下一步',
             prevLabel: '上一步',
             doneLabel: '进入设置',
-            skipLabel: '',
+            skipLabel: 'x',
             showProgress: true,
             showBullets: false,
             exitOnOverlayClick: false,
@@ -119,7 +119,7 @@ export function useTour() {
             nextLabel: '下一步',
             prevLabel: '上一步',
             doneLabel: '完成',
-            skipLabel: '',
+            skipLabel: 'x',
             showProgress: true,
             showBullets: false,
             exitOnOverlayClick: false,
@@ -141,6 +141,7 @@ export function useTour() {
      */
     async function updateSkipTour() {
         await $leporid('/api/nuxt/profile/tour', { method: 'POST' })
+        updateCallback() // 调用回调函数以刷新用户数据
     }
 
     /**

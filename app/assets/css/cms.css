@@ -1,6 +1,0 @@
-@import "tailwindcss";
-@plugin "@tailwindcss/typography";
-
-.prose a:not(h2 a, h3 a, h4 a, h5 a, h6 a, button a) {
-  @apply text-indigo-500 dark:text-indigo-400;
-}

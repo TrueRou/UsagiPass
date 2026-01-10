@@ -4,13 +4,13 @@ useHead({
     title: '首页 - UsagiPass',
 })
 
-const contextStore = useContextStore()
-const { startMainPageTour, inTour, tourRating, tourUsername, tourFriendCode } = useTour()
-const { loggedIn } = useUserSession()
+const { data: profile, refresh } = await useLeporid<UserProfile>('/api/nuxt/profile')
 
-const { data: profile } = await useLeporid<UserProfile>('/api/nuxt/profile')
+const contextStore = useContextStore()
+const { loggedIn } = useUserSession()
 const { img } = useUtils()
 const { triggerCrawl } = useWechatCrawl()
+const { startMainPageTour, inTour, tourRating, tourUsername, tourFriendCode } = useTour(refresh)
 
 const playerRating = computed(() => {
     // 引导模式下使用预设数据
