@@ -1,44 +1,47 @@
-export default defineEventHandler(async (event) => {
-    const session = await getUserSession(event)
-    const db = useDrizzle()
-    const config = useRuntimeConfig()
+const DEFAULT_GUEST_PROFILE: UserPreference = {
+    userId: '',
+    maimaiVersion: '',
+    simplifiedCode: '',
+    characterName: '',
+    friendCode: '',
+    displayName: '',
+    dxRating: '',
+    qrSize: 15,
+    maskType: 0,
+    playerInfoColor: '#ffffff',
+    charaInfoColor: '#fee37c',
+    showDxRating: true,
+    showDisplayName: true,
+    showFriendCode: true,
+    showDate: true,
+    enableMask: false,
+    characterId: '2e7046aa-ddc2-40fb-bf5d-5236ffca50f9',
+    maskId: '421943e9-2221-45f1-8f76-5a1ca012028e',
+    backgroundId: '6a742fd3-f9e2-4edf-ab65-9208fae30d36',
+    frameId: '421943e9-2221-45f1-8f76-5a1ca012028e',
+    passnameId: 'f6988add-bb65-4b78-a69c-7d01c453d4a8',
+    skipTour: false,
+}
 
-    // Guest: return default profile
-    if (!session?.user) {
-        const defaultProfile: UserProfile = {
-            preference: {
-                userId: '',
-                maimaiVersion: '',
-                simplifiedCode: '',
-                characterName: '',
-                friendCode: '',
-                displayName: '',
-                dxRating: '',
-                qrSize: 15,
-                maskType: 0,
-                playerInfoColor: '#ffffff',
-                charaInfoColor: '#fee37c',
-                showDxRating: true,
-                showDisplayName: true,
-                showFriendCode: true,
-                showDate: true,
-                enableMask: false,
-                characterId: config.leporid.defaultImage.characterId,
-                maskId: config.leporid.defaultImage.maskId,
-                backgroundId: config.leporid.defaultImage.backgroundId,
-                frameId: config.leporid.defaultImage.frameId,
-                passnameId: config.leporid.defaultImage.passnameId,
-                skipTour: false,
-            },
-            accounts: [],
-            player: null,
-        }
+export default defineEventHandler(async (event) => {
+    const isGuest = getCookie(event, 'guest')
+    if (isGuest === 'true') {
+        const guestPreferenceRaw = getCookie(event, 'guest_preference') as string | undefined
+        const guestPreference = guestPreferenceRaw ? JSON.parse(guestPreferenceRaw) : DEFAULT_GUEST_PROFILE
         return {
             code: 200,
             message: '请求成功',
-            data: defaultProfile,
+            data: {
+                preference: guestPreference as UserPreference,
+                accounts: [],
+                player: null,
+            } as UserProfile,
         }
     }
+
+    const db = useDrizzle()
+    const config = useRuntimeConfig()
+    const session = await requireUserSession(event)
 
     // 查询用户偏好设置
     const preference = await db.query.userPreference.findFirst({

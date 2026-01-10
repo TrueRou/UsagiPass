@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ middleware: 'redirect-guest' })
+definePageMeta({ middleware: 'require-guest' })
 useHead({
     title: '偏好设置 - UsagiPass',
 })
@@ -9,7 +9,6 @@ const { $leporid } = useNuxtApp()
 const { loggedIn, user, clear } = useUserSession()
 const notificationsStore = useNotificationsStore()
 const { startPreferenceTour, restartTour } = useTour()
-const { saveGuestProfile } = useGuestProfile()
 const route = useRoute()
 
 // 检查是否需要继续引导（从主页跳转过来）
@@ -173,7 +172,6 @@ async function handleSave() {
     isSaving.value = true
     try {
         if (loggedIn.value) {
-            // Authenticated: save to database
             profileData.value = await useNuxtApp().$leporid('/api/nuxt/profile', {
                 method: 'PUT',
                 body: profileData.value,
@@ -182,12 +180,12 @@ async function handleSave() {
             })
         }
         else {
-            // Guest: save to localStorage
-            saveGuestProfile(profileData.value!.preference)
+            const guestProfile = useCookie<UserPreference>('guest_preference', { maxAge: 60 * 60 * 24 * 365 })
+            guestProfile.value = profileData.value!.preference
 
             notificationsStore.addNotification({
                 type: 'success',
-                message: '偏好设置已保存（仅本机有效，登录后可同步到云端）',
+                message: '偏好设置已保存（仅本地）',
             })
         }
     }
@@ -228,10 +226,7 @@ function goToPrev() {
                             访客模式
                         </p>
                         <p class="text-sm text-base-content/70">
-                            您正在使用访客模式，偏好设置仅保存在本机浏览器中。
-                            <NuxtLink to="/auth/login" class="link link-primary">
-                                登录后可同步到云端
-                            </NuxtLink>
+                            您正在使用访客模式，部分功能将受到限制。
                         </p>
                     </div>
                 </div>
@@ -296,7 +291,7 @@ function goToPrev() {
                                     访客用户
                                 </p>
                                 <p class="text-xs text-base-content/70">
-                                    未登录
+                                    偏好设置仅保存在本地
                                 </p>
                             </div>
                         </div>
@@ -634,16 +629,10 @@ function goToPrev() {
                 <!-- 账号设置标题 -->
                 <div class="divider my-2 flex items-center justify-between">
                     <span>{{ t("sections.accounts") }}</span>
-                    <div v-if="!loggedIn" class="badge badge-warning gap-1 text-xs">
-                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                        需要登录
-                    </div>
                 </div>
 
                 <!-- 账号设置表单 -->
-                <div class="flex flex-col flex-auto gap-4" :class="{ 'opacity-50 pointer-events-none': !loggedIn }" data-tour="account-settings">
+                <div class="flex flex-col flex-auto gap-4 mt-4" :class="{ 'opacity-50 pointer-events-none': !loggedIn }" data-tour="account-settings">
                     <button
                         class="btn btn-outline" type="button"
                         data-tour="add-account"
@@ -656,7 +645,8 @@ function goToPrev() {
                         v-if="profileData.accounts.length === 0"
                         class="rounded-lg border border-dashed border-base-200 p-8 text-center text-sm text-base-content/60"
                     >
-                        暂无账号，请新增账号
+                        <span v-if="loggedIn">暂无账号，请新增账号</span>
+                        <span v-else>登录后才可以使用该功能</span>
                     </div>
 
                     <div v-else class="space-y-4">
@@ -689,14 +679,6 @@ function goToPrev() {
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Guest message -->
-                    <div v-if="!loggedIn" class="text-center text-sm text-base-content/60 py-4 bg-base-200 rounded-lg">
-                        <p>账号绑定功能需要登录后才能使用</p>
-                        <NuxtLink to="/auth/login" class="link link-primary">
-                            立即登录
-                        </NuxtLink>
                     </div>
                 </div>
 

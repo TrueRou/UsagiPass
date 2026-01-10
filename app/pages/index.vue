@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ middleware: 'redirect-guest' })
+definePageMeta({ middleware: 'require-guest' })
 useHead({
     title: '首页 - UsagiPass',
 })
@@ -146,7 +146,7 @@ onMounted(() => {
                             {{ maimaiVersion }}
                         </p>
                     </div>
-                    <NuxtLink :to="{ path: '/preference', query: { guest: loggedIn ? '1' : '0' } }" data-tour="settings-button">
+                    <NuxtLink to="/preference" data-tour="settings-button">
                         <div class="p-1 rounded-full bg-white dark:bg-gray-800" aria-label="settings" role="img">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg" class="footer-icon" viewBox="-4 -4 32 32"

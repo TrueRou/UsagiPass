@@ -6,6 +6,8 @@ useHead({
 })
 
 const { loggedIn, fetch: fetchUser, user } = useUserSession()
+const guestCookie = useCookie<boolean>('guest', { maxAge: 60 * 60 * 24 * 365 })
+guestCookie.value = false
 
 const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length ?? 0) === 0)
 
@@ -50,16 +52,6 @@ async function handleLogin() {
     if (!validate())
         return
 
-    // Clear guest data before login
-    if (import.meta.client) {
-        try {
-            localStorage.removeItem('usagipass_guest_profile')
-        }
-        catch (error) {
-            console.error('Failed to clear guest profile:', error)
-        }
-    }
-
     await useNuxtApp().$leporid('/api/nuxt/auth/login', {
         method: 'POST',
         body: {
@@ -76,8 +68,8 @@ async function handleLogin() {
 }
 
 async function handleGuestMode() {
-    // Navigate to home page as guest
-    await navigateTo('/?guest=1')
+    guestCookie.value = true
+    await navigateTo('/')
 }
 
 useHead({
@@ -147,16 +139,12 @@ useHead({
                 </button>
             </form>
 
-            <div class="divider">
-                或者
-            </div>
-
-            <button type="button" class="btn btn-outline w-full" @click="handleGuestMode">
+            <button type="button" class="btn btn-outline w-full mt-2" @click="handleGuestMode">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                以访客模式使用
+                要使用游客模式吗
             </button>
 
             <hr class="my-8">
