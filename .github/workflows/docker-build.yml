@@ -5,6 +5,7 @@ on:
     branches:
       - next # replace with main when ready
     paths:
+      - 'docs/**'
       - 'app/**'
       - 'server/**'
       - 'shared/**'
