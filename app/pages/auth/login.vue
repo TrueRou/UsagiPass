@@ -6,6 +6,7 @@ useHead({
 })
 
 const { loggedIn, fetch: fetchUser, user } = useUserSession()
+const route = useRoute()
 const guestCookie = useCookie<boolean>('guest', { maxAge: 60 * 60 * 24 * 365 })
 guestCookie.value = false
 
@@ -17,12 +18,20 @@ const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string, 
     { value: AuthStrategy.LXNS, name: '落雪 · LXNS', desc: '使用此前绑定的落雪咖啡屋个人 API 密钥登录', passwordLabel: '个人密钥', usernameLabel: undefined },
 ]
 
+// 登录后的跳转目标：优先使用 ?redirect= 参数，否则按资料完整性决定
+const redirectTarget = computed(() => {
+    const r = route.query.redirect as string
+    if (r && r.startsWith('/'))
+        return r
+    return shouldCompleteProfile.value ? '/auth/reset' : '/'
+})
+
 // Redirect if already logged in
 watchEffect(() => {
     if (!loggedIn.value)
         return
 
-    navigateTo(shouldCompleteProfile.value ? '/auth/reset' : '/')
+    navigateTo(redirectTarget.value)
 })
 
 // Zod schema for validation
@@ -64,17 +73,13 @@ async function handleLogin() {
     })
 
     await fetchUser()
-    await navigateTo(shouldCompleteProfile.value ? '/auth/profile-update' : '/')
+    await navigateTo(redirectTarget.value)
 }
 
 async function handleGuestMode() {
     guestCookie.value = true
     await navigateTo('/')
 }
-
-useHead({
-    title: '登录',
-})
 </script>
 
 <template>

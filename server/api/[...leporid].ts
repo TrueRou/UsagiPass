@@ -37,11 +37,21 @@ export default defineEventHandler(async (event) => {
                     }
                 },
             })
+            // 刷新后重新读取 session，避免使用刷新前已过期的旧 token
+            const freshSession = await getUserSession(event)
+            // refresh token 也已失效，session 已被清除，拒绝本次请求
+            if (!freshSession.secure) {
+                throw createError({ statusCode: 401, statusMessage: '会话已过期，请重新登录' })
+            }
+            // 使用刷新后的新 token
+            const reqAuthorization = getHeader(event, 'authorization')
+            headers.Authorization = reqAuthorization || `Bearer ${freshSession.secure.accessToken}`
         }
-        // 如果令牌不存在，使用后端访问令牌进行代理请求
-        const reqAuthorization = getHeader(event, 'authorization')
-        const curAuthorization = `Bearer ${session.secure.accessToken}`
-        headers.Authorization = reqAuthorization || curAuthorization
+        else {
+            // token 未过期，直接使用当前 token
+            const reqAuthorization = getHeader(event, 'authorization')
+            headers.Authorization = reqAuthorization || `Bearer ${session.secure.accessToken}`
+        }
     }
 
     {

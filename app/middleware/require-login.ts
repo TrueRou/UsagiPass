@@ -9,6 +9,6 @@ export default defineNuxtRouteMiddleware(async (_to, _from) => {
                 message: '请登录以访问此页面。',
             })
         }
-        return navigateTo('/auth/login')
+        return navigateTo(`/auth/login?redirect=${encodeURIComponent(_to.fullPath)}`)
     }
 })

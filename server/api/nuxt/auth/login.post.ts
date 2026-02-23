@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
     catch (error: any) {
         return {
             code: error.statusCode || 500,
-            message: error.data.message ?? '未知错误',
+            message: error.data?.message ?? '未知错误',
             data: null,
         }
     }

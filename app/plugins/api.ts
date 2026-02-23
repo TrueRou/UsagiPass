@@ -11,6 +11,12 @@ export default defineNuxtPlugin((_nuxtApp) => {
                 loadingIndicator.start()
             }
         },
+        onRequestError() {
+            if (import.meta.client) {
+                const loadingIndicator = useLoadingIndicator()
+                loadingIndicator.finish()
+            }
+        },
         onResponse(context) {
             const rawData = context.response._data
 
