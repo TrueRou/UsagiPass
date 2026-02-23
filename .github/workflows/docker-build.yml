@@ -3,7 +3,8 @@ name: Docker Build
 on:
   push:
     branches:
-      - next # replace with main when ready
+      - main
+      - next # fallback branch for old releases
     paths:
       - 'docs/**'
       - 'app/**'
