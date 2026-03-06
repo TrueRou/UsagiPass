@@ -37,24 +37,21 @@ UsagiPass 需要代理 HTTPS 流量以实现二维码页面的替换功能，故
 :::
 
 ::: details 安卓设备（安装为系统证书，需要拥有Root权限）
-> [!WARNING]
-> 警告！<br>
+
+::: danger 警告
 此方法高度依赖动手能力，除非你安装用户证书后无效，否则不推荐此方法！<br>
 本教程不对你因使用此方法而对设备造成的任何损害负责！
+:::
 
-> [!IMPORTANT]
-> 注：<br>
-`KernelSU` 及相关分支，需要额外搭配元模块才能让模块正常工作，
-
-> [!TIP]
-> 提示：<br>
+::: tip 注意
+`KernelSU` 及相关分支，需要额外搭配元模块才能让模块正常工作，<br>
 `Magisk Manager` / `KernelSU App` / `APatch App` 以及相关分支的App在下文皆称为 `Root管理器`
+:::
 
 1. Root管理器的模块管理内安装 [MoveCertificate](https://github.com/ys1231/MoveCertificate/releases)
-
 2. 再按照用户证书的方法操作
-
 3. 然后重启手机
+
 :::
 
 ::: details iOS 设备
