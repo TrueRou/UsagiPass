@@ -20,3 +20,12 @@ rules:
   - DOMAIN-SUFFIX,sys-allnet.cn,UsagiPass
   - DOMAIN,tgk-wcaime.wahlap.com,UsagiPass
   - MATCH,DIRECT
+
+# payload部分仅当文件处于rule-providers下有效
+# rule-providers:
+#   UsagiPass: { "type": "http", "behavior": "domain", "interval": 600, "format": "yaml", "url": "https://up.turou.fun/UsagiPass.yaml", }
+payload:
+  - '+.wq.wahlap.net'
+  - '+.sys-all.cn'
+  - '+.sys-allnet.cn'
+  - 'tgk-wcaime.wahlap.com'
