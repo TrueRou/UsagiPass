@@ -96,10 +96,7 @@ function handleImageLoad() {
         <div class="relative">
             <!-- 左上 图片名称 -->
             <div class="absolute top-1 left-1 max-w-[calc(100%-0.5rem)] z-10">
-                <div v-if="!isEditing" class="badge lg:badge-lg max-w-full" :title="image.name" @click.stop="beginEdit">
-                    <span class="truncate">{{ image.name }}</span>
-                </div>
-                <div v-else class="flex gap-2 flex-col bg-black/50 p-2 rounded">
+                <div v-if="isEditing" class="flex gap-2 flex-col bg-black/50 p-2 rounded">
                     <input
                         v-model="editableName" type="text" class="input input-xs"
                         placeholder="输入新名称"
@@ -110,6 +107,9 @@ function handleImageLoad() {
                     <button class="btn btn-xs" @click.stop="cancelEdit">
                         取消
                     </button>
+                </div>
+                <div v-else-if="image.name" class="badge lg:badge-lg max-w-full" :title="image.name" @click.stop="beginEdit">
+                    <span class="truncate">{{ image.name }}</span>
                 </div>
             </div>
 
