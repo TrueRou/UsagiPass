@@ -21,7 +21,7 @@ export default defineNuxtConfig({
     },
     runtimeConfig: {
         usagipass: {
-            baseURL: 'http://localhost:7200',
+            URL: 'http://localhost:7200',
             databaseURL: 'postgresql://postgres:password@localhost:5432/usagipass',
         },
         mitmproxy: {

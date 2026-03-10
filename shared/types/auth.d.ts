@@ -3,7 +3,7 @@ declare module '#auth-utils' {
         id: string
         username: string
         email: string
-        permissions: string[]
+        permissions: number[]
     }
 
     interface UserSession {
