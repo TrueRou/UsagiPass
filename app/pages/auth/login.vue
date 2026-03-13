@@ -13,7 +13,7 @@ guestCookie.value = false
 const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length ?? 0) === 0)
 
 const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string, passwordLabel: string, usernameLabel?: string }> = [
-    { value: AuthStrategy.LOCAL, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 通行证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名' },
+    { value: AuthStrategy.LOCAL, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 通行证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名 / 邮箱' },
     { value: AuthStrategy.DIVING_FISH, name: '水鱼 · DIVING-FISH', desc: '使用此前绑定的水鱼查分器账号密码登录', passwordLabel: '密码', usernameLabel: '用户名' },
     { value: AuthStrategy.LXNS, name: '落雪 · LXNS', desc: '使用此前绑定的落雪咖啡屋个人 API 密钥登录', passwordLabel: '个人密钥', usernameLabel: undefined },
 ]
@@ -26,12 +26,10 @@ const redirectTarget = computed(() => {
     return shouldCompleteProfile.value ? '/auth/reset' : '/'
 })
 
-// Redirect if already logged in
-watchEffect(() => {
-    if (!loggedIn.value)
-        return
-
-    navigateTo(redirectTarget.value)
+watch(loggedIn, async () => {
+    if (loggedIn.value) {
+        await navigateTo(redirectTarget.value, { external: true })
+    }
 })
 
 // Zod schema for validation
@@ -73,12 +71,11 @@ async function handleLogin() {
     })
 
     await fetchUser()
-    await navigateTo(redirectTarget.value)
 }
 
 async function handleGuestMode() {
     guestCookie.value = true
-    await navigateTo('/')
+    await navigateTo('/', { external: true })
 }
 </script>
 
