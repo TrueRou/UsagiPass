@@ -136,20 +136,63 @@ async function submit() {
         return
     submitting.value = true
     try {
-        const blob = await new Promise<Blob>((resolve, reject) => {
-            cropper.value?.getCropBlob((blob: Blob | null) => {
-                if (blob) {
-                    resolve(blob)
-                }
-                else {
-                    reject(new Error('Failed to crop image'))
-                }
-            })
-        })
-
         const formData = new FormData()
+        const isGif = fileRaw.value.type === 'image/gif'
         const fileName = fileRaw.value?.name ?? 'image.png'
-        formData.append('file', blob, fileName)
+
+        if (isGif) {
+            const getCropAxisData = await new Promise<string | object>((resolve, reject) => {
+                if (!cropper.value) {
+                    reject(new Error('裁切器未初始化'))
+                    return
+                }
+                cropper.value.getCropAxis((axis: string | object) => resolve(axis))
+            })
+
+            let x = 0; let y = 0; let w = 0; let h = 0
+
+            if (typeof getCropAxisData === 'string') {
+                const axisParts = getCropAxisData.split(',').map(Number)
+                if (axisParts.length >= 4 && !axisParts.some(isNaN)) {
+                    x = axisParts[0] || 0
+                    y = axisParts[1] || 0
+                    w = axisParts[2] || 0
+                    h = axisParts[3] || 0
+                }
+            }
+            else if (typeof getCropAxisData === 'object' && getCropAxisData !== null) {
+                const axisObj = getCropAxisData as any
+                x = axisObj.x || 0
+                y = axisObj.y || 0
+                w = axisObj.width || 0
+                h = axisObj.height || 0
+            }
+
+            formData.append('crop_x', String(Math.floor(x)))
+            formData.append('crop_y', String(Math.floor(y)))
+            formData.append('crop_w', String(Math.floor(w)))
+            formData.append('crop_h', String(Math.floor(h)))
+
+            formData.append('file', fileRaw.value, fileName)
+        }
+        else {
+            const blob = await new Promise<Blob>((resolve, reject) => {
+                if (!cropper.value) {
+                    reject(new Error('裁切器未初始化'))
+                    return
+                }
+                cropper.value.getCropBlob((blob: Blob | null) => {
+                    if (blob) {
+                        resolve(blob)
+                    }
+                    else {
+                        reject(new Error('Failed to crop image'))
+                    }
+                })
+            })
+            formData.append('file', blob, fileName)
+        }
+
         formData.append('aspect_id', props.aspect.id)
         formData.append('name', metadata.name.trim())
         formData.append('description', metadata.description.trim() ?? metadata.name.trim())
@@ -204,13 +247,16 @@ async function submit() {
                                 <ClientOnly>
                                     <div class="rounded-lg border h-64 md:h-80 lg:h-96 w-full overflow-hidden">
                                         <VueCropper
-                                            ref="cropper" :img="filePreviewImage" output-type="png" :auto-crop="true" :fixed="true"
+                                            ref="cropperRef" :img="filePreviewImage" output-type="png" :auto-crop="true" :fixed="true"
                                             :fixed-number="cropRatio" :center-box="false" :auto-crop-width="cropBox.width"
                                             :auto-crop-height="cropBox.height" :full="true" :can-scale="true" :info-true="true"
                                             class="h-64 md:h-80 lg:h-96 w-full"
                                         />
                                     </div>
                                 </ClientOnly>
+                                <div v-if="fileRaw?.type === 'image/gif'" class="alert alert-info py-2 shadow-sm text-sm">
+                                    <span>检测到 GIF 动图。预览区将只显示静态帧，但上传成功后在展示处将保留动画效果。</span>
+                                </div>
                                 <div class="flex flex-wrap gap-2">
                                     <button class="btn btn-sm" type="button" @click="rotateLeft">
                                         ⟲ 向左旋转
