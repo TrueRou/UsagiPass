@@ -45,6 +45,8 @@ const cropBox = computed(() => {
     return { width, height }
 })
 
+const isGif = computed(() => fileRaw.value?.type === 'image/gif')
+
 watch(() => props.open, (value) => {
     if (value) {
         reset()
@@ -80,10 +82,14 @@ async function handleFileChange(event: Event) {
 }
 
 function rotateLeft() {
+    if (isGif.value)
+        return
     cropper.value?.rotateLeft()
 }
 
 function rotateRight() {
+    if (isGif.value)
+        return
     cropper.value?.rotateRight()
 }
 
@@ -135,16 +141,37 @@ async function submit() {
     submitting.value = true
     try {
         const formData = new FormData()
-        const isGif = fileRaw.value.type === 'image/gif'
         const fileName = fileRaw.value?.name ?? 'image.png'
 
-        if (isGif) {
-            const getCropAxisData: { x1: number, x2: number, y1: number, y2: number } = cropper.value.getCropAxis()
+        if (isGif.value) {
+            if (!cropper.value) {
+                throw new Error('裁切器未初始化')
+            }
 
-            formData.append('crop_x', String(Math.floor(getCropAxisData.x1)))
-            formData.append('crop_y', String(Math.floor(getCropAxisData.y1)))
-            formData.append('crop_w', String(Math.floor(getCropAxisData.x2 - getCropAxisData.x1)))
-            formData.append('crop_h', String(Math.floor(getCropAxisData.y2 - getCropAxisData.y1)))
+            const getCropAxisData: { x1: number, x2: number, y1: number, y2: number } = cropper.value.getCropAxis()
+            const getImgAxisData: { x1: number, x2: number, y1: number, y2: number } = cropper.value.getImgAxis()
+
+            const naturalSize = await getImageNaturalSize(fileRaw.value)
+
+            const imageBoxWidth = Math.max(1, getImgAxisData.x2 - getImgAxisData.x1)
+            const imageBoxHeight = Math.max(1, getImgAxisData.y2 - getImgAxisData.y1)
+            const scaleX = naturalSize.width / imageBoxWidth
+            const scaleY = naturalSize.height / imageBoxHeight
+
+            const cropXRaw = (getCropAxisData.x1 - getImgAxisData.x1) * scaleX
+            const cropYRaw = (getCropAxisData.y1 - getImgAxisData.y1) * scaleY
+            const cropWRaw = (getCropAxisData.x2 - getCropAxisData.x1) * scaleX
+            const cropHRaw = (getCropAxisData.y2 - getCropAxisData.y1) * scaleY
+
+            const cropX = Math.max(0, Math.min(Math.floor(cropXRaw), naturalSize.width - 1))
+            const cropY = Math.max(0, Math.min(Math.floor(cropYRaw), naturalSize.height - 1))
+            const cropW = Math.max(1, Math.min(Math.floor(cropWRaw), naturalSize.width - cropX))
+            const cropH = Math.max(1, Math.min(Math.floor(cropHRaw), naturalSize.height - cropY))
+
+            formData.append('crop_x', String(cropX))
+            formData.append('crop_y', String(cropY))
+            formData.append('crop_w', String(cropW))
+            formData.append('crop_h', String(cropH))
 
             formData.append('file', fileRaw.value, fileName)
         }
@@ -181,6 +208,24 @@ async function submit() {
     finally {
         submitting.value = false
     }
+}
+
+function getImageNaturalSize(file: File): Promise<{ width: number, height: number }> {
+    return new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(file)
+        const img = new Image()
+
+        img.onload = () => {
+            resolve({ width: img.naturalWidth, height: img.naturalHeight })
+            URL.revokeObjectURL(objectUrl)
+        }
+        img.onerror = () => {
+            reject(new Error('无法读取图片尺寸'))
+            URL.revokeObjectURL(objectUrl)
+        }
+
+        img.src = objectUrl
+    })
 }
 </script>
 
@@ -221,19 +266,19 @@ async function submit() {
                                         <VueCropper
                                             ref="cropperRef" :img="filePreviewImage" output-type="png" :auto-crop="true" :fixed="true"
                                             :fixed-number="cropRatio" :center-box="false" :auto-crop-width="cropBox.width"
-                                            :auto-crop-height="cropBox.height" :full="true" :can-scale="true" :info-true="true"
+                                            :auto-crop-height="cropBox.height" :full="true" :can-scale="!isGif" :info-true="true"
                                             class="h-64 md:h-80 lg:h-96 w-full"
                                         />
                                     </div>
                                 </ClientOnly>
-                                <div v-if="fileRaw?.type === 'image/gif'" class="alert alert-info py-2 shadow-sm text-sm">
+                                <div v-if="isGif" class="alert alert-info py-2 shadow-sm text-sm">
                                     <span>检测到 GIF 动图。预览区将只显示静态帧，但上传成功后在展示处将保留动画效果。</span>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
-                                    <button class="btn btn-sm" type="button" @click="rotateLeft">
+                                    <button class="btn btn-sm" type="button" :disabled="isGif" @click="rotateLeft">
                                         ⟲ 向左旋转
                                     </button>
-                                    <button class="btn btn-sm" type="button" @click="rotateRight">
+                                    <button class="btn btn-sm" type="button" :disabled="isGif" @click="rotateRight">
                                         ⟳ 向右旋转
                                     </button>
                                     <button class="btn btn-sm" type="button" @click="resetCrop">
