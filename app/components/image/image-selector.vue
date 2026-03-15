@@ -24,13 +24,18 @@ const {
     totalRow,
     totalPage,
     activeFilters,
-    representativeLabels,
+    availableLabels,
     updateImage,
     deleteImage,
     refresh,
 } = useImageList({ aspectId: props.aspect.id, pageSize: props.pageSize, initialFilters: props.initialFilters })
 
 const activeSecondary = ref<string[]>([])
+const baseFilters = computed(() => props.initialFilters ?? [])
+const representativeLabels = computed(() => {
+    const allLabels = [...baseFilters.value, ...availableLabels.value, ...activeSecondary.value]
+    return Array.from(new Set(allLabels)).sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'))
+})
 const searchKeyword = ref('')
 const selectedImage = ref<ImageSimpleResponse | null>(null)
 const openUploader = ref(false)
@@ -60,8 +65,31 @@ function updateSelection(image: ImageSimpleResponse) {
     selectedImage.value = image
 }
 
+function isTagActive(label: string) {
+    return baseFilters.value.includes(label) || activeSecondary.value.includes(label)
+}
+
+function isBaseTag(label: string) {
+    return baseFilters.value.includes(label)
+}
+
+function toggleSecondary(label: string) {
+    if (isBaseTag(label))
+        return
+
+    if (activeSecondary.value.includes(label)) {
+        activeSecondary.value = activeSecondary.value.filter(item => item !== label)
+        return
+    }
+    activeSecondary.value = [...activeSecondary.value, label]
+}
+
+function clearSecondaryFilters() {
+    activeSecondary.value = []
+}
+
 async function confirmSearch() {
-    await list({ filters: activeSecondary.value, keyword: searchKeyword.value })
+    await list({ pageNumber: 1, filters: activeSecondary.value, keyword: searchKeyword.value })
 }
 
 async function prevPage() {
@@ -146,7 +174,7 @@ watch(() => props.open, async (isOpen) => {
 }, { immediate: true })
 
 watch([activeSecondary], async () => {
-    await list({ filters: activeSecondary.value, keyword: searchKeyword.value })
+    await list({ pageNumber: 1, filters: activeSecondary.value, keyword: searchKeyword.value })
 })
 </script>
 
@@ -172,22 +200,31 @@ watch([activeSecondary], async () => {
                 </header>
                 <section>
                     <div class="flex flex-wrap gap-2 items-center mt-2">
-                        <div class="flex gap-1 overflow-hidden">
-                            <form class="flex overflow-auto gap-1" @submit.prevent>
-                                <input
-                                    v-for="val in representativeLabels" :key="val" v-model="activeSecondary" type="checkbox"
-                                    name="secondary-filter" class="btn" :value="val" :aria-label="val"
-                                >
-                            </form>
-                            <button v-if="totalRow !== 0" class="btn btn-square" type="button" @click="activeSecondary = []">
-                                x
+                        <div class="flex w-full items-center gap-2">
+                            <div class="flex-1 overflow-x-auto">
+                                <div class="flex gap-1 min-w-max">
+                                    <button
+                                        v-for="val in representativeLabels" :key="val" class="btn btn-sm" type="button"
+                                        :class="isTagActive(val) ? 'btn-primary' : 'btn-outline'"
+                                        :title="isBaseTag(val) ? '默认标签（固定）' : undefined"
+                                        @click="toggleSecondary(val)"
+                                    >
+                                        {{ val }}{{ isBaseTag(val) ? ' · 默认' : '' }}
+                                    </button>
+                                </div>
+                            </div>
+                            <button
+                                v-if="activeSecondary.length > 0" class="btn btn-sm btn-ghost" type="button"
+                                @click="clearSecondaryFilters"
+                            >
+                                清空标签
                             </button>
                         </div>
 
                         <div class="join w-full">
                             <input
                                 v-model="searchKeyword" type="search" class="input input-bordered join-item flex-1"
-                                placeholder="按名称搜索"
+                                placeholder="按名称搜索" @keydown.enter.prevent="confirmSearch"
                             >
                             <button class="btn btn-neutral join-item" type="button" @click="confirmSearch">
                                 搜索

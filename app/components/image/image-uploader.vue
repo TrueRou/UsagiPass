@@ -23,7 +23,6 @@ const tagDraft = ref('')
 
 const metadata = reactive({
     name: '',
-    description: '',
     visibility: ImageVisibility.PRIVATE,
     labels: [] as string[],
 })
@@ -121,7 +120,6 @@ function cleanupPreview() {
 
 function reset() {
     metadata.name = ''
-    metadata.description = ''
     metadata.visibility = ImageVisibility.PRIVATE
     metadata.labels = ['workshop', ...props.suggestedLabels ?? []]
     tagDraft.value = ''
@@ -141,37 +139,12 @@ async function submit() {
         const fileName = fileRaw.value?.name ?? 'image.png'
 
         if (isGif) {
-            const getCropAxisData = await new Promise<string | object>((resolve, reject) => {
-                if (!cropper.value) {
-                    reject(new Error('裁切器未初始化'))
-                    return
-                }
-                cropper.value.getCropAxis((axis: string | object) => resolve(axis))
-            })
+            const getCropAxisData: { x1: number, x2: number, y1: number, y2: number } = cropper.value.getCropAxis()
 
-            let x = 0; let y = 0; let w = 0; let h = 0
-
-            if (typeof getCropAxisData === 'string') {
-                const axisParts = getCropAxisData.split(',').map(Number)
-                if (axisParts.length >= 4 && !axisParts.some(isNaN)) {
-                    x = axisParts[0] || 0
-                    y = axisParts[1] || 0
-                    w = axisParts[2] || 0
-                    h = axisParts[3] || 0
-                }
-            }
-            else if (typeof getCropAxisData === 'object' && getCropAxisData !== null) {
-                const axisObj = getCropAxisData as any
-                x = axisObj.x || 0
-                y = axisObj.y || 0
-                w = axisObj.width || 0
-                h = axisObj.height || 0
-            }
-
-            formData.append('crop_x', String(Math.floor(x)))
-            formData.append('crop_y', String(Math.floor(y)))
-            formData.append('crop_w', String(Math.floor(w)))
-            formData.append('crop_h', String(Math.floor(h)))
+            formData.append('crop_x', String(Math.floor(getCropAxisData.x1)))
+            formData.append('crop_y', String(Math.floor(getCropAxisData.y1)))
+            formData.append('crop_w', String(Math.floor(getCropAxisData.x2 - getCropAxisData.x1)))
+            formData.append('crop_h', String(Math.floor(getCropAxisData.y2 - getCropAxisData.y1)))
 
             formData.append('file', fileRaw.value, fileName)
         }
@@ -195,7 +168,6 @@ async function submit() {
 
         formData.append('aspect_id', props.aspect.id)
         formData.append('name', metadata.name.trim())
-        formData.append('description', metadata.description.trim() ?? metadata.name.trim())
         formData.append('visibility', String(metadata.visibility.valueOf()))
         metadata.labels.forEach(label => formData.append('labels', label))
 
@@ -280,15 +252,6 @@ async function submit() {
                                 v-model="metadata.name" type="text" class="input input-bordered w-full"
                                 placeholder="给图片起个名字"
                             >
-                        </div>
-                        <div>
-                            <label class="label">
-                                <span class="label-text">描述</span>
-                            </label>
-                            <textarea
-                                v-model="metadata.description" class="textarea textarea-bordered w-full"
-                                placeholder="描述这张图片（可选）" rows="3"
-                            />
                         </div>
                         <div>
                             <label class="label">
