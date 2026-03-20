@@ -20,6 +20,14 @@ export default defineNuxtConfig({
         },
     },
     runtimeConfig: {
+        session: {
+            name: 'nuxt-session',
+            password: process.env.NUXT_SESSION_PASSWORD || '',
+            maxAge: 31536000,
+            cookie: {
+                sameSite: 'lax',
+            },
+        },
         usagipass: {
             URL: 'http://localhost:7200',
             databaseURL: 'postgresql://postgres:password@localhost:5432/usagipass',
