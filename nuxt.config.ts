@@ -52,8 +52,8 @@ export default defineNuxtConfig({
             developerToken: 'de5ca192916344b360f391d83e20ba85',
         },
         public: {
-            imageURL: 'https://assets.dev.turou.fun/leporid/images',
-            imagePreviewURL: 'https://assets.dev.turou.fun/leporid/thumbnails',
+            imageURL: 'https://cdn.assets.turou.fun/leporid/images',
+            imagePreviewURL: 'https://cdn.assets.turou.fun/leporid/thumbnails',
         },
     },
     i18n: {
