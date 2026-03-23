@@ -18,8 +18,8 @@ const ratingLevels: any = [
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 
-const getNum = (id: string) => new URL(`../../assets/icons/rating/num/UI_CMN_Num_26p_${id}.png`, import.meta.url).href
-const getBase = (id: string) => new URL(`../../assets/icons/rating/UI_CMA_Rating_Base_${id}.png`, import.meta.url).href
+const getNum = async (id: string) => (await import(`../../assets/icons/rating/num/UI_CMN_Num_26p_${id}.png`)).default
+const getBase = async (id: string) => (await import(`../../assets/icons/rating/UI_CMA_Rating_Base_${id}.png`)).default
 
 function countOccurrences(str: string, searchTerm: string) {
     let count = 0
@@ -31,20 +31,19 @@ function countOccurrences(str: string, searchTerm: string) {
     return count
 }
 
-const numImages = computed(() => {
+const numImageIds = computed(() => {
     const numValue = props.rating?.replace(/\+/g, '').replace(/-/g, '')
     if (!numValue || Number.isNaN(Number(numValue)))
         return []
     const arr = numValue.split('')
     while (arr.length < 5) arr.unshift('10')
-    const finalValue = arr.map(num => getNum(num))
-    return finalValue.slice(0, 5)
+    return arr.slice(0, 5)
 })
 
-const baseImage = computed(() => {
+const baseImageId = computed(() => {
     const numValue = props.rating?.replace(/\+/g, '').replace(/-/g, '')
     if (!numValue || Number.isNaN(Number(numValue)))
-        return getBase('0')
+        return '0'
     let rating = Number.parseInt(numValue)
     rating = Math.max(ratingLevels[0], Math.min(rating, ratingLevels[9]))
     let stage = 0
@@ -53,7 +52,7 @@ const baseImage = computed(() => {
     const sideEffect = countOccurrences(props.rating || '', '+') - countOccurrences(props.rating || '', '-')
     const finalValue = Math.max(Math.min(stage + 1 + sideEffect, 10), 0)
 
-    return getBase(String(finalValue))
+    return String(finalValue)
 })
 
 async function drawCanvas() {
@@ -68,14 +67,19 @@ async function drawCanvas() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
+    const [baseSrc, numSrcs] = await Promise.all([
+        getBase(baseImageId.value),
+        Promise.all(numImageIds.value.map(id => getNum(id))),
+    ])
+
     const baseImg = new Image()
     baseImg.fetchPriority = 'high'
-    baseImg.src = baseImage.value
+    baseImg.src = baseSrc
 
     baseImg.onload = () => {
         ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height)
 
-        const numImgPromises = numImages.value.map((src) => {
+        const numImgPromises = numSrcs.map((src) => {
             const img = new Image()
             img.fetchPriority = 'high'
             img.src = src
@@ -96,7 +100,7 @@ async function drawCanvas() {
 }
 
 onMounted(drawCanvas)
-watch([() => props.rating, baseImage, numImages], drawCanvas)
+watch([() => props.rating, baseImageId, numImageIds], drawCanvas)
 </script>
 
 <template>

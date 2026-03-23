@@ -3,9 +3,17 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
-    devtools: { enabled: true },
+    devtools: { enabled: process.env.NODE_ENV === 'development' },
     modules: ['@pinia/nuxt', '@nuxtjs/i18n', '@nuxt/eslint', 'nuxt-auth-utils'],
-    css: ['~/assets/css/main.css', 'intro.js/introjs.css'],
+    css: ['~/assets/css/main.css'],
+    app: {
+        head: {
+            link: [
+                { rel: 'dns-prefetch', href: 'https://cdn.assets.turou.fun' },
+                { rel: 'preconnect', href: 'https://cdn.assets.turou.fun', crossorigin: '' },
+            ],
+        },
+    },
     vite: {
         plugins: [
             tailwindcss(),

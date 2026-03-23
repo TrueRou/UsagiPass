@@ -11,8 +11,9 @@ export function useTour(updateCallback: () => void = () => {}) {
     /**
      * 启动主页引导（第一阶段）
      */
-    function startMainPageTour() {
-        const intro = nuxtApp.$intro.tour()
+    async function startMainPageTour() {
+        const introJs = await nuxtApp.$getIntro()
+        const intro = introJs.tour()
         inTour.value = true
 
         intro.setOptions({
@@ -76,8 +77,9 @@ export function useTour(updateCallback: () => void = () => {}) {
     /**
      * 启动设置页引导（第二阶段）
      */
-    function startPreferenceTour() {
-        const intro = nuxtApp.$intro.tour()
+    async function startPreferenceTour() {
+        const introJs = await nuxtApp.$getIntro()
+        const intro = introJs.tour()
 
         intro.setOptions({
             steps: [
