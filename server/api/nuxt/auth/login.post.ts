@@ -31,8 +31,6 @@ export default defineEventHandler(async (event) => {
             },
             secure: {
                 accessToken: tokenResponse.access_token,
-                refreshToken: tokenResponse.refresh_token,
-                expiresAt: Date.now() + (tokenResponse.expires_in * 1000),
             },
         })
 
