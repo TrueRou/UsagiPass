@@ -5,10 +5,22 @@ useHead({
     title: '登录 - UsagiPass',
 })
 
-const { loggedIn, fetch: fetchUser, user } = useUserSession()
+const { loggedIn, fetch: fetchUser, user, clear } = useUserSession()
 const route = useRoute()
 const guestCookie = useCookie<boolean>('guest', { maxAge: 60 * 60 * 24 * 365 })
 guestCookie.value = false
+
+if (route.query.clear === '1' || route.query.clear === 'true') {
+    await clear()
+
+    const nextQuery = { ...route.query }
+    delete nextQuery.clear
+
+    await navigateTo({
+        path: route.path,
+        query: nextQuery,
+    }, { replace: true })
+}
 
 const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length ?? 0) === 0)
 
@@ -21,7 +33,7 @@ const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string, 
 // 登录后的跳转目标：优先使用 ?redirect= 参数，否则按资料完整性决定
 const redirectTarget = computed(() => {
     const r = route.query.redirect as string
-    if (r && r.startsWith('/'))
+    if (r && r.startsWith('/') && !r.startsWith('/auth/login') && !r.startsWith('/auth/register'))
         return r
     return shouldCompleteProfile.value ? '/auth/reset' : '/'
 })

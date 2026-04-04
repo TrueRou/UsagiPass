@@ -20,7 +20,9 @@ export default defineEventHandler(async (event) => {
     console.info(`[proxy] ${new Date().toISOString()} ${method} ${safeUrl} -> ${proxyUrl} user=${userId}`)
 
     const val = await proxyRequest(event, target, { headers })
-    if (!reqAuthorization && val?.statusCode === 401) {
+
+    if (event.node.res.statusCode === 401 && !reqAuthorization) {
+        console.warn(`[auth] ${new Date().toISOString()} 401 Unauthorized for ${method} ${safeUrl} user=${userId}, clearing session.`)
         await clearUserSession(event)
     }
 
