@@ -35,23 +35,30 @@ export default defineNuxtPlugin((nuxtApp) => {
         }
     }
 
-    const showErrorToast = (message: string, options?: ApiFetchOptions) => {
+    const shouldShowErrorToast = (options?: ApiFetchOptions, method?: string) => {
+        if (options?.showErrorToast !== undefined)
+            return options.showErrorToast
+
+        return (method || 'GET').toUpperCase() !== 'GET'
+    }
+
+    const addToast = (type: 'success' | 'error', message: string) => {
         if (!import.meta.client)
             return
 
-        if (options?.showErrorToast === true) {
-            const { addNotification } = useNotificationsStore()
-            addNotification({ type: 'error', message })
+        const { addNotification } = useNotificationsStore()
+        addNotification({ type, message })
+    }
+
+    const showErrorToast = (message: string, options?: ApiFetchOptions, method?: string) => {
+        if (shouldShowErrorToast(options, method)) {
+            addToast('error', message)
         }
     }
 
     const showSuccessToast = (message: string, options?: ApiFetchOptions) => {
-        if (!import.meta.client)
-            return
-
         if (options?.showSuccessToast === true) {
-            const { addNotification } = useNotificationsStore()
-            addNotification({ type: 'success', message })
+            addToast('success', message)
         }
     }
 
@@ -69,7 +76,7 @@ export default defineNuxtPlugin((nuxtApp) => {
             return
         }
 
-        showErrorToast(message || '登录状态过期，请重新登录。', { showErrorToast: true })
+        addToast('error', message || '登录状态过期，请重新登录。')
         const redirect = encodeURIComponent(route.fullPath || '/')
         await nuxtApp.runWithContext(() => navigateTo(`/auth/login?redirect=${redirect}`))
     }
@@ -88,30 +95,41 @@ export default defineNuxtPlugin((nuxtApp) => {
         },
         onRequestError(context) {
             stopGlobalLoading()
-            showErrorToast(context.error?.message || '请求发送失败，请稍后重试。', context.options as ApiFetchOptions)
+
+            const options = context.options as ApiFetchOptions
+            const message = context.error?.message || '请求失败，请稍后重试。'
+            showErrorToast(message, options, context.options.method?.toString())
         },
         async onResponse(context) {
             stopGlobalLoading()
-            const rawData = context.response._data as ApiResponse
 
-            if (rawData.data !== undefined && rawData.code === 200) {
-                showSuccessToast(rawData.message || '请求成功', context.options as ApiFetchOptions)
-                context.response._data = rawData.data // unwrap data
+            const options = context.options as ApiFetchOptions
+            const rawData = context.response._data as ApiResponse | undefined
+
+            if (!rawData || rawData.code === undefined) {
+                return
             }
 
-            const message = rawData.message || context.response.statusText
-            if (rawData !== undefined && rawData.code === 401) {
+            if (rawData.code === 200) {
+                showSuccessToast(options.successMessage || rawData.message || '操作成功', options)
+                if (rawData.data !== undefined) {
+                    context.response._data = rawData.data
+                }
+                return
+            }
+
+            const message = rawData.message || context.response.statusText || '请求失败，请稍后重试。'
+            if (rawData.code === 401) {
                 await handleUnauthorized(message)
+                return
             }
 
-            if (rawData !== undefined && rawData.code !== 200) {
-                showErrorToast(message, context.options as ApiFetchOptions)
-                throw createError({
-                    statusCode: context.response.status || 400,
-                    data: rawData,
-                    message,
-                })
-            }
+            showErrorToast(message, options, context.options.method?.toString())
+            throw createError({
+                statusCode: context.response.status || 400,
+                data: rawData,
+                message,
+            })
         },
     })
 
