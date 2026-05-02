@@ -2,24 +2,25 @@
 outline: deep
 ---
 
-# Clash/Mihomo 配置
+# <i-arcticons-clash style="display: inline-block; vertical-align: middle;" />Clash / <i-arcticons-clash-meta style="display: inline-block; vertical-align: middle;" />Mihomo 配置
 
 ::: tip 提示
-Clash 和 Mihomo 都支持 UsagiPass, 已经安装过系列软件的, 直接查看第2步
+<i-arcticons-clash style="display: inline-block; vertical-align: middle;" />Clash 和 <i-arcticons-clash-meta style="display: inline-block; vertical-align: middle;" />Mihomo 都支持 UsagiPass, 已经安装过系列软件的, 直接查看第2步
 :::
-1. 安装 Clash/Mihomo（原 ClashMeta）：
+
+1. 安装 <i-arcticons-clash style="display: inline-block; vertical-align: middle;" />Clash / <i-arcticons-clash-meta style="display: inline-block; vertical-align: middle;" />Mihomo（原 ClashMeta）：
     - **ClashMetaForAndroid**: [Github (推荐) ](https://github.com/MetaCubeX/ClashMetaForAndroid/releases) / [蓝奏云 (国内) ](https://wwps.lanzouj.com/iXMCk2cydjmd)
     - [**其他客户端** (MetaCubeX Wiki)](https://wiki.metacubex.one/startup/client/client/)
     - 加入 UsagiPass 用户群，在群公告处获取：363346002
 2. 导入 UsagiPass 配置
-    - 一键导入：[导入 Clash 配置](clash://install-config?url=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.yaml&name=UsagiPass)
-    - 复制链接到 Clash 导入：https://dxpass.turou.fun/UsagiPass.yaml
+    - [一键导入 <i-arcticons-clash style="display: inline-block; vertical-align: middle;" /> / <i-arcticons-clash-meta style="display: inline-block; vertical-align: middle;" /> 配置](clash://install-config?url=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.yaml&name=UsagiPass)
+    - 复制链接到  <i-arcticons-clash style="display: inline-block; vertical-align: middle;" /> / <i-arcticons-clash-meta style="display: inline-block; vertical-align: middle;" /> 导入：https://dxpass.turou.fun/UsagiPass.yaml
     - 加入 UsagiPass 用户群，在群文件获取配置：363346002
 3. **确保选择了 UsagiPass 配置，点击启动代理即可生效！**
 
 <br>
 
-::: details 高级方法: 插入在自己的 Clash/Mihomo 配置文件
+::: details 高级方法: 插入在自己的  <i-arcticons-clash style="display: inline-block; vertical-align: middle;" />Clash / <i-arcticons-clash-meta style="display: inline-block; vertical-align: middle;" />Mihomo 配置文件
 
 > [!TIP] 提示
 > 本方法需熟知内核的 [`proxy-providers`](https://wiki.metacubex.one/config/proxy-providers) 与 [`rule-providers`](https://wiki.metacubex.one/config/rule-providers) 方法<br>

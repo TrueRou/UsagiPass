@@ -69,6 +69,9 @@ importers:
       '@antfu/eslint-config':
         specifier: ^6.2.0
         version: 6.2.0(@vue/compiler-sfc@3.5.24)(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
+      '@iconify-json/arcticons':
+        specifier: ^1.2.52
+        version: 1.2.52
       '@iconify-json/fa6-solid':
         specifier: ^1.2.4
         version: 1.2.4
@@ -1105,6 +1108,9 @@ packages:
   '@humanwhocodes/retry@0.4.3':
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
+
+  '@iconify-json/arcticons@1.2.52':
+    resolution: {integrity: sha512-g8tPqNhr3cM6KkgI09gxaUv+HnIzOK64ToN+wq2u4A8dsgJ1J1JcBdGzzSVGCtHtS+pSVK4mIQ2z8II7xN8adw==}
 
   '@iconify-json/fa6-solid@1.2.4':
     resolution: {integrity: sha512-LmDNNdJVyvF5mPm1yxWvL8KjCc/E8LzoqnF1LNTVpyY2ZJRUlGOWuPIThdbuFBF2IovgttkIyumhyqfmlHdwKg==}
@@ -7545,6 +7551,10 @@ snapshots:
   '@humanwhocodes/module-importer@1.0.1': {}
 
   '@humanwhocodes/retry@0.4.3': {}
+
+  '@iconify-json/arcticons@1.2.52':
+    dependencies:
+      '@iconify/types': 2.0.0
 
   '@iconify-json/fa6-solid@1.2.4':
     dependencies:

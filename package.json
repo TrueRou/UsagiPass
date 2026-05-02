@@ -38,6 +38,7 @@
     },
     "devDependencies": {
         "@antfu/eslint-config": "^6.2.0",
+        "@iconify-json/arcticons": "^1.2.52",
         "@iconify-json/fa6-solid": "^1.2.4",
         "@iconify/json": "^2.2.469",
         "@nuxt/eslint": "1.10.0",

@@ -2,10 +2,10 @@
 outline: deep
 ---
 
-# Shadowrocket 配置
+# <i-ion-md-rocket style="display: inline-block; vertical-align: middle;" />Shadowrocket 配置
 
 ::: tip
-Shadowrocket 需要外区账号，且购买后才能安装；[<i-fa6-solid-magnifying-glass-location style="display: inline-block; vertical-align: middle;" />](https://app.sensortower.com/overview/932747118)<br>
+<i-ion-md-rocket style="display: inline-block; vertical-align: middle;" />Shadowrocket 需要外区账号，且购买后才能安装；[<i-fa6-solid-magnifying-glass-location style="display: inline-block; vertical-align: middle;" />](https://app.sensortower.com/overview/932747118)<br>
 如果你对如何获取小火箭感到疑惑，推荐 iOS 用户使用 Sing-box 方案。
 :::
 

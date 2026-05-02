@@ -12,7 +12,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    IArcticonsClash: typeof import('~icons/arcticons/clash')['default']
+    IArcticonsClashMeta: typeof import('~icons/arcticons/clash-meta')['default']
     IFa6SolidMagnifyingGlassLocation: typeof import('~icons/fa6-solid/magnifying-glass-location')['default']
+    IIonMdRocket: typeof import('~icons/ion/md-rocket')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
@@ -20,7 +23,10 @@ declare module 'vue' {
 
 // For TSX support
 declare global {
+  const IArcticonsClash: typeof import('~icons/arcticons/clash')['default']
+  const IArcticonsClashMeta: typeof import('~icons/arcticons/clash-meta')['default']
   const IFa6SolidMagnifyingGlassLocation: typeof import('~icons/fa6-solid/magnifying-glass-location')['default']
+  const IIonMdRocket: typeof import('~icons/ion/md-rocket')['default']
   const RouterLink: typeof import('vue-router')['RouterLink']
   const RouterView: typeof import('vue-router')['RouterView']
 }

@@ -68,7 +68,9 @@ export default defineConfig({
             Components({
                 include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
                 resolvers: [
-                    IconsResolver(),
+                    IconsResolver({
+                        prefix: 'i', // 确保前缀为 i
+                    }),
                 ],
             }) as any, // 同样使用 as any 绕过
         ],
