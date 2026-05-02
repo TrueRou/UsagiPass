@@ -15,5 +15,5 @@ outline: deep
 2. 导入 UsagiPass 配置
     - [一键导入 <i-ion-md-rocket style="display: inline-block; vertical-align: middle;" /> 配置](shadowrocket://add/sub://aHR0cHM6Ly9keHBhc3MudHVyb3UuZnVuL1VzYWdpUGFzcy55YW1s?remark=UsagiPass)
     - 复制链接到小火箭导入：https://dxpass.turou.fun/UsagiPass.yaml
-    - 加入 UsagiPass 用户群，在群文件获取配置（使用 Clash 配置就可以了）：363346002
+    - 加入 UsagiPass 用户群，在群文件获取配置（使用 <i-arcticons-clash style="display: inline-block; vertical-align: middle;" />Clash 配置就可以了）：363346002
 3. **确保选择了 UsagiPass 配置，确保“全局代理”处开启了配置模式，点击启动代理即可生效！**
