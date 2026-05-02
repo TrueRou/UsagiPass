@@ -62,17 +62,17 @@ export default defineConfig({
         build: { assetsDir: '../' },
         plugins: [
             Icons({
-                compiler: 'vue3', // 显式指定 vue3
+                compiler: 'vue3',
                 autoInstall: true,
             }) as any,
             Components({
                 include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
                 resolvers: [
                     IconsResolver({
-                        prefix: 'i', // 确保前缀为 i
+                        prefix: 'i',
                     }),
                 ],
-            }) as any, // 同样使用 as any 绕过
+            }) as any,
         ],
     },
 })
