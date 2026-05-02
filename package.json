@@ -38,11 +38,15 @@
     },
     "devDependencies": {
         "@antfu/eslint-config": "^6.2.0",
+        "@iconify-json/fa6-solid": "^1.2.4",
+        "@iconify/json": "^2.2.469",
         "@nuxt/eslint": "1.10.0",
         "@types/pg": "^8.15.6",
         "daisyui": "^5.5.3",
         "drizzle-kit": "^0.31.7",
         "eslint": "^9.39.1",
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3",
+        "unplugin-icons": "^23.0.1",
+        "unplugin-vue-components": "^32.0.0"
     }
 }

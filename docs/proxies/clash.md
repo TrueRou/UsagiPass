@@ -17,13 +17,15 @@ Clash 和 Mihomo 都支持 UsagiPass, 已经安装过系列软件的, 直接查�
     - 加入 UsagiPass 用户群，在群文件获取配置：363346002
 3. **确保选择了 UsagiPass 配置，点击启动代理即可生效！**
 
+<br>
 
 ::: details 高级方法: 插入在自己的 Clash/Mihomo 配置文件
 
-::: tip 提示
-本方法需熟知 Mihomo 内核 的 `proxy-provider` 与 `rule-provider` 方法
-以下内容仅供参考, 
-:::
+> [!TIP] 提示
+> 本方法需熟知内核的 [`proxy-providers`](https://wiki.metacubex.one/config/proxy-providers) 与 [`rule-providers`](https://wiki.metacubex.one/config/rule-providers) 方法<br>
+  以下内容仅供参考, 
+
+<br>
 
 ```yaml
 proxy-providers:
@@ -48,5 +50,4 @@ rule-providers:
 rule:
   - 'RULE-SET,maimaiDX_domain,舞萌DX登录'
 ```
-
 :::
