@@ -1,4 +1,7 @@
 import { defineConfig } from 'vitepress'
+import Icons from 'unplugin-icons/vite'
+import Components from 'unplugin-vue-components/vite'
+import IconsResolver from 'unplugin-icons/resolver'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -57,5 +60,19 @@ export default defineConfig({
     },
     vite: {
         build: { assetsDir: '../' },
+        plugins: [
+            Icons({
+                compiler: 'vue3',
+                autoInstall: true,
+            }) as any,
+            Components({
+                include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
+                resolvers: [
+                    IconsResolver({
+                        prefix: 'i',
+                    }),
+                ],
+            }) as any,
+        ],
     },
 })
