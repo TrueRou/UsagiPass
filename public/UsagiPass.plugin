@@ -1,0 +1,10 @@
+#!name=UsagiPass
+#!desc=通过代理替换 wq.wahlap.net 网页，将请求重定向到 up.turou.fun。
+#!author=iAPara
+#!icon=
+
+[rule]
+DOMAIN-SUFFIX, wq.wahlap.net, UsagiPass
+DOMAIN-SUFFIX, sys-all.cn, UsagiPass
+DOMAIN-SUFFIX, sys-allnet.cn, UsagiPass
+DOMAIN, tgk-wcaime.wahlap.com, UsagiPass
