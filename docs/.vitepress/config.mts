@@ -27,7 +27,7 @@ export default defineConfig({
                 text: '受支持的代理',
                 items: [
                     { text: 'Clash / Mihomo', link: '/proxies/clash' },
-                    { text: 'Sing-box / Hiddify', link: '/proxies/singbox' },
+                    { text: 'Sing-box', link: '/proxies/singbox' },
                     { text: 'Shadowrocket', link: '/proxies/rocket' },
                     { text: 'Loon', link: '/proxies/loon' },
                     { text: 'Quantumult X', link: '/proxies/quantx' },

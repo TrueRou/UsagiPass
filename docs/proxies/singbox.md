@@ -2,11 +2,10 @@
 outline: deep
 ---
 
-# Sing-box / <i-arcticons-hiddify />Hiddify 配置
+# Sing-box 配置
 
 ::: tip
 感谢 MisakaNo 提供 Sing-box 配置文件。<br>
-<i-arcticons-hiddify />Hiddify 可直接使用一键导入或者扫码, 如何安装 <i-arcticons-hiddify />Hiddify 不再描述 [<i-fa6-solid-magnifying-glass-location />](https://app.sensortower.com/overview/6596777532)
 :::
 
 1. iOS 使用 Sing-box：
@@ -17,8 +16,8 @@ outline: deep
         - [**Github(推荐)**](https://github.com/SagerNet/sing-box/releases) / [Google Play](https://play.google.com/store/apps/details?id=io.nekohasekai.sfa)
         - 加入 UsagiPass 用户群，在群公告处获取：363346002
     2. Profiles -> 新建图标 -> **Create Manually** -> Name: 随意，Type: Remote，URL: https://dxpass.turou.fun/UsagiPass.json -> Create<br>
-3. 扫码 或 [一键导入](
-sing-box://import-remote-profile?url=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.json) Sing-box / <i-arcticons-hiddify />Hiddify ![](/image/singbox-qrcode.svg)
+3. 不会手动导入的话 扫码 或 [一键导入](
+sing-box://import-remote-profile?url=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.json) Sing-box ![](/image/singbox-qrcode.svg)
 4. **确保选择了 UsagiPass 配置，点击启动代理即可生效！**
 
 ::: tip
