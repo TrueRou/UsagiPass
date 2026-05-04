@@ -76,7 +76,7 @@ UsagiPass 需要代理才能运行，请根据你的设备选择合适的代理�
 推荐使用 [**Sing-box**](/proxies/singbox)<br>
 若熟悉以下应用，可查看对应教程:<br>
 [**<i-ion-md-rocket />Shadowrocket**](/proxies/rocket)<br>
-[**<i-bxs-balloon />Loon**](/proxies/loon)
+[**<i-bxs-balloon />Loon**](/proxies/loon)<br>
 [**Quantumult X**](/proxies/quantx)
 
 :::
