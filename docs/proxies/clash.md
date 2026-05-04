@@ -15,8 +15,8 @@ outline: deep
     - 加入 UsagiPass 用户群，在群公告处获取：363346002
 2. 导入 UsagiPass 配置
     - ![](/image/mihomo-qrcode.svg)
-    [一键导入 <i-arcticons-clash /> / <i-arcticons-clash-meta /> 配置](clash://install-config?url=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.yaml&name=UsagiPass)
-    - 复制链接到  <i-arcticons-clash /> / <i-arcticons-clash-meta /> 导入：https://dxpass.turou.fun/UsagiPass.yaml
+    扫码 或 [一键导入](clash://install-config?url=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.yaml&name=UsagiPass) <i-arcticons-clash /> / <i-arcticons-clash-meta /> 配置
+    - 或复制链接到  <i-arcticons-clash /> / <i-arcticons-clash-meta /> 导入：https://dxpass.turou.fun/UsagiPass.yaml
     - 加入 UsagiPass 用户群，在群文件获取配置：363346002
 3. **确保选择了 UsagiPass 配置，点击启动代理即可生效！**
 
