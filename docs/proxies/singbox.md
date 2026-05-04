@@ -22,7 +22,6 @@ sing-box://import-remote-profile?url=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.
 4. **确保选择了 UsagiPass 配置，点击启动代理即可生效！**
 
 ::: tip
-也可以选择使用文件导入，Type 处选择 Local 即可。
-
+也可以选择使用文件导入，Type 处选择 Local 即可。<br>
 安卓用户如果在导入文件过程中出现 invalid message 错误，请仔细阅读导入流程（一定要选择 Create Manually，而不是 Import from file）。
 :::
