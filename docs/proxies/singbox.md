@@ -6,7 +6,7 @@ outline: deep
 
 ::: tip
 感谢 MisakaNo 提供 Sing-box 配置文件。<br>
-<i-arcticons-hiddify />Hiddify App 可直接使用一键导入或者扫码
+<i-arcticons-hiddify />Hiddify 可直接使用一键导入或者扫码, 如何安装 <i-arcticons-hiddify />Hiddify 不再描述 [<i-fa6-solid-magnifying-glass-location />](https://app.sensortower.com/overview/6596777532)
 :::
 
 1. iOS 使用 Sing-box：
