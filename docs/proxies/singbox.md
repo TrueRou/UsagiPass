@@ -17,7 +17,7 @@ outline: deep
         - 加入 UsagiPass 用户群，在群公告处获取：363346002
     2. Profiles -> 新建图标 -> **Create Manually** -> Name: 随意，Type: Remote，URL: https://dxpass.turou.fun/UsagiPass.json -> Create<br>
 3. 不会手动导入的话 扫码 或 [一键导入](
-sing-box://import-remote-profile?url=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.json) Sing-box ![](/image/singbox-qrcode.svg)
+sing-box://import-remote-profile?url=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.json#UsagiPass) Sing-box ![](/image/singbox-qrcode.svg)
 4. **确保选择了 UsagiPass 配置，点击启动代理即可生效！**
 
 ::: tip
