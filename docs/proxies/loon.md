@@ -13,7 +13,7 @@ outline: deep
     - 请自行寻找安装方法
     - 请尽量不要在 UsagiPass 用户群寻求安装帮助，如对安装有困难推荐查看 [Sing-box](/proxies/singbox) 方案
 2. 添加 UsagiPass 节点
-    - [一键导入 <i-bxs-balloon />](loon://import?sub=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.txt)
+    - [一键导入 <i-bxs-balloon />](loon://import?nodelist=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.txt&name=UsagiPass)
     - 或在 <i-bxs-balloon />Loon 的 配置 - 所有节点 中，点击右上角加号，添加一个订阅：https://dxpass.turou.fun/UsagiPass.txt
 3. 添加 UsagiPass 插件
     - [一键导入 <i-bxs-balloon />](loon://import?plugin=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.plugin)
