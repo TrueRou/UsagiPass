@@ -5,7 +5,7 @@ outline: deep
 # Sing-box 配置
 
 ::: tip
-感谢 MisakaNo 提供 Sing-box 配置文件。
+感谢 MisakaNo 提供 Sing-box 配置文件。<br>
 :::
 
 1. iOS 使用 Sing-box：
@@ -13,14 +13,14 @@ outline: deep
     2. Profiles -> New Profile -> Name: 随意，Type: Remote，URL: https://dxpass.turou.fun/UsagiPass.json -> Create
 2. 安卓使用 Sing-box：
     1. 下载 Sing-box
-        - **Github(推荐)**：[https://github.com/SagerNet/sing-box/releases](https://github.com/SagerNet/sing-box/releases)
-        - Google Play：搜索 Sing-box 并下载
+        - [**Github(推荐)**](https://github.com/SagerNet/sing-box/releases) / [Google Play](https://play.google.com/store/apps/details?id=io.nekohasekai.sfa)
         - 加入 UsagiPass 用户群，在群公告处获取：363346002
-    2. Profiles -> 新建图标 -> **Create Manually** -> Name: 随意，Type: Remote，URL: https://dxpass.turou.fun/UsagiPass.json -> Create
-3. **确保选择了 UsagiPass 配置，点击启动代理即可生效！**
+    2. Profiles -> 新建图标 -> **Create Manually** -> Name: 随意，Type: Remote，URL: https://dxpass.turou.fun/UsagiPass.json -> Create<br>
+3. 不会手动导入的话 扫码 或 [一键导入](
+sing-box://import-remote-profile?url=https%3a%2f%2fdxpass.turou.fun%2fUsagiPass.json#UsagiPass) Sing-box ![](/image/singbox-qrcode.svg)
+4. **确保选择了 UsagiPass 配置，点击启动代理即可生效！**
 
 ::: tip
-也可以选择使用文件导入，Type 处选择 Local 即可。
-
+也可以选择使用文件导入，Type 处选择 Local 即可。<br>
 安卓用户如果在导入文件过程中出现 invalid message 错误，请仔细阅读导入流程（一定要选择 Create Manually，而不是 Import from file）。
 :::

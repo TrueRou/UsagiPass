@@ -69,27 +69,16 @@ UsagiPass 需要代理 HTTPS 流量以实现二维码页面的替换功能，故
 UsagiPass 需要代理才能运行，请根据你的设备选择合适的代理软件：
 
 ::: details 安卓设备
-推荐使用 **Mihomo**：
-
-1. 下载安装 Mihomo：
-   - **Github（推荐）**：[https://github.com/MetaCubeX/ClashMetaForAndroid/releases](https://github.com/MetaCubeX/ClashMetaForAndroid/releases)
-   - **蓝奏云（国内）**：[https://wwps.lanzouj.com/iXMCk2cydjmd](https://wwps.lanzouj.com/iXMCk2cydjmd)
-   - 加入 UsagiPass 用户群，在群公告处获取：363346002
-
-2. 导入 UsagiPass 配置：
-   - 一键导入：[导入 Clash 配置](clash://install-config?url=https://up.turou.fun/UsagiPass.yaml&name=UsagiPass)
-   - 复制链接到 Clash 导入：`https://up.turou.fun/UsagiPass.yaml`
-   - 从群文件获取配置：363346002
+推荐使用 [**<i-arcticons-clash-meta />Mihomo**](/proxies/clash)
 :::
 
 ::: details iOS 设备
-推荐使用 **Singbox**：
+推荐使用 [**Sing-box**](/proxies/singbox)<br>
+若熟悉以下应用，可查看对应教程:<br>
+[**<i-ion-md-rocket />Shadowrocket**](/proxies/rocket)<br>
+[**<i-bxs-balloon />Loon**](/proxies/loon)<br>
+[**Quantumult X**](/proxies/quantx)
 
-1. 切换外区账号，在 AppStore 中搜索 **Singbox VT** 并下载
-
-2. Profiles -> New Profile -> Name: 随意，Type: Remote，URL: `https://up.turou.fun/UsagiPass.json` -> Create
-
-3. **确保选择了 UsagiPass 配置，点击启动代理即可生效！**
 :::
 
 ### 第三步：访问 UsagiPass

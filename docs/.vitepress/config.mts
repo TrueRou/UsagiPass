@@ -27,8 +27,9 @@ export default defineConfig({
                 text: '受支持的代理',
                 items: [
                     { text: 'Clash / Mihomo', link: '/proxies/clash' },
-                    { text: 'Shadowrocket', link: '/proxies/rocket' },
                     { text: 'Sing-box', link: '/proxies/singbox' },
+                    { text: 'Shadowrocket', link: '/proxies/rocket' },
+                    { text: 'Loon', link: '/proxies/loon' },
                     { text: 'Quantumult X', link: '/proxies/quantx' },
                 ],
             },
@@ -64,6 +65,7 @@ export default defineConfig({
             Icons({
                 compiler: 'vue3',
                 autoInstall: true,
+                defaultStyle: 'display: inline-block; vertical-align: middle;',
             }) as any,
             Components({
                 include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
