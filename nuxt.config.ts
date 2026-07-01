@@ -21,6 +21,22 @@ export default defineNuxtConfig({
         build: {
             sourcemap: false,
         },
+        optimizeDeps: {
+            include: [
+                '@intlify/core',
+                '@intlify/core-base',
+                '@intlify/message-compiler',
+                '@intlify/shared',
+                '@intlify/utils/h3',
+                '@vue/devtools-core',
+                '@vue/devtools-kit',
+                'intro.js',
+                'qrcode', // CJS
+                'ufo',
+                'vue-cropper',
+                'vue-i18n',
+            ],
+        },
     },
     eslint: {
         config: {

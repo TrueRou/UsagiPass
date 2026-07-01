@@ -18,8 +18,11 @@ const ratingLevels: any = [
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 
-const getNum = async (id: string) => (await import(`../../assets/icons/rating/num/UI_CMN_Num_26p_${id}.png`)).default
-const getBase = async (id: string) => (await import(`../../assets/icons/rating/UI_CMA_Rating_Base_${id}.png`)).default
+const numImages = import.meta.glob<string>('../../assets/icons/rating/num/UI_CMN_Num_26p_*.png', { eager: true, import: 'default' })
+const baseImages = import.meta.glob<string>('../../assets/icons/rating/UI_CMA_Rating_Base_*.png', { eager: true, import: 'default' })
+
+const getNum = (id: string) => numImages[`../../assets/icons/rating/num/UI_CMN_Num_26p_${id}.png`]
+const getBase = (id: string) => baseImages[`../../assets/icons/rating/UI_CMA_Rating_Base_${id}.png`] || baseImages['../../assets/icons/rating/UI_CMA_Rating_Base_0.png']
 
 function countOccurrences(str: string, searchTerm: string) {
     let count = 0
@@ -35,7 +38,9 @@ const numImageIds = computed(() => {
     const numValue = props.rating?.replace(/\+/g, '').replace(/-/g, '')
     if (!numValue || Number.isNaN(Number(numValue)))
         return []
-    const arr = numValue.split('')
+    const arr = numValue.replace(/\D/g, '').split('')
+    if (!arr.length)
+        return []
     while (arr.length < 5) arr.unshift('10')
     return arr.slice(0, 5)
 })
@@ -69,7 +74,7 @@ async function drawCanvas() {
 
     const [baseSrc, numSrcs] = await Promise.all([
         getBase(baseImageId.value),
-        Promise.all(numImageIds.value.map(id => getNum(id))),
+        Promise.all(numImageIds.value.map(id => getNum(id)).filter(src => src !== undefined)),
     ])
 
     const baseImg = new Image()
