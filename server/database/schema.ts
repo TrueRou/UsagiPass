@@ -42,6 +42,13 @@ export const userPreference = pgTable('tbl_preference', {
     skipTour: boolean('skip_tour').notNull().default(false),
 })
 
+export const metadata = pgTable('tbl_metadata', {
+    key: text('key').primaryKey(),
+    value: text('value').notNull(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    updatedBy: uuid('updated_by'),
+})
+
 export const userRating = pgTable('tbl_rating', {
     userId: uuid('user_id').primaryKey(),
     name: text('name').notNull().default(''),

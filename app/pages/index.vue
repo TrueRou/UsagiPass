@@ -5,6 +5,9 @@ useHead({
 })
 
 const { data: profile, refresh } = await useLeporid<UserProfile>('/api/nuxt/profile')
+const { data: maimaiVersionMetadata } = await useLeporid<Metadata | null>('/api/nuxt/metadata', {
+    query: { key: 'maimaiVersion' },
+})
 
 const contextStore = useContextStore()
 const { loggedIn } = useUserSession()
@@ -67,10 +70,10 @@ const simplifiedCode = computed(() => {
 })
 
 const maimaiVersion = computed(() => {
-    // 覆盖优先级：用户偏好设置 > 机台最新版本（TODO）
+    // 覆盖优先级：用户偏好设置 > 全局机台最新版本 > 内置默认值
     if (profile.value?.preference.maimaiVersion)
         return profile.value?.preference.maimaiVersion
-    return '[maimaiDX]CN1.51-H'
+    return maimaiVersionMetadata.value?.value || '[maimaiDX]CN1.51-H'
 })
 
 onMounted(() => {

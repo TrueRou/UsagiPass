@@ -4,6 +4,17 @@ export enum AuthStrategy {
     LXNS = 2,
 }
 
+export enum UserPermission {
+    ANY_ADMIN = 0,
+    USERS_ADMIN = 1,
+    IMAGES_ADMIN = 2,
+    ARTIFACTS_ADMIN = 3,
+    ORDERS_ADMIN = 4,
+    PLATFORM_ADMIN = 5,
+    MARKETPLACE_ADMIN = 6,
+    METADATA_ADMIN = 7,
+}
+
 /**
  * 用户注册请求
  */
@@ -55,5 +66,12 @@ export interface UserResponse {
     /** 邮箱 */
     email: string
     /** 用户权限 */
-    permissions: string[]
+    permissions: number[]
+}
+
+export interface Metadata {
+    key: string
+    value: string
+    updatedAt: Date | string
+    updatedBy: string | null
 }

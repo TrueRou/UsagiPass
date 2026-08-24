@@ -22,6 +22,13 @@
       "when": 1764692282273,
       "tag": "0002_yielding_fixer",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787579704075,
+      "tag": "0003_keen_white_tiger",
+      "breakpoints": true
     }
   ]
 }

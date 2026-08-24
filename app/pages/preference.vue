@@ -29,6 +29,8 @@ const profileData = ref<UserProfile>()
 
 watch(profileDataRaw, val => profileData.value = val, { immediate: true })
 
+const canSeeAdminSettings = computed(() => loggedIn.value && (user.value?.permissions.length || 0) > 0)
+
 type PreferenceForm = Omit<UserPreference, 'user_id'>
 
 const serverMap = computed(() => {
@@ -681,6 +683,29 @@ function goToPrev() {
                         </div>
                     </div>
                 </div>
+
+                <!-- 管理员设置入口 -->
+                <template v-if="canSeeAdminSettings">
+                    <div class="divider my-2">
+                        管理员设置
+                    </div>
+
+                    <section class="rounded-box border border-base-200 bg-base-100 p-4 shadow-sm">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p class="font-medium text-sm">
+                                    元数据管理
+                                </p>
+                                <p class="text-xs text-base-content/60">
+                                    查看和管理应用的全局默认设置。
+                                </p>
+                            </div>
+                            <NuxtLink to="/metadata" class="btn btn-outline">
+                                打开管理员设置
+                            </NuxtLink>
+                        </div>
+                    </section>
+                </template>
 
                 <footer class="flex justify-end">
                     <button class="btn btn-primary w-full md:w-auto" type="submit" data-tour="save-button" :disabled="isSaving" @click.stop="goToPrev()">
