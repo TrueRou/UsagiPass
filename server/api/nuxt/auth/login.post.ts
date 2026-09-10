@@ -27,7 +27,6 @@ export default defineEventHandler(async (event) => {
                 id: userResponse.data.id,
                 username: userResponse.data.username,
                 email: userResponse.data.email,
-                roles: userResponse.data.roles,
             },
             secure: {
                 accessToken: tokenResponse.access_token,

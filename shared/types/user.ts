@@ -4,13 +4,6 @@ export enum AuthStrategy {
     LXNS = 2,
 }
 
-export enum UserRole {
-    ADMIN = 'admin',
-    SUPPORT = 'support',
-    OPERATIONS = 'operations',
-    MANUFACTURING = 'manufacturing',
-}
-
 /**
  * 用户注册请求
  */
@@ -63,8 +56,6 @@ export interface UserResponse {
     username: string
     /** 邮箱 */
     email: string
-    /** 用户角色 */
-    roles: string[]
 }
 
 export interface Metadata {
