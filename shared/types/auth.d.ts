@@ -3,7 +3,7 @@ declare module '#auth-utils' {
         id: string
         username: string
         email: string
-        permissions: number[]
+        roles: string[]
     }
 
     interface UserSession {
@@ -12,6 +12,7 @@ declare module '#auth-utils' {
 
     interface SecureSessionData {
         accessToken: string
+        refreshToken: string
     }
 }
 

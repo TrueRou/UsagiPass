@@ -4,15 +4,11 @@ export enum AuthStrategy {
     LXNS = 2,
 }
 
-export enum UserPermission {
-    ANY_ADMIN = 0,
-    USERS_ADMIN = 1,
-    IMAGES_ADMIN = 2,
-    ARTIFACTS_ADMIN = 3,
-    ORDERS_ADMIN = 4,
-    PLATFORM_ADMIN = 5,
-    MARKETPLACE_ADMIN = 6,
-    METADATA_ADMIN = 7,
+export enum UserRole {
+    ADMIN = 'admin',
+    SUPPORT = 'support',
+    OPERATIONS = 'operations',
+    MANUFACTURING = 'manufacturing',
 }
 
 /**
@@ -53,6 +49,8 @@ export interface UserAuthResponse {
     token_type: string
     /** 过期时间（秒） */
     expires_in: number
+    /** 刷新令牌过期时间（秒） */
+    refresh_expires_in: number
 }
 
 /**
@@ -65,8 +63,8 @@ export interface UserResponse {
     username: string
     /** 邮箱 */
     email: string
-    /** 用户权限 */
-    permissions: number[]
+    /** 用户角色 */
+    roles: string[]
 }
 
 export interface Metadata {

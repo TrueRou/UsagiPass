@@ -61,8 +61,9 @@ export default defineNuxtConfig({
             listenHost: '127.0.0.1',
             listenPort: 7300,
         },
-        leporid: {
+        leporidae: {
             baseURL: 'https://api.dev.turou.fun/leporid',
+            developerToken: 'de5ca192916344b360f391d83e20ba85',
             defaultImage: {
                 characterId: '2e7046aa-ddc2-40fb-bf5d-5236ffca50f9',
                 maskId: '421943e9-2221-45f1-8f76-5a1ca012028e',
@@ -70,10 +71,6 @@ export default defineNuxtConfig({
                 frameId: '421943e9-2221-45f1-8f76-5a1ca012028e',
                 passnameId: 'f6988add-bb65-4b78-a69c-7d01c453d4a8',
             },
-        },
-        otoge: {
-            baseURL: 'https://api.dev.turou.fun/otoge',
-            developerToken: 'de5ca192916344b360f391d83e20ba85',
         },
         public: {
             imageURL: 'https://cdn.assets.turou.fun/leporid/images',

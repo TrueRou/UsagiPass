@@ -49,14 +49,14 @@ async function handleRegister() {
         email: form.email,
     }
 
-    await useNuxtApp().$leporid('/api/auth/register', {
+    await useNuxtApp().$leporidae('/api/auth/register', {
         method: 'POST',
         body: requestData,
         showSuccessToast: true,
         successMessage: '注册成功',
     })
 
-    await useNuxtApp().$leporid('/api/nuxt/auth/login', {
+    await useNuxtApp().$leporidae('/api/nuxt/auth/login', {
         method: 'POST',
         body: {
             username: form.username,

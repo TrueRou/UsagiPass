@@ -12,7 +12,7 @@ interface ListOptions {
 }
 
 export function useImageList(options: UseImageListOptions) {
-    const { $leporid } = useNuxtApp()
+    const { $leporidae } = useNuxtApp()
 
     const images = ref<ImageSimpleResponse[]>([])
     const loading = ref(false)
@@ -50,7 +50,7 @@ export function useImageList(options: UseImageListOptions) {
                 query.keyword = listOptions.keyword
             }
 
-            const response = await $leporid<ImageSearchResponse>('/api/images', {
+            const response = await $leporidae<ImageSearchResponse>('/api/images', {
                 method: 'GET',
                 query,
             })
@@ -80,7 +80,7 @@ export function useImageList(options: UseImageListOptions) {
     }
 
     const updateImage = async (uuid: string, payload: ImageUpdateRequest) => {
-        await $leporid(`/api/images/${uuid}`, {
+        await $leporidae(`/api/images/${uuid}`, {
             method: 'PUT',
             body: payload,
         })
@@ -88,7 +88,7 @@ export function useImageList(options: UseImageListOptions) {
     }
 
     const deleteImage = async (uuid: string) => {
-        await $leporid(`/api/images/${uuid}`, {
+        await $leporidae(`/api/images/${uuid}`, {
             method: 'DELETE',
         })
         // 如果当前页删除了最后一张图片且不是第一页，则回退一页以保证列表不空

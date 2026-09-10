@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
         code: number
         message: string
         data?: { credentials: any }
-    }>(`/api/otoge/maimai/wechat/identifiers`, {
+    }>(`/api/maimai/wechat/identifiers`, {
         method: 'GET',
         ignoreResponseError: true,
         query: {
@@ -87,7 +87,7 @@ export default defineEventHandler(async (event) => {
             code: number
             message: string
             data?: any
-        }>(`/api/otoge/maimai/updates_chain`, {
+        }>(`/api/maimai/updates_chain`, {
             method: 'POST',
             ignoreResponseError: true,
             body: {
@@ -119,7 +119,7 @@ export default defineEventHandler(async (event) => {
         code: number
         message: string
         data?: { name: string, rating: number, friend_code: string }
-    }>(`/api/otoge/maimai/wechat/players`, {
+    }>(`/api/maimai/wechat/players`, {
         method: 'GET',
         ignoreResponseError: true,
         query: {

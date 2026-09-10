@@ -12,7 +12,7 @@ const emit = defineEmits<{
     (event: 'uploaded', image: ImageResponse): void
 }>()
 
-const { $leporid } = useNuxtApp()
+const { $leporidae } = useNuxtApp()
 
 const cropper = useTemplateRef<InstanceType<typeof VueCropper>>('cropperRef')
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -198,7 +198,7 @@ async function submit() {
         formData.append('visibility', String(metadata.visibility.valueOf()))
         metadata.labels.forEach(label => formData.append('labels', label))
 
-        const response = await $leporid<ImageResponse>('/api/images', {
+        const response = await $leporidae<ImageResponse>('/api/images', {
             method: 'POST',
             body: formData,
         })

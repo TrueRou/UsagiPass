@@ -16,7 +16,7 @@ async function handleCallback() {
         duration: 120 * 1000,
     })
 
-    await useLeporid('/api/nuxt/wechat/callback', {
+    await useLeporidae('/api/nuxt/wechat/callback', {
         method: 'POST',
         body: {
             code: route.query.code,

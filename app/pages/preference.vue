@@ -5,7 +5,7 @@ useHead({
 })
 
 const { t } = useI18n()
-const { $leporid } = useNuxtApp()
+const { $leporidae } = useNuxtApp()
 const { loggedIn, user, clear } = useUserSession()
 const notificationsStore = useNotificationsStore()
 const { startPreferenceTour, restartTour } = useTour()
@@ -21,15 +21,15 @@ onMounted(() => {
     }
 })
 
-const { data: profileDataRaw } = await useLeporid<UserProfile>('/api/nuxt/profile')
-const { data: serversData } = await useLeporid<Server[]>('/api/nuxt/servers')
-const { data: imageAspect } = await useLeporid<ImageAspect>('/api/images/aspects/id-1-ff')
+const { data: profileDataRaw } = await useLeporidae<UserProfile>('/api/nuxt/profile')
+const { data: serversData } = await useLeporidae<Server[]>('/api/nuxt/servers')
+const { data: imageAspect } = await useLeporidae<ImageAspect>('/api/images/aspects/id-1-ff')
 
 const profileData = ref<UserProfile>()
 
 watch(profileDataRaw, val => profileData.value = val, { immediate: true })
 
-const canSeeAdminSettings = computed(() => loggedIn.value && (user.value?.permissions.length || 0) > 0)
+const canSeeAdminSettings = computed(() => loggedIn.value && (user.value?.roles.length || 0) > 0)
 
 type PreferenceForm = Omit<UserPreference, 'user_id'>
 
@@ -60,7 +60,7 @@ async function matchCharacterMetadata() {
         source: string
         character_name?: string
         version?: string
-    } = await $leporid('/api/nuxt/image/metadata', {
+    } = await $leporidae('/api/nuxt/image/metadata', {
         method: 'GET',
         query: {
             id: profileData.value?.preference.characterId,
@@ -174,7 +174,7 @@ async function handleSave() {
     isSaving.value = true
     try {
         if (loggedIn.value) {
-            profileData.value = await useNuxtApp().$leporid('/api/nuxt/profile', {
+            profileData.value = await useNuxtApp().$leporidae('/api/nuxt/profile', {
                 method: 'PUT',
                 body: profileData.value,
                 showSuccessToast: true,
@@ -262,12 +262,6 @@ function goToPrev() {
                                     </svg>
                                 </summary>
                                 <ul class="menu mt-1 dropdown-content bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm">
-                                    <li>
-                                        <NuxtLink class="justify-between" to="/auth/merge">
-                                            合并账户
-                                            <span class="badge badge-outline badge-xs">Beta</span>
-                                        </NuxtLink>
-                                    </li>
                                     <li>
                                         <button type="button" @click="restartTour">
                                             重新开始引导

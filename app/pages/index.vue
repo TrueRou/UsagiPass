@@ -4,8 +4,8 @@ useHead({
     title: '首页 - UsagiPass',
 })
 
-const { data: profile, refresh } = await useLeporid<UserProfile>('/api/nuxt/profile')
-const { data: maimaiVersionMetadata } = await useLeporid<Metadata | null>('/api/nuxt/metadata', {
+const { data: profile, refresh } = await useLeporidae<UserProfile>('/api/nuxt/profile')
+const { data: maimaiVersionMetadata } = await useLeporidae<Metadata | null>('/api/nuxt/metadata', {
     query: { key: 'maimaiVersion' },
 })
 

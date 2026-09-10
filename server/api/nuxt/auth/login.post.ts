@@ -27,10 +27,11 @@ export default defineEventHandler(async (event) => {
                 id: userResponse.data.id,
                 username: userResponse.data.username,
                 email: userResponse.data.email,
-                permissions: userResponse.data.permissions,
+                roles: userResponse.data.roles,
             },
             secure: {
                 accessToken: tokenResponse.access_token,
+                refreshToken: tokenResponse.refresh_token,
             },
         })
 

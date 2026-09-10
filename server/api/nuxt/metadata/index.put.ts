@@ -8,7 +8,7 @@ const metadataSchema = z.object({
 export default defineEventHandler(async (event) => {
     const session = await requireUserSession(event)
 
-    if (!session.user.permissions.includes(UserPermission.METADATA_ADMIN)) {
+    if (!session.user.roles.includes(UserRole.ADMIN)) {
         setResponseStatus(event, 403)
         return {
             code: 403,

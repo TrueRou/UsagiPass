@@ -1,6 +1,6 @@
 export function useTour(updateCallback: () => void = () => {}) {
     const router = useRouter()
-    const { $leporid } = useNuxtApp()
+    const { $leporidae } = useNuxtApp()
     const nuxtApp = useNuxtApp()
     const { inTour } = storeToRefs(useContextStore())
 
@@ -107,8 +107,8 @@ export function useTour(updateCallback: () => void = () => {}) {
                 },
                 {
                     element: '[data-tour="merge-account"]',
-                    title: '合并账户',
-                    intro: '如果您有多个 UsagiLab 通行证，可以在这里合并它们。您也可以随时从这里重新开始本引导。',
+                    title: '更多选项',
+                    intro: '您可以随时从这里重新开始本引导。',
                     position: 'bottom',
                 },
                 {
@@ -142,7 +142,7 @@ export function useTour(updateCallback: () => void = () => {}) {
      * 更新用户的 skipTour 偏好
      */
     async function updateSkipTour() {
-        await $leporid('/api/nuxt/profile/tour', { method: 'POST' })
+        await $leporidae('/api/nuxt/profile/tour', { method: 'POST' })
         updateCallback() // 调用回调函数以刷新用户数据
     }
 

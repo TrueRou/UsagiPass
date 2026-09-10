@@ -81,7 +81,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         await nuxtApp.runWithContext(() => navigateTo(`/auth/login?redirect=${redirect}`))
     }
 
-    const leporid = $fetch.create({
+    const leporidae = $fetch.create({
         onRequest(context) {
             if (import.meta.server) {
                 const reqHeaders = useRequestHeaders(['cookie'])
@@ -135,7 +135,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     return {
         provide: {
-            leporid,
+            leporidae,
         },
     }
 })

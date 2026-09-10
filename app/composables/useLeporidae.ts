@@ -6,10 +6,10 @@ interface UseApiOptions {
     successMessage?: string
 }
 
-export async function useLeporid<T = any>(url: string, options: UseFetchOptions<T> & UseApiOptions = {}) {
+export async function useLeporidae<T = any>(url: string, options: UseFetchOptions<T> & UseApiOptions = {}) {
     const asyncData = await useFetch<T>(url, {
         ...(options as any),
-        $fetch: useNuxtApp().$leporid,
+        $fetch: useNuxtApp().$leporidae,
     })
 
     // 服务器端如果发生错误，需要 Nuxt 处理并显示错误页面

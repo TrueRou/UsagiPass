@@ -54,7 +54,7 @@ async function handleSubmit() {
 
     isSubmitting.value = true
     try {
-        await nuxtApp.$leporid('/api/users/me', {
+        await nuxtApp.$leporidae('/api/users/me', {
             method: 'PATCH',
             body: {
                 username: form.username,

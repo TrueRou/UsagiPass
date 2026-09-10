@@ -4,21 +4,21 @@ useHead({
     title: '管理员设置 - UsagiPass',
 })
 
-const { $leporid } = useNuxtApp()
+const { $leporidae } = useNuxtApp()
 const { user } = useUserSession()
 
-const { data: maimaiVersionMetadata } = await useLeporid<Metadata | null>('/api/nuxt/metadata', {
+const { data: maimaiVersionMetadata } = await useLeporidae<Metadata | null>('/api/nuxt/metadata', {
     query: { key: 'maimaiVersion' },
 })
 
-const canManageMetadata = computed(() => user.value?.permissions.includes(UserPermission.METADATA_ADMIN) === true)
+const canManageMetadata = computed(() => user.value?.roles.includes(UserRole.ADMIN) === true)
 const metadataValue = ref(maimaiVersionMetadata.value?.value || '')
 const isSaving = ref(false)
 
 async function handleSave() {
     isSaving.value = true
     try {
-        await $leporid('/api/nuxt/metadata', {
+        await $leporidae('/api/nuxt/metadata', {
             method: 'PUT',
             body: {
                 key: 'maimaiVersion',

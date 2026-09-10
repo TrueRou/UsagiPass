@@ -3,7 +3,7 @@ async function getMaimaiMetadata(characterId: number): Promise<MaimaiCharacter |
         code: number
         message: string
         data: MaimaiCharacter[]
-    }>(`/api/otoge/maimai/characters?id=${characterId}`, { method: 'GET' })
+    }>(`/api/maimai/characters?id=${characterId}`, { method: 'GET' })
     return response.data.length > 0 ? response.data[0] ?? null : null
 }
 
@@ -12,7 +12,7 @@ async function getChunithmMetadata(cardId: number): Promise<ChunithmCharacter | 
         code: number
         message: string
         data: ChunithmCharacter[]
-    }>(`/api/otoge/chunithm/characters?id=${cardId}`, { method: 'GET' })
+    }>(`/api/chunithm/characters?id=${cardId}`, { method: 'GET' })
     return response.data.length > 0 ? response.data[0] ?? null : null
 }
 
@@ -21,7 +21,7 @@ async function getOngekiMetadata(cardId: number): Promise<OngekiCard | null> {
         code: number
         message: string
         data: OngekiCard[]
-    }>(`/api/otoge/ongeki/cards?id=${cardId}`, { method: 'GET' })
+    }>(`/api/ongeki/cards?id=${cardId}`, { method: 'GET' })
     return response.data.length > 0 ? response.data[0] ?? null : null
 }
 

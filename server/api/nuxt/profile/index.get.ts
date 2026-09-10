@@ -53,11 +53,11 @@ export default defineEventHandler(async (event) => {
     if (!userPreference) {
         const [newPreference] = await db.insert(tables.userPreference).values({
             userId: session.user.id,
-            characterId: config.leporid.defaultImage.characterId,
-            maskId: config.leporid.defaultImage.maskId,
-            backgroundId: config.leporid.defaultImage.backgroundId,
-            frameId: config.leporid.defaultImage.frameId,
-            passnameId: config.leporid.defaultImage.passnameId,
+            characterId: config.leporidae.defaultImage.characterId,
+            maskId: config.leporidae.defaultImage.maskId,
+            backgroundId: config.leporidae.defaultImage.backgroundId,
+            frameId: config.leporidae.defaultImage.frameId,
+            passnameId: config.leporidae.defaultImage.passnameId,
         }).returning()
         userPreference = newPreference
     }

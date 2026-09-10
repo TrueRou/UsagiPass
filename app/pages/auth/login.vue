@@ -71,7 +71,7 @@ async function handleLogin() {
     if (!validate())
         return
 
-    await useNuxtApp().$leporid('/api/nuxt/auth/login', {
+    await useNuxtApp().$leporidae('/api/nuxt/auth/login', {
         method: 'POST',
         body: {
             username: form.username,

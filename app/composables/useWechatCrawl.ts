@@ -16,7 +16,7 @@ export function useWechatCrawl() {
 
         try {
             // 发起 OAuth 请求
-            const redirectUrl = await useNuxtApp().$leporid<{ url: string }>('/api/otoge/maimai/wechat_oauth', { method: 'GET' })
+            const redirectUrl = await useNuxtApp().$leporidae<{ url: string }>('/api/maimai/wechat_oauth', { method: 'GET' })
 
             // 储存当前上下文然后跳转
             localStorage.setItem('context', JSON.stringify(context))
