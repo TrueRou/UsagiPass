@@ -86,6 +86,9 @@ async function handleLogin() {
 }
 
 async function handleGuestMode() {
+    // 游客模式意味着“不使用账号”，因此必须清掉已有会话，
+    // 否则会出现已登录却读到游客默认值的情况
+    await clear()
     guestCookie.value = true
     await navigateTo('/', { external: true })
 }

@@ -24,8 +24,12 @@ const DEFAULT_GUEST_PROFILE: UserPreference = {
 }
 
 export default defineEventHandler(async (event) => {
-    const isGuest = getCookie(event, 'guest')
-    if (isGuest === 'true') {
+    // 会话优先于游客标记：浏览器可能同时残留 guest=true（用户点过“游客模式”），
+    // 此时必须以登录态为准，否则会把 userId 为空串的游客默认值返回给已登录用户
+    const session = await getUserSession(event)
+    const isGuest = getCookie(event, 'guest') === 'true' && !session?.user
+
+    if (isGuest) {
         const guestPreferenceRaw = getCookie(event, 'guest_preference') as string | undefined
         const guestPreference = guestPreferenceRaw ? JSON.parse(guestPreferenceRaw) : DEFAULT_GUEST_PROFILE
         return {
@@ -41,18 +45,18 @@ export default defineEventHandler(async (event) => {
 
     const db = useDrizzle()
     const config = useRuntimeConfig()
-    const session = await requireUserSession(event)
+    const currentUser = await requireUserSession(event)
 
     // 查询用户偏好设置
     const preference = await db.query.userPreference.findFirst({
-        where: eq(tables.userPreference.userId, session.user.id),
+        where: eq(tables.userPreference.userId, currentUser.user.id),
     })
 
     // 如果用户偏好设置不存在，创建默认的偏好设置
     let userPreference = preference
     if (!userPreference) {
         const [newPreference] = await db.insert(tables.userPreference).values({
-            userId: session.user.id,
+            userId: currentUser.user.id,
             characterId: config.leporidae.defaultImage.characterId,
             maskId: config.leporidae.defaultImage.maskId,
             backgroundId: config.leporidae.defaultImage.backgroundId,
@@ -64,12 +68,12 @@ export default defineEventHandler(async (event) => {
 
     // 查询用户账号列表
     const userAccounts = await db.query.userAccount.findMany({
-        where: eq(tables.userAccount.userId, session.user.id),
+        where: eq(tables.userAccount.userId, currentUser.user.id),
     })
 
     // 查询用户评分信息
     const userRating = await db.query.userRating.findFirst({
-        where: eq(tables.userRating.userId, session.user.id),
+        where: eq(tables.userRating.userId, currentUser.user.id),
     })
 
     const profile: UserProfile = {
