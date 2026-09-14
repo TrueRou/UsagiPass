@@ -16,13 +16,19 @@ export default defineEventHandler(async (event) => {
 
     // 更新用户偏好设置
     if (body.preference) {
+        // 剥离客户端传入的 userId：它是主键，且会出现在 ON CONFLICT DO UPDATE SET 中，
+        // 一旦客户端传空串（游客默认值）就会触发 uuid 格式错误，传其他 uuid 则等于改写主键
+        const { userId: _userId, ...preferenceFields } = body.preference
+
         await db.insert(tables.userPreference).values({
-            ...body.preference,
+            ...preferenceFields,
             userId: session.user.id,
         }).onConflictDoUpdate({
             target: tables.userPreference.userId,
             set: {
-                ...body.preference,
+                ...preferenceFields,
+                // 显式回填服务端 userId：既不信任客户端，也保证 set 子句非空（空 set 是非法 SQL）
+                userId: session.user.id,
             },
         })
     }
@@ -39,15 +45,18 @@ export default defineEventHandler(async (event) => {
                 incomingIds.add(account.id)
             }
 
+            // 同样剥离客户端传入的 userId，避免账号归属被改写
+            const { userId: _accountUserId, ...accountFields } = account
+
             const existingAccount = account.id != null ? existingMap.get(account.id) : undefined
             if (existingAccount) {
                 await db.update(tables.userAccount)
-                    .set({ ...account, createdAt: new Date(account.createdAt), updatedAt: new Date() })
+                    .set({ ...accountFields, createdAt: new Date(account.createdAt), updatedAt: new Date() })
                     .where(eq(tables.userAccount.id, existingAccount.id))
             }
             else {
                 await db.insert(tables.userAccount).values({
-                    ...account,
+                    ...accountFields,
                     userId: session.user.id,
                     updatedAt: new Date(),
                     createdAt: new Date(),
