@@ -53,7 +53,7 @@ export default defineNuxtConfig({
             },
         },
         usagipass: {
-            URL: 'http://localhost:7200',
+            baseURL: 'https://up.turou.fun',
             databaseURL: 'postgresql://postgres:password@localhost:5432/usagipass',
         },
         mitmproxy: {
@@ -74,7 +74,7 @@ export default defineNuxtConfig({
         },
         public: {
             imageURL: 'https://static.turou.fun/leporidae/images',
-            imagePreviewURL: 'https://static.turou.fun/leporidae/images',
+            imagePreviewURL: 'https://static.turou.fun/leporidae/thumbnails',
         },
     },
     i18n: {

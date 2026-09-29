@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
             method: 'POST',
             body: new URLSearchParams({
                 grant_type: 'password',
-                strategy: (strategy ?? AuthStrategy.LOCAL).toString(),
+                strategy: AuthStrategy[strategy ?? AuthStrategy.LOCAL] as keyof typeof AuthStrategy,
                 username,
                 password,
             }),
