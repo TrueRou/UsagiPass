@@ -9,8 +9,8 @@ export default defineNuxtConfig({
     app: {
         head: {
             link: [
-                { rel: 'dns-prefetch', href: 'https://cdn.assets.turou.fun' },
-                { rel: 'preconnect', href: 'https://cdn.assets.turou.fun', crossorigin: '' },
+                { rel: 'dns-prefetch', href: 'https://static.turou.fun' },
+                { rel: 'preconnect', href: 'https://static.turou.fun', crossorigin: '' },
             ],
         },
     },
@@ -62,8 +62,8 @@ export default defineNuxtConfig({
             listenPort: 7300,
         },
         leporidae: {
-            baseURL: 'https://api.dev.turou.fun/leporid',
-            developerToken: 'de5ca192916344b360f391d83e20ba85',
+            baseURL: 'https://api.turou.fun/leporidae',
+            developerToken: '4616dd015b6139704d259ea9c1a0e29d',
             defaultImage: {
                 characterId: '2e7046aa-ddc2-40fb-bf5d-5236ffca50f9',
                 maskId: '421943e9-2221-45f1-8f76-5a1ca012028e',
@@ -73,8 +73,8 @@ export default defineNuxtConfig({
             },
         },
         public: {
-            imageURL: 'https://cdn.assets.turou.fun/leporid/images',
-            imagePreviewURL: 'https://cdn.assets.turou.fun/leporid/thumbnails',
+            imageURL: 'https://static.turou.fun/leporidae/images',
+            imagePreviewURL: 'https://static.turou.fun/leporidae/images',
         },
     },
     i18n: {

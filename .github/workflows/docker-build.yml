@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - next # fallback branch for old releases
     paths:
       - 'docs/**'
       - 'app/**'
@@ -15,12 +14,6 @@ on:
       - 'pnpm-lock.yaml'
       - 'nuxt.config.ts'
   workflow_dispatch:
-
-env:
-  REGISTRY: ${{ secrets.DOCKER_REGISTRY_URL }}
-  REGISTRY_USERNAME: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
-  REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -33,18 +26,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Log in to the Container registry
-      uses: docker/login-action@v3.6.0
+    - name: Login to Docker Hub
+      uses: docker/login-action@v4
       with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ env.REGISTRY_USERNAME }}
-        password: ${{ env.REGISTRY_PASSWORD }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
       uses: docker/metadata-action@v5.9.0
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        images: turou/usagipass
 
     - name: Build and push Docker images
       uses: docker/build-push-action@v6.18.0
@@ -53,5 +45,3 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-          
-        
