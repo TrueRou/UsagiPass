@@ -9,8 +9,8 @@ export default defineNuxtConfig({
     app: {
         head: {
             link: [
-                { rel: 'dns-prefetch', href: 'https://static.turou.fun' },
-                { rel: 'preconnect', href: 'https://static.turou.fun', crossorigin: '' },
+                { rel: 'dns-prefetch', href: 'https://eo.assets.turou.fun' },
+                { rel: 'preconnect', href: 'https://eo.assets.turou.fun', crossorigin: '' },
             ],
         },
     },
@@ -73,8 +73,8 @@ export default defineNuxtConfig({
             },
         },
         public: {
-            imageURL: 'https://static.turou.fun/leporidae/images',
-            imagePreviewURL: 'https://static.turou.fun/leporidae/thumbnails',
+            imageURL: 'https://eo.assets.turou.fun/leporidae/images',
+            imagePreviewURL: 'https://eo.assets.turou.fun/leporidae/thumbnails',
         },
     },
     i18n: {
