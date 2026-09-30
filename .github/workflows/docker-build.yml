@@ -38,6 +38,9 @@ jobs:
       with:
         images: turou/usagipass
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     - name: Build and push Docker images
       uses: docker/build-push-action@v6.18.0
       with:
@@ -45,3 +48,5 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
