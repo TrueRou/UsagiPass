@@ -12,7 +12,25 @@ export interface UserCreateRequest {
     username: string
     /** 密码 */
     password: string
-    /** 手机号 */
+    /** 邮箱 */
+    email: string
+    /** 6 位邮箱验证码 */
+    code: string
+}
+
+/**
+ * 注册验证码发送请求
+ */
+export interface RegisterCodeRequest {
+    /** 注册邮箱 */
+    email: string
+}
+
+/**
+ * 忘记密码请求（发送重置邮件）
+ */
+export interface PasswordForgotRequest {
+    /** 注册邮箱 */
     email: string
 }
 

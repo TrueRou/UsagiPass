@@ -33,9 +33,9 @@ const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string, 
 // 登录后的跳转目标：优先使用 ?redirect= 参数，否则按资料完整性决定
 const redirectTarget = computed(() => {
     const r = route.query.redirect as string
-    if (r && r.startsWith('/') && !r.startsWith('/auth/login') && !r.startsWith('/auth/register'))
+    if (r && r.startsWith('/') && !r.startsWith('/auth/login') && !r.startsWith('/auth/register') && !r.startsWith('/auth/forgot'))
         return r
-    return shouldCompleteProfile.value ? '/auth/reset' : '/'
+    return shouldCompleteProfile.value ? '/auth/complete-profile' : '/'
 })
 
 watch(loggedIn, async () => {
@@ -116,7 +116,15 @@ async function handleGuestMode() {
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium mb-2">{{ strategyOptions[form.strategy]?.passwordLabel }}</label>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium">{{ strategyOptions[form.strategy]?.passwordLabel }}</label>
+                        <NuxtLink
+                            v-if="form.strategy === AuthStrategy.LOCAL" to="/auth/forgot"
+                            class="link link-hover text-xs text-base-content/60"
+                        >
+                            忘记密码？
+                        </NuxtLink>
+                    </div>
                     <input
                         v-model="form.password" type="password" :placeholder="`请输入${strategyOptions[form.strategy]?.passwordLabel}`"
                         class="input input-bordered w-full" :class="{ 'input-error': ve('password') }"

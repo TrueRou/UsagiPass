@@ -30,7 +30,7 @@ const form = reactive({
 const schema = z.object({
     username: z.string().min(3, '用户名至少 3 个字符'),
     email: z.string().email('请输入正确的邮箱地址'),
-    password: z.string().min(6, '密码至少 6 个字符'),
+    password: z.string().min(8, '密码至少 8 个字符'),
     confirmPassword: z.string(),
 }).refine(values => values.password === values.confirmPassword, {
     message: '两次输入的密码不一致',
@@ -54,8 +54,8 @@ async function handleSubmit() {
 
     isSubmitting.value = true
     try {
-        await nuxtApp.$leporidae('/api/users/me', {
-            method: 'PATCH',
+        await nuxtApp.$leporidae('/api/users/me/complete-profile', {
+            method: 'POST',
             body: {
                 username: form.username,
                 email: form.email,
@@ -73,10 +73,6 @@ async function handleSubmit() {
         isSubmitting.value = false
     }
 }
-
-useHead({
-    title: '完成账户信息',
-})
 </script>
 
 <template>
