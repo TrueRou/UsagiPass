@@ -61,9 +61,6 @@ async function handleGuestMode() {
             <h1 class="text-3xl font-bold text-center mb-4">
                 登录
             </h1>
-            <p class="text-center text-sm text-base-content/70 mb-8">
-                使用 UsagiLab 通行证（原兔卡账号）登录，登录与密码管理将在 UsagiLab 官网完成。
-            </p>
 
             <div v-if="loginError" role="alert" class="alert alert-error alert-soft mb-6 text-sm">
                 {{ loginError }}

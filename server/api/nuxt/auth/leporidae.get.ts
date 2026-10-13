@@ -28,19 +28,10 @@ export default defineEventHandler(async (event) => {
     if (!query.code && !query.error)
         setCookie(event, REDIRECT_COOKIE, safeRedirect(query.redirect), { httpOnly: true, sameSite: 'lax', maxAge: 600, path: '/' })
 
-    // 官网（授权页）地址由 leporidae 下发
-    let feBaseURL: string
-    try {
-        feBaseURL = (await getPlatformConfig()).fe_public_url
-    }
-    catch (error: any) {
-        return fail(event, `无法连接 UsagiLab：${error?.message ?? '未知错误'}`)
-    }
-
     const handler = defineOAuthOidcEventHandler<{ data: UserResponse }>({
         config: {
             openidConfig: {
-                authorization_endpoint: joinURL(feBaseURL, '/oauth/authorize'),
+                authorization_endpoint: joinURL(config.leporidae.fePublicURL, '/oauth/authorize'),
                 token_endpoint: joinURL(config.leporidae.baseURL, '/oauth/token'),
                 userinfo_endpoint: joinURL(config.leporidae.baseURL, '/users/me'),
             },

@@ -71,6 +71,7 @@ export default defineNuxtConfig({
         },
         leporidae: {
             baseURL: 'https://api.turou.fun/leporidae',
+            fePublicURL: 'https://hoshirabi.com',
             developerToken: '4616dd015b6139704d259ea9c1a0e29d',
             defaultImage: {
                 characterId: '2e7046aa-ddc2-40fb-bf5d-5236ffca50f9',
