@@ -61,6 +61,14 @@ export default defineNuxtConfig({
             listenHost: '127.0.0.1',
             listenPort: 7300,
         },
+        // UsagiLab 账号登录（OAuth 授权码 + PKCE），凭据通过 NUXT_OAUTH_OIDC_* 注入
+        oauth: {
+            oidc: {
+                clientId: '',
+                clientSecret: '',
+                redirectURL: '',
+            },
+        },
         leporidae: {
             baseURL: 'https://api.turou.fun/leporidae',
             developerToken: '4616dd015b6139704d259ea9c1a0e29d',

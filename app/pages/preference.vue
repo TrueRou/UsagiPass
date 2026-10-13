@@ -90,6 +90,8 @@ async function matchCharacterMetadata() {
 }
 
 async function handleLogout() {
+    // 服务端先吊销 refresh token 再清除 session，随后同步客户端状态
+    await $fetch('/api/nuxt/auth/logout', { method: 'POST' })
     await clear()
     notificationsStore.addNotification({
         type: 'info',

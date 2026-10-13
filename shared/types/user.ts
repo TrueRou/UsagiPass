@@ -1,67 +1,15 @@
-export enum AuthStrategy {
-    LOCAL = 0,
-    DIVING_FISH = 1,
-    LXNS = 2,
-}
-
 /**
- * 用户注册请求
+ * OAuth 令牌响应（leporidae /oauth/token，RFC 6749）
  */
-export interface UserCreateRequest {
-    /** 用户名 */
-    username: string
-    /** 密码 */
-    password: string
-    /** 邮箱 */
-    email: string
-    /** 6 位邮箱验证码 */
-    code: string
-}
-
-/**
- * 注册验证码发送请求
- */
-export interface RegisterCodeRequest {
-    /** 注册邮箱 */
-    email: string
-}
-
-/**
- * 忘记密码请求（发送重置邮件）
- */
-export interface PasswordForgotRequest {
-    /** 注册邮箱 */
-    email: string
-}
-
-/**
- * 用户令牌创建请求
- */
-export interface UserAuthRequest {
-    /** 用户名 */
-    username: string
-    /** 密码 */
-    password: string
-    /** 认证策略 */
-    strategy: AuthStrategy
-    /** 刷新令牌 */
-    refresh_token?: string
-}
-
-/**
- * 用户令牌响应
- */
-export interface UserAuthResponse {
+export interface OAuthTokenResponse {
     /** 访问令牌 */
     access_token: string
-    /** 刷新令牌 */
+    /** 刷新令牌（每次刷新轮换） */
     refresh_token: string
     /** 令牌类型 */
     token_type: string
-    /** 过期时间（秒） */
+    /** 访问令牌过期时间（秒） */
     expires_in: number
-    /** 刷新令牌过期时间（秒） */
-    refresh_expires_in: number
 }
 
 /**

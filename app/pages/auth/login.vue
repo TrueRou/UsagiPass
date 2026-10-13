@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { z } from 'zod'
-
 useHead({
     title: '登录 - UsagiPass',
 })
 
-const { loggedIn, fetch: fetchUser, user, clear } = useUserSession()
+const { loggedIn, clear } = useUserSession()
 const route = useRoute()
 const guestCookie = useCookie<boolean>('guest', { maxAge: 60 * 60 * 24 * 365 })
 guestCookie.value = false
@@ -22,67 +20,28 @@ if (route.query.clear === '1' || route.query.clear === 'true') {
     }, { replace: true })
 }
 
-const shouldCompleteProfile = computed(() => (user.value?.email?.trim()?.length ?? 0) === 0)
-
-const strategyOptions: Array<{ value: AuthStrategy, name: string, desc: string, passwordLabel: string, usernameLabel?: string }> = [
-    { value: AuthStrategy.LOCAL, name: 'UsagiLab 通行证', desc: '使用 UsagiLab 通行证（原兔卡账号）登录', passwordLabel: '密码', usernameLabel: '用户名 / 邮箱' },
-    { value: AuthStrategy.DIVING_FISH, name: '水鱼 · DIVING-FISH', desc: '使用此前绑定的水鱼查分器账号密码登录', passwordLabel: '密码', usernameLabel: '用户名' },
-    { value: AuthStrategy.LXNS, name: '落雪 · LXNS', desc: '使用此前绑定的落雪咖啡屋个人 API 密钥登录', passwordLabel: '个人密钥', usernameLabel: undefined },
-]
-
-// 登录后的跳转目标：优先使用 ?redirect= 参数，否则按资料完整性决定
+// 登录后的跳转目标：仅允许站内路径
 const redirectTarget = computed(() => {
     const r = route.query.redirect as string
-    if (r && r.startsWith('/') && !r.startsWith('/auth/login') && !r.startsWith('/auth/register') && !r.startsWith('/auth/forgot'))
+    if (r && r.startsWith('/') && !r.startsWith('//') && !r.startsWith('/auth/'))
         return r
-    return shouldCompleteProfile.value ? '/auth/complete-profile' : '/'
+    return '/'
 })
 
-watch(loggedIn, async () => {
-    if (loggedIn.value) {
-        await navigateTo(redirectTarget.value, { external: true })
-    }
-})
+const loginError = computed(() => (typeof route.query.error === 'string' ? route.query.error : ''))
 
-// Zod schema for validation
-const loginSchema = z.object({
-    username: z.string().min(1, '用户名不能为空'),
-    password: z.string().min(1, '密码不能为空'),
-    refresh_token: z.string().optional(),
-    strategy: z.number(),
-})
+if (loggedIn.value)
+    await navigateTo(redirectTarget.value, { replace: true })
 
-interface LoginForm {
-    username: string
-    password: string
-    refresh_token?: string
-    strategy: AuthStrategy
+function oauthURL(prompt?: 'create') {
+    const query = new URLSearchParams({ redirect: redirectTarget.value })
+    if (prompt)
+        query.set('prompt', prompt)
+    return `/api/nuxt/auth/leporidae?${query}`
 }
 
-const form = reactive<LoginForm>({
-    username: '',
-    password: '',
-    strategy: AuthStrategy.LOCAL,
-})
-
-const { validate, ve } = useFormValidation(loginSchema, form)
-
-async function handleLogin() {
-    if (!validate())
-        return
-
-    await useNuxtApp().$leporidae('/api/nuxt/auth/login', {
-        method: 'POST',
-        body: {
-            username: form.username,
-            password: form.password,
-            strategy: form.strategy,
-        },
-        showSuccessToast: true,
-        successMessage: '登录成功！',
-    })
-
-    await fetchUser()
+async function handleLogin(prompt?: 'create') {
+    await navigateTo(oauthURL(prompt), { external: true })
 }
 
 async function handleGuestMode() {
@@ -99,70 +58,20 @@ async function handleGuestMode() {
         <BannerAccountSystem />
 
         <div class="max-w-md mx-auto px-4 pt-16">
-            <h1 class="text-3xl font-bold text-center mb-8">
+            <h1 class="text-3xl font-bold text-center mb-4">
                 登录
             </h1>
+            <p class="text-center text-sm text-base-content/70 mb-8">
+                使用 UsagiLab 通行证（原兔卡账号）登录，登录与密码管理将在 UsagiLab 官网完成。
+            </p>
 
-            <form class="space-y-6" @submit.prevent="handleLogin">
-                <div v-if="strategyOptions[form.strategy]?.usernameLabel">
-                    <label class="block text-sm font-medium mb-2">{{ strategyOptions[form.strategy]?.usernameLabel }}</label>
-                    <input
-                        v-model="form.username" type="text" :placeholder="`请输入${strategyOptions[form.strategy]?.usernameLabel}`"
-                        class="input input-bordered w-full" :class="{ 'input-error': ve('username') }"
-                    >
-                    <p v-if="ve('username')" class="text-error text-sm mt-1">
-                        {{ ve('username') }}
-                    </p>
-                </div>
+            <div v-if="loginError" role="alert" class="alert alert-error alert-soft mb-6 text-sm">
+                {{ loginError }}
+            </div>
 
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="block text-sm font-medium">{{ strategyOptions[form.strategy]?.passwordLabel }}</label>
-                        <NuxtLink
-                            v-if="form.strategy === AuthStrategy.LOCAL" to="/auth/forgot"
-                            class="link link-hover text-xs text-base-content/60"
-                        >
-                            忘记密码？
-                        </NuxtLink>
-                    </div>
-                    <input
-                        v-model="form.password" type="password" :placeholder="`请输入${strategyOptions[form.strategy]?.passwordLabel}`"
-                        class="input input-bordered w-full" :class="{ 'input-error': ve('password') }"
-                    >
-                    <p v-if="ve('password')" class="text-error text-sm mt-1">
-                        {{ ve('password') }}
-                    </p>
-                </div>
-
-                <div>
-                    <p class="block text-sm font-medium mb-3">
-                        登录方式
-                    </p>
-                    <div class="space-y-3">
-                        <label
-                            v-for="option in strategyOptions" :key="option.value"
-                            class="flex items-start gap-3 rounded-box border border-base-300 px-3 py-2"
-                        >
-                            <input
-                                v-model="form.strategy" type="radio" class="radio radio-primary mt-1"
-                                :value="option.value"
-                            >
-                            <div>
-                                <p class="font-medium text-sm">
-                                    {{ option.name }}
-                                </p>
-                                <p class="text-xs text-base-content/70">
-                                    {{ option.desc }}
-                                </p>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary w-full">
-                    登录
-                </button>
-            </form>
+            <button type="button" class="btn btn-primary w-full" @click="handleLogin()">
+                使用 UsagiLab 账号登录
+            </button>
 
             <button type="button" class="btn btn-outline w-full mt-2" @click="handleGuestMode">
                 <img src="../../assets/icons/misc/offline.png" alt="guest" class="inline h-6">
@@ -173,9 +82,9 @@ async function handleGuestMode() {
 
             <p class="text-center text-sm">
                 没有账户？
-                <NuxtLink to="/auth/register" class="link link-primary">
+                <a :href="oauthURL('create')" class="link link-primary" @click.prevent="handleLogin('create')">
                     注册
-                </NuxtLink>
+                </a>
             </p>
         </div>
     </div>
