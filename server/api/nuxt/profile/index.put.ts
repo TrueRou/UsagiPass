@@ -39,6 +39,8 @@ export default defineEventHandler(async (event) => {
         })
         const existingMap = new Map(existingAccounts.map(account => [account.id, account]))
         const incomingIds = new Set<string>()
+        // 被删除或替换掉的 OAuth 授权需要同步作废
+        const discardedCredentials: string[] = []
 
         for (const account of body.accounts) {
             if (account.id != null) {
@@ -50,6 +52,8 @@ export default defineEventHandler(async (event) => {
 
             const existingAccount = account.id != null ? existingMap.get(account.id) : undefined
             if (existingAccount) {
+                if (existingAccount.credentials !== account.credentials)
+                    discardedCredentials.push(existingAccount.credentials)
                 await db.update(tables.userAccount)
                     .set({ ...accountFields, createdAt: new Date(account.createdAt), updatedAt: new Date() })
                     .where(eq(tables.userAccount.id, existingAccount.id))
@@ -66,10 +70,13 @@ export default defineEventHandler(async (event) => {
 
         for (const account of existingAccounts) {
             if (account.id != null && !incomingIds.has(account.id)) {
+                discardedCredentials.push(account.credentials)
                 await db.delete(tables.userAccount)
                     .where(eq(tables.userAccount.id, account.id))
             }
         }
+
+        await Promise.all(discardedCredentials.map(revokeProberOAuthCredential))
     }
 
     // 查询更新后的用户偏好设置

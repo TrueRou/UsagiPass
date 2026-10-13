@@ -164,6 +164,23 @@ function removeAccount(accountId: string) {
     }
 }
 
+const oauthAuthorizing = ref(false)
+
+async function handleOAuthAccount(server: Server) {
+    oauthAuthorizing.value = true
+    try {
+        // 跳转授权会离开当前页面，先保存尚未提交的修改
+        profileData.value = await $leporidae<UserProfile>('/api/nuxt/profile', {
+            method: 'PUT',
+            body: profileData.value,
+        })
+        await startProberOAuth(server.identifier)
+    }
+    finally {
+        oauthAuthorizing.value = false
+    }
+}
+
 // 保存相关逻辑
 
 const isSaving = ref(false)
@@ -211,8 +228,8 @@ function goToPrev() {
             @update:open="handleSelectorVisibility" @select="handleImageSelect"
         />
         <ModalAddAccount
-            :open="addAccountOpen" :servers="serversData || []" @update:open="handleAddAccountVisibility"
-            @confirm="handleAddAccount"
+            :open="addAccountOpen" :servers="serversData || []" :authorizing="oauthAuthorizing" @update:open="handleAddAccountVisibility"
+            @confirm="handleAddAccount" @oauth="handleOAuthAccount"
         />
         <div class="mx-auto w-full max-w-6xl px-4 py-4 lg:py-10">
             <!-- Guest mode banner -->
@@ -652,6 +669,7 @@ function goToPrev() {
                                 <div>
                                     <p class="text-base font-semibold">
                                         {{ serverMap.get(account.serverId)?.name || t("accounts.fallback-name") }}
+                                        <span v-if="isProberOAuthCredential(account.credentials)" class="badge badge-success badge-sm align-middle ml-1">已授权</span>
                                     </p>
                                     <p class="text-xs text-base-content/60">
                                         {{ serverMap.get(account.serverId)?.description || t("accounts.fallback-desc") }}

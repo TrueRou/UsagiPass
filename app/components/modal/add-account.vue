@@ -4,11 +4,13 @@ import type { Server } from '~~/server/utils/drizzle'
 const props = defineProps<{
     open: boolean
     servers: Server[]
+    authorizing?: boolean
 }>()
 
 const emit = defineEmits<{
     (event: 'update:open', value: boolean): void
     (event: 'confirm', server: Server, credentials: string): void
+    (event: 'oauth', server: Server): void
 }>()
 
 const selectedServer = ref<Server | null>(null)
@@ -19,6 +21,8 @@ const serverMap = computed(() => {
     props.servers.forEach(server => map.set(server.id, server))
     return map
 })
+
+const oauthCapable = computed(() => isProberOAuthServer(selectedServer.value?.identifier))
 </script>
 
 <template>
@@ -51,7 +55,34 @@ const serverMap = computed(() => {
                     </select>
                 </div>
 
-                <div class="form-control flex flex-col">
+                <template v-if="oauthCapable">
+                    <div class="space-y-2">
+                        <button
+                            class="btn btn-primary w-full" type="button" :disabled="props.authorizing"
+                            @click="emit('oauth', selectedServer!)"
+                        >
+                            <span v-if="props.authorizing" class="loading loading-spinner loading-sm" />
+                            使用{{ selectedServer!.name }}账号授权
+                        </button>
+                        <p class="text-xs text-base-content/60 leading-relaxed">
+                            推荐：跳转至查分器完成授权，无需复制密钥，可随时在查分器账号设置中撤销。授权将替换该查分器下已添加的账号，并自动保存当前偏好设置。
+                        </p>
+                    </div>
+
+                    <details class="collapse collapse-arrow rounded-lg border border-base-300">
+                        <summary class="collapse-title min-h-0 py-3 text-sm">
+                            使用 {{ selectedServer!.credentialsName || '凭证' }}
+                        </summary>
+                        <div class="collapse-content">
+                            <input
+                                v-model="credentialsModel" class="input input-bordered w-full" type="text"
+                                :placeholder="selectedServer!.credentialsName || '输入查分器凭证（如个人密钥）'"
+                            >
+                        </div>
+                    </details>
+                </template>
+
+                <div v-else class="form-control flex flex-col">
                     <label class="label">
                         <span class="label-text">
                             凭证
@@ -65,7 +96,7 @@ const serverMap = computed(() => {
             </div>
 
             <div
-                v-if="selectedServer"
+                v-if="selectedServer && (!oauthCapable || credentialsModel)"
                 class="alert bg-base-200 text-base-content/80"
             >
                 <div>
@@ -90,7 +121,7 @@ const serverMap = computed(() => {
                 <button class="btn btn-ghost" type="button" @click="emit('update:open', false)">
                     取消
                 </button>
-                <button class="btn btn-primary" type="button" :disabled="!selectedServer || !credentialsModel" @click="emit('confirm', selectedServer!, credentialsModel)">
+                <button v-if="!oauthCapable || credentialsModel" class="btn" :class="oauthCapable ? 'btn-outline' : 'btn-primary'" type="button" :disabled="!selectedServer || !credentialsModel" @click="emit('confirm', selectedServer!, credentialsModel)">
                     添加账号
                 </button>
             </div>
