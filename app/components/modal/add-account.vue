@@ -62,14 +62,14 @@ const oauthCapable = computed(() => isProberOAuthServer(selectedServer.value?.id
                             @click="emit('oauth', selectedServer!)"
                         >
                             <span v-if="props.authorizing" class="loading loading-spinner loading-sm" />
-                            使用{{ selectedServer!.name }}账号授权
+                            使用 {{ selectedServer!.name }} 授权
                         </button>
                         <p class="text-xs text-base-content/60 leading-relaxed">
-                            推荐：跳转至查分器完成授权，无需复制密钥，可随时在查分器账号设置中撤销。授权将替换该查分器下已添加的账号，并自动保存当前偏好设置。
+                            跳转至查分器完成 OAuth 授权，安全且方便。
                         </p>
                     </div>
 
-                    <details class="collapse collapse-arrow rounded-lg border border-base-300">
+                    <!-- <details class="collapse collapse-arrow rounded-lg border border-base-300">
                         <summary class="collapse-title min-h-0 py-3 text-sm">
                             使用 {{ selectedServer!.credentialsName || '凭证' }}
                         </summary>
@@ -79,7 +79,7 @@ const oauthCapable = computed(() => isProberOAuthServer(selectedServer.value?.id
                                 :placeholder="selectedServer!.credentialsName || '输入查分器凭证（如个人密钥）'"
                             >
                         </div>
-                    </details>
+                    </details> -->
                 </template>
 
                 <div v-else class="form-control flex flex-col">
@@ -117,7 +117,7 @@ const oauthCapable = computed(() => isProberOAuthServer(selectedServer.value?.id
                 </div>
             </div>
 
-            <div class="modal-action">
+            <div v-if="!oauthCapable" class="modal-action">
                 <button class="btn btn-ghost" type="button" @click="emit('update:open', false)">
                     取消
                 </button>

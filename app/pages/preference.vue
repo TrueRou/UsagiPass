@@ -169,6 +169,15 @@ function removeAccount(accountId: string) {
 const oauthAuthorizing = ref(false)
 
 async function handleOAuthAccount(server: Server) {
+    if (!loggedIn.value) {
+        notificationsStore.addNotification({
+            type: 'warning',
+            message: '授权绑定需要登录，请先登录后再试。',
+        })
+        await navigateTo('/auth/login')
+        return
+    }
+
     oauthAuthorizing.value = true
     try {
         // 跳转授权会离开当前页面，先保存尚未提交的修改

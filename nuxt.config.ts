@@ -66,7 +66,6 @@ export default defineNuxtConfig({
             oidc: {
                 clientId: '',
                 clientSecret: '',
-                redirectURL: '',
             },
         },
         leporidae: {
