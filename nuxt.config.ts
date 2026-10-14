@@ -53,7 +53,6 @@ export default defineNuxtConfig({
             },
         },
         usagipass: {
-            baseURL: 'https://up.turou.fun',
             databaseURL: 'postgresql://postgres:password@localhost:5432/usagipass',
         },
         mitmproxy: {
@@ -81,6 +80,7 @@ export default defineNuxtConfig({
             },
         },
         public: {
+            URL: 'https://up.turou.fun',
             imageURL: 'https://eo.assets.turou.fun/leporidae/images',
             imagePreviewURL: 'https://eo.assets.turou.fun/leporidae/thumbnails',
         },
@@ -96,7 +96,9 @@ export default defineNuxtConfig({
             },
         ],
     },
+    // nuxt-auth-utils 依赖 @nuxt/schema 4.6.1，在 shamefully-hoist 下盖过了 nuxt 自带的 4.4.8，
+    // 使 nitro 配置类型退化为只含少数字段的回退类型；对齐 @nuxt/schema 版本后可移除此断言
     nitro: {
         preset: 'bun',
-    },
+    } as Record<string, any>,
 })

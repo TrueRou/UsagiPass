@@ -8,7 +8,7 @@ import * as schema from '../database/schema'
 async function seedInitialData(db: ReturnType<typeof useDrizzle>) {
     // 检查 server 表是否为空
     const serverCount = await db.select({ count: count() }).from(schema.server)
-    if (serverCount[0].count === 0) {
+    if (serverCount[0]?.count === 0) {
         await db.insert(schema.server).values([
             {
                 id: 1,

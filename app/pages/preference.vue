@@ -53,12 +53,12 @@ function clearImage(key: ImageMapKey) {
 }
 
 async function matchCharacterMetadata() {
-    const response: {
+    const response = await $leporidae<{
         mask_image?: ImageSimpleResponse
         source: string
         character_name?: string
         version?: string
-    } = await $leporidae('/api/nuxt/image/metadata', {
+    }>('/api/nuxt/image/metadata', {
         method: 'GET',
         query: {
             id: profileData.value?.preference.characterId,
@@ -200,12 +200,12 @@ async function handleSave() {
     isSaving.value = true
     try {
         if (loggedIn.value) {
-            profileData.value = await useNuxtApp().$leporidae('/api/nuxt/profile', {
+            profileData.value = await useNuxtApp().$leporidae<UserProfile>('/api/nuxt/profile', {
                 method: 'PUT',
                 body: profileData.value,
                 showSuccessToast: true,
                 successMessage: '偏好设置已保存',
-            })
+            } as any)
         }
         else {
             const guestProfile = useCookie<UserPreference>('guest_preference', { maxAge: 60 * 60 * 24 * 365 })

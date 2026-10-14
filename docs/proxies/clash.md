@@ -26,7 +26,7 @@ outline: deep
 
 > [!TIP] 提示
 > 本方法需熟知内核的 [`proxy-providers`](https://wiki.metacubex.one/config/proxy-providers) 与 [`rule-providers`](https://wiki.metacubex.one/config/rule-providers) 方法<br>
-  以下内容仅供参考, 
+  以下内容仅供参考,
 
 <br>
 
@@ -46,7 +46,7 @@ proxy-providers:
 
 proxy-group:
 - { "name": "舞萌DX登录", "type": "select", "proxies": [ "DIRECT" ], "use": [ "UsagiPass" ] }
-  
+
 rule-providers:
   maimaiDX_domain: { "type": "http", "behavior": "domain", "interval": 600, "format": "yaml", "url": "https://up.turou.fun/UsagiPass.yaml", }
 

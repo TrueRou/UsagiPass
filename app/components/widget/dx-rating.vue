@@ -76,6 +76,8 @@ async function drawCanvas() {
         getBase(baseImageId.value),
         Promise.all(numImageIds.value.map(id => getNum(id)).filter(src => src !== undefined)),
     ])
+    if (!baseSrc)
+        return
 
     const baseImg = new Image()
     baseImg.fetchPriority = 'high'

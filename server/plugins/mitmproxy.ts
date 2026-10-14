@@ -59,7 +59,7 @@ export default defineNitroPlugin((_nitroApp) => {
             const timestamp = Number(new URL(urlPart, `http://${host}`).searchParams.get('l') ?? '0')
             const { time, date } = buildShanghaiDate(timestamp)
 
-            const redirectUrl = new URL(config.usagipass.baseURL || 'https://up.turou.fun')
+            const redirectUrl = new URL(config.public.URL || 'https://up.turou.fun')
             redirectUrl.searchParams.set('maid', maid)
             redirectUrl.searchParams.set('time', time)
             redirectUrl.searchParams.set('date', date)
@@ -74,7 +74,7 @@ export default defineNitroPlugin((_nitroApp) => {
         else if (WAHLAP_HOSTS.has(host) && urlPart.startsWith('/wc_auth/oauth/callback/maimai-dx')) {
             const urlParams = new URL(urlPart, `http://${host}`).searchParams
 
-            const redirectBaseUrl = new URL(config.usagipass.baseURL || 'https://up.turou.fun')
+            const redirectBaseUrl = new URL(config.public.URL || 'https://up.turou.fun')
             const redirectUrl = new URL('/wechat/callback', redirectBaseUrl)
             redirectUrl.searchParams.set('r', urlParams.get('r') || '')
             redirectUrl.searchParams.set('t', urlParams.get('t') || '')

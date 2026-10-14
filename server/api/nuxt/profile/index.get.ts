@@ -63,6 +63,8 @@ export default defineEventHandler(async (event) => {
             frameId: config.leporidae.defaultImage.frameId,
             passnameId: config.leporidae.defaultImage.passnameId,
         }).returning()
+        if (!newPreference)
+            throw createError({ statusCode: 500, message: '创建默认偏好设置失败' })
         userPreference = newPreference
     }
 

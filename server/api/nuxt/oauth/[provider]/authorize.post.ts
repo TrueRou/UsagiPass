@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
         method: 'POST',
         ignoreResponseError: true,
         body: {
-            redirect_uri: joinURL(useRuntimeConfig().usagipass.baseURL, '/oauth/callback', provider),
+            redirect_uri: joinURL(useRuntimeConfig().public.URL, '/oauth/callback', provider),
             // 回调时据此确认授权归属当前登录用户
             context: { app: 'usagipass', user_id: session.user.id },
         },

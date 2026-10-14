@@ -30,8 +30,8 @@ export default defineEventHandler(async (event) => {
 
     const handler = defineOAuthOidcEventHandler<{ data: UserResponse }>({
         config: {
-            // 回调地址固定为本站：由 baseURL 拼接，无需单独配置 NUXT_OAUTH_OIDC_REDIRECT_URL
-            redirectURL: joinURL(config.usagipass.baseURL, '/api/nuxt/auth/leporidae'),
+            // 回调地址固定为本站：由 public.URL 拼接，无需单独配置 NUXT_OAUTH_OIDC_REDIRECT_URL
+            redirectURL: joinURL(config.public.URL, '/api/nuxt/auth/leporidae'),
             openidConfig: {
                 authorization_endpoint: joinURL(config.leporidae.fePublicURL, '/oauth/authorize'),
                 token_endpoint: joinURL(config.leporidae.baseURL, '/oauth/token'),
