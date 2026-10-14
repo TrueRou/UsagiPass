@@ -8,7 +8,6 @@ useHead({
 
 const route = useRoute()
 const router = useRouter()
-const { addNotification } = useNotificationsStore()
 
 const errorMessage = ref('')
 
@@ -41,7 +40,6 @@ async function handleCallback() {
         errorMessage.value = e?.data?.message || e?.message || '授权失败，请返回偏好设置重新授权。'
         return
     }
-    addNotification({ type: 'info', message: '已更新账号列表，下次更新查分器时生效。' })
     await navigateTo('/preference')
 }
 
