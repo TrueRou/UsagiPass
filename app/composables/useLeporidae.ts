@@ -1,4 +1,4 @@
-import type { UseFetchOptions } from 'nuxt/app'
+import type { AnyServerRouteMethod, KeysOf, UseFetchOptions } from 'nuxt/app'
 
 interface UseApiOptions {
     showErrorToast?: boolean
@@ -6,7 +6,10 @@ interface UseApiOptions {
     successMessage?: string
 }
 
-export async function useLeporidae<T = any>(url: string, options: UseFetchOptions<T> & UseApiOptions = {}) {
+// Nuxt 4.6 起 UseFetchOptions 的 method 泛型默认收窄为 'get'，这里显式放开为任意方法
+type LeporidaeFetchOptions<T> = UseFetchOptions<T, T, KeysOf<T>, undefined, string, AnyServerRouteMethod>
+
+export async function useLeporidae<T = any>(url: string, options: LeporidaeFetchOptions<T> & UseApiOptions = {}) {
     const asyncData = await useFetch<T>(url, {
         ...(options as any),
         $fetch: useNuxtApp().$leporidae,

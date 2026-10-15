@@ -1,4 +1,4 @@
-export default defineNuxtRouteMiddleware((_from, _to) => {
+export default defineNuxtRouteMiddleware((_to, _from) => {
     const { loggedIn } = useUserSession()
     const guestCookie = useCookie<boolean>('guest')
 

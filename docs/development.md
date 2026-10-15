@@ -34,7 +34,7 @@ pnpm install
 
 创建 `.env` 文件，至少配置以下环境变量：
 
-```env
+```dotenv
 # 数据库配置（请根据实际情况修改：postgresql://用户名:密码@主机:端口/数据库名））
 NUXT_USAGIPASS_DATABASE_URL=postgresql://postgres:password@localhost:5432/usagipass
 ```

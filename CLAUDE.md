@@ -55,8 +55,9 @@ The app requires PostgreSQL 15+ running locally or accessible via connection str
 
 ### Key Frontend Files
 - [app/app.vue](app/app.vue) - Root component
-- [app/pages/index.vue](app/pages/index.vue) - Main DXPASS display page (requires login via [app/middleware/require-login.ts](app/middleware/require-login.ts))
-- [app/pages/preference.vue](app/pages/preference.vue) - User settings page
+- [app/pages/index.vue](app/pages/index.vue) - Main DXPASS display page (guarded by [app/middleware/require-guest.ts](app/middleware/require-guest.ts): admits logged-in users or holders of the `guest` cookie, otherwise redirects to `/auth/login`)
+- [app/pages/preference.vue](app/pages/preference.vue) - User settings page (also guarded by `require-guest`)
+- [app/middleware/require-login.ts](app/middleware/require-login.ts) - Strict login guard (no guest mode) used by the OAuth/WeChat callback pages; redirects to `/auth/login?redirect=...`
 - [app/plugins/api.ts](app/plugins/api.ts) - `$leporid` fetch wrapper that unwraps API responses and shows toasts
 - [app/composables/useLeporid.ts](app/composables/useLeporid.ts) - `useLeporid()` composable for API calls
 
