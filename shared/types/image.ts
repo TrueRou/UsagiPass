@@ -2,9 +2,9 @@
  * 图片可见性枚举
  */
 export enum ImageVisibility {
-    DELETED = -1,
-    PRIVATE = 0,
-    PUBLIC = 1,
+    DELETED = 'DELETED',
+    PRIVATE = 'PRIVATE',
+    PUBLIC = 'PUBLIC',
 }
 
 /**
