@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { joinURL } from 'ufo'
 
 /** 以 OAuth refresh token 轮换令牌（旧 refresh token 立即作废，调用方须写回 session） */
@@ -8,6 +9,7 @@ export async function refreshTokens(refreshToken: string): Promise<OAuthTokenRes
         body: new URLSearchParams({
             grant_type: 'refresh_token',
             refresh_token: refreshToken,
+            refresh_request_id: createHash('sha256').update(refreshToken).digest('hex'),
             client_id: config.oauth.oidc.clientId,
             client_secret: config.oauth.oidc.clientSecret,
         }),

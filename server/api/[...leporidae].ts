@@ -26,33 +26,25 @@ export default defineEventHandler(async (event) => {
         return headers
     }
 
-    let val = await proxyRequest(event, target, { headers: buildHeaders(session.secure?.accessToken) })
-
-    if (event.node.res.statusCode === 401 && !reqAuthorization && session.secure?.refreshToken) {
-        console.info(`[auth] ${new Date().toISOString()} access token expired for user=${userId}, attempting refresh.`)
-        try {
-            const tokens = await refreshTokens(session.secure.refreshToken)
-            await setUserSession(event, {
-                ...session,
-                secure: {
-                    accessToken: tokens.access_token,
-                    refreshToken: tokens.refresh_token,
+    const refreshToken = session.secure?.refreshToken
+    const fetch = !reqAuthorization && refreshToken
+        ? createOAuthProxyFetch({
+                refresh: () => refreshTokens(refreshToken),
+                save: async (tokens) => {
+                    await setUserSession(event, {
+                        ...session,
+                        secure: {
+                            accessToken: tokens.access_token,
+                            refreshToken: tokens.refresh_token,
+                        },
+                    })
+                },
+                clear: async () => {
+                    console.warn(`[auth] refresh token invalid for user=${userId}, clearing session.`)
+                    await clearUserSession(event)
                 },
             })
-            console.info(`[auth] ${new Date().toISOString()} token refreshed for user=${userId}, retrying request.`)
-            val = await proxyRequest(event, target, { headers: buildHeaders(tokens.access_token) })
-        }
-        catch {
-            console.warn(`[auth] ${new Date().toISOString()} refresh failed for user=${userId}, clearing session.`)
-            await clearUserSession(event)
-            return val
-        }
-    }
+        : undefined
 
-    if (event.node.res.statusCode === 401 && !reqAuthorization) {
-        console.warn(`[auth] ${new Date().toISOString()} 401 Unauthorized for ${method} ${safeUrl} user=${userId}, clearing session.`)
-        await clearUserSession(event)
-    }
-
-    return val
+    return proxyRequest(event, target, { headers: buildHeaders(session.secure?.accessToken), fetch })
 })

@@ -11,6 +11,8 @@ interface ApiResponse<T = unknown> {
 }
 
 export default defineNuxtPlugin((nuxtApp) => {
+    const event = import.meta.server ? useRequestEvent() : undefined
+    const ssrCookies = event ? createSsrCookieForwarder(event) : undefined
     let pendingRequestCount = 0
 
     const startGlobalLoading = () => {
@@ -84,10 +86,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     const leporidae = $fetch.create({
         onRequest(context) {
             if (import.meta.server) {
-                const reqHeaders = useRequestHeaders(['cookie'])
-                const cookie = reqHeaders.cookie || ''
                 const headers = new Headers(context.options.headers as HeadersInit | undefined)
-                headers.set('cookie', cookie)
+                headers.set('cookie', ssrCookies?.requestCookie() || '')
                 context.options.headers = headers
             }
 
@@ -102,6 +102,8 @@ export default defineNuxtPlugin((nuxtApp) => {
         },
         async onResponse(context) {
             stopGlobalLoading()
+            if (typeof context.request === 'string' && context.request.startsWith('/api/'))
+                ssrCookies?.onResponse(context.response.headers)
 
             const options = context.options as ApiFetchOptions
             const rawData = context.response._data as ApiResponse | undefined

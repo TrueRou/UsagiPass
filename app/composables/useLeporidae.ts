@@ -18,15 +18,18 @@ export async function useLeporidae<T = any>(url: string, options: LeporidaeFetch
     // 服务器端如果发生错误，需要 Nuxt 处理并显示错误页面
     if (import.meta.server && asyncData.error.value) {
         const error = asyncData.error.value
+        const statusCode = error.statusCode || error.status || 500
         throw createError({
-            statusCode: error.statusCode || error.status || 500,
+            statusCode,
             statusMessage: error.statusMessage,
             message: error.message,
-            data: {
-                to: '/auth/login',
-                hint: '重新登录',
-                clear: true,
-            },
+            data: statusCode === 401
+                ? {
+                        to: '/auth/login',
+                        hint: '重新登录',
+                        clear: true,
+                    }
+                : error.data,
         })
     }
 
