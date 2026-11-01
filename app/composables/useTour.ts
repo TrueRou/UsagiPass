@@ -102,7 +102,7 @@ export function useTour(updateCallback: () => void = () => {}) {
                 {
                     element: '[data-tour="add-account"]',
                     title: '新增账号',
-                    intro: '点击此按钮可以添加新的查分器账号，支持多个查分器和 UsagiLab 通行证绑定。',
+                    intro: '点击此按钮可以添加新的查分器账号，支持多个查分器和 HoshiRabi 通行证绑定。',
                     position: 'left',
                 },
                 {

@@ -67,7 +67,7 @@ async function handleGuestMode() {
             </div>
 
             <button type="button" class="btn btn-primary w-full" @click="handleLogin()">
-                使用 UsagiLab 账号登录
+                使用 HoshiRabi 账号登录
             </button>
 
             <button type="button" class="btn btn-outline w-full mt-2" @click="handleGuestMode">

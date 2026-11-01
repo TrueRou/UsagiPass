@@ -1,11 +1,11 @@
 # 账号迁移说明
 
-UsagiPass 与 兔卡账号 已完成深度融合升级，现统一更名为 UsagiLab 账号。
+UsagiPass 与 兔卡账号 已完成深度融合升级，现统一更名为 HoshiRabi 账号。
 
 您的账号将发生以下变化：
 
-1. 原 UsagiCard 账号直接变为 UsagiLab 账号。可以使用账号和密码登录。
-2. 原 UsagiPass 账号也会变成 UsagiLab 账号，但首次只能使用第三方登录。
+1. 原 UsagiCard 账号直接变为 HoshiRabi 账号。可以使用账号和密码登录。
+2. 原 UsagiPass 账号也会变成 HoshiRabi 账号，但首次只能使用第三方登录。
 3. 原 UsagiPass 账号第三方登录后，将要求完善账号信息，完善后即可使用任意方式登录。
 
 您的数据将发生以下变化：

@@ -30,7 +30,7 @@ UsagiCard 指 样式类似 DXPASS 的实体卡片以及围绕卡片提供的相�
 
 ## 账号迁移说明
 
-UsagiPass 与 兔卡账号 已完成深度融合升级，现统一更名为 UsagiLab 账号。关于账号升级的详细说明，请查看[账号迁移说明](./account-system.md)。
+UsagiPass 与 兔卡账号 已完成深度融合升级，现统一更名为 HoshiRabi 账号。关于账号升级的详细说明，请查看[账号迁移说明](./account-system.md)。
 
 ## 开发者相关
 

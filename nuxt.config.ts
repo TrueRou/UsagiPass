@@ -60,7 +60,7 @@ export default defineNuxtConfig({
             listenHost: '127.0.0.1',
             listenPort: 7300,
         },
-        // UsagiLab 账号登录（OAuth 授权码 + PKCE），凭据通过 NUXT_OAUTH_OIDC_* 注入
+        // HoshiRabi 账号登录（OAuth 授权码 + PKCE），凭据通过 NUXT_OAUTH_OIDC_* 注入
         oauth: {
             oidc: {
                 clientId: '',

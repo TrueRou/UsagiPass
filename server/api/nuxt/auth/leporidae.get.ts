@@ -12,12 +12,12 @@ function safeRedirect(value: unknown): string {
 
 async function fail(event: H3Event, message: string) {
     deleteCookie(event, REDIRECT_COOKIE)
-    console.warn(`[auth] ${new Date().toISOString()} UsagiLab OAuth login failed: ${message}`)
+    console.warn(`[auth] ${new Date().toISOString()} HoshiRabi OAuth login failed: ${message}`)
     return sendRedirect(event, withQuery('/auth/login', { error: message }))
 }
 
 /**
- * UsagiLab 账号登录（授权码 + PKCE），由 nuxt-auth-utils 的通用 OIDC handler 完成：
+ * HoshiRabi 账号登录（授权码 + PKCE），由 nuxt-auth-utils 的通用 OIDC handler 完成：
  * 首次请求跳转官网授权页，回调时校验 state 并以 client 凭据 + code_verifier 换取令牌。
  * 令牌只保存在服务端加密 session（secure）中，刷新见 server/utils/leporidae.ts。
  */
@@ -57,7 +57,7 @@ export default defineEventHandler(async (event) => {
             })
             const redirect = safeRedirect(getCookie(event, REDIRECT_COOKIE))
             deleteCookie(event, REDIRECT_COOKIE)
-            console.info(`[auth] ${new Date().toISOString()} user=${user.data.username} logged in via UsagiLab OAuth.`)
+            console.info(`[auth] ${new Date().toISOString()} user=${user.data.username} logged in via HoshiRabi OAuth.`)
             return sendRedirect(event, redirect)
         },
         onError(event, error) {
